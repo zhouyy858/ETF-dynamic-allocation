@@ -54,7 +54,9 @@ def build_returns(slot, layer="real"):
     if backup:
         parts.append(load_series(backup)); note.append(backup)
     parts.append(load_series(primary)); note.append(primary)
-    r = pd.concat(parts).sort_index()
+    # 陷阱: 备用/主代理序列日期重叠时, 默认不稳定排序会让 duplicated(keep="last") 的
+    # 胜出者随面板总长度漂移(追加尾部数据会改写历史收益) -> 必须稳定排序保证主代理恒优先
+    r = pd.concat(parts).sort_index(kind="stable")
     r = r[~r.index.duplicated(keep="last")]
     r = r[r.index > "1990-12-31"]
     return r, "+".join(note)
