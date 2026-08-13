@@ -27,6 +27,9 @@ PROXY = {
     "513500": ("513500_nav.csv", None),
     "159952": ("index_sz399006.csv", "159952_nav.csv"),
 }
+# 价格指数不含分红: 红利类资产用常数股息率近似全收益(中证全收益指数接口不可用, 口径见README)
+# 515100红利低波100 ~4.5%/年, 159232自由现金流 ~3.5%/年 (创业板指股息率<0.5%忽略)
+DIV_YIELD = {"515100": 0.045, "159232": 0.035}
 REPO_YIELD = 0.018
 TRADING_DAYS = 252
 
@@ -59,6 +62,10 @@ def build_returns(slot, layer="real"):
     r = pd.concat(parts).sort_index(kind="stable")
     r = r[~r.index.duplicated(keep="last")]
     r = r[r.index > "1990-12-31"]
+    y = DIV_YIELD.get(slot)
+    if y:
+        r = (1 + r) * (1 + y / TRADING_DAYS) - 1
+        note.append(f"+股息近似{y:.1%}")
     return r, "+".join(note)
 
 def build_panel(layer="real", start=None, end=None):

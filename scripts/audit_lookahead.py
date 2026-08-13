@@ -105,37 +105,37 @@ v24_r = res["v24 严格(v23+现金债0.75)"]["real"]["cagr"]
 v25_p = res["v25 严格(v24+溢价倾斜)"]["proxy"]["cagr"]
 v25_r = res["v25 严格(v24+溢价倾斜)"]["real"]["cagr"]
 # 2026-08-12 数据管道修复(代理序列去重改为稳定排序)后统一重定基线
-assert abs(old_p - 0.1539) < 0.005, f"旧口径proxy复现失败: {old_p:.4f}"
+assert abs(old_p - 0.1581) < 0.005, f"旧口径proxy复现失败: {old_p:.4f}"
 assert abs(old_r - 0.2717) < 0.01, f"旧口径real复现失败: {old_r:.4f}"
-assert abs(v_p - 0.0974) < 0.005, f"严格proxy回归失败(v21): {v_p:.4f}"
+assert abs(v_p - 0.1015) < 0.005, f"严格proxy回归失败(v21): {v_p:.4f}"
 assert abs(v_r - 0.2317) < 0.01, f"严格real回归失败(v21): {v_r:.4f}"
-assert abs(w_p - 0.1009) < 0.01, f"严格proxy回归失败(v22): {w_p:.4f}"
+assert abs(w_p - 0.1026) < 0.01, f"严格proxy回归失败(v22): {w_p:.4f}"
 assert abs(w_r - 0.2737) < 0.01, f"严格real回归失败(v22): {w_r:.4f}"
-assert abs(b_p - 0.1026) < 0.01, f"严格proxy回归失败(v22b): {b_p:.4f}"  # 2026-08-03数据修正后
+assert abs(b_p - 0.1043) < 0.01, f"严格proxy回归失败(v22b): {b_p:.4f}"  # 2026-08-03数据修正后
 assert abs(b_r - 0.2784) < 0.01, f"严格real回归失败(v22b): {b_r:.4f}"
-assert abs(v24_p - 0.1052) < 0.01, f"严格proxy回归失败(v24): {v24_p:.4f}"
+assert abs(v24_p - 0.1069) < 0.01, f"严格proxy回归失败(v24): {v24_p:.4f}"
 assert abs(v24_r - 0.2783) < 0.01, f"严格real回归失败(v24): {v24_r:.4f}"
-assert abs(v25_p - 0.1063) < 0.01, f"严格proxy回归失败(v25): {v25_p:.4f}"
+assert abs(v25_p - 0.1080) < 0.01, f"严格proxy回归失败(v25): {v25_p:.4f}"
 assert abs(v25_r - 0.2797) < 0.01, f"严格real回归失败(v25): {v25_r:.4f}"
 v26_p = res["v26 严格(v25+溢价门控削减增强)"]["proxy"]["cagr"]
 v26_r = res["v26 严格(v25+溢价门控削减增强)"]["real"]["cagr"]
-assert abs(v26_p - 0.1078) < 0.01, f"严格proxy回归失败(v26): {v26_p:.4f}"
+assert abs(v26_p - 0.1095) < 0.01, f"严格proxy回归失败(v26): {v26_p:.4f}"
 assert abs(v26_r - 0.2933) < 0.01, f"严格real回归失败(v26): {v26_r:.4f}"
 v27_p = res["v27 严格(v26+恢复期12)"]["proxy"]["cagr"]
 v27_r = res["v27 严格(v26+恢复期12)"]["real"]["cagr"]
-assert abs(v27_p - 0.1070) < 0.01, f"严格proxy回归失败(v27): {v27_p:.4f}"
+assert abs(v27_p - 0.1087) < 0.01, f"严格proxy回归失败(v27): {v27_p:.4f}"
 assert abs(v27_r - 0.2933) < 0.01, f"严格real回归失败(v27): {v27_r:.4f}"
 v28_p = res["v28 严格(前提驱动)"]["proxy"]["cagr"]
 v28_r = res["v28 严格(前提驱动)"]["real"]["cagr"]
-assert abs(v28_p - 0.1047) < 0.01, f"严格proxy回归失败(v28): {v28_p:.4f}"
+assert abs(v28_p - 0.1081) < 0.01, f"严格proxy回归失败(v28): {v28_p:.4f}"
 assert abs(v28_r - 0.2816) < 0.01, f"严格real回归失败(v28): {v28_r:.4f}"
 v29_p = res["v29 严格(AI超配)"]["proxy"]["cagr"]
 v29_r = res["v29 严格(AI超配)"]["real"]["cagr"]
-assert abs(v29_p - 0.1062) < 0.01, f"严格proxy回归失败(v29): {v29_p:.4f}"
+assert abs(v29_p - 0.1096) < 0.01, f"严格proxy回归失败(v29): {v29_p:.4f}"
 assert abs(v29_r - 0.2859) < 0.01, f"严格real回归失败(v29): {v29_r:.4f}"
 v30_p = res["v30 严格(定稿)"]["proxy"]["cagr"]
 v30_r = res["v30 严格(定稿)"]["real"]["cagr"]
-assert abs(v30_p - 0.1049) < 0.01, f"严格proxy回归失败(v30): {v30_p:.4f}"
+assert abs(v30_p - 0.1073) < 0.01, f"严格proxy回归失败(v30): {v30_p:.4f}"
 assert abs(v30_r - 0.2914) < 0.01, f"严格real回归失败(v30): {v30_r:.4f}"
 print("\n[ok] 旧口径复现(15.39%/27.17%) 通过; 严格口径复现 v21/v22/v22b/v24/v25/v26/v27/v28/v29/v30 通过")
 
