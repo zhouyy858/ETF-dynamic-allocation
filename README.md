@@ -79,6 +79,7 @@
 
 | 版本/探索 | 类型 | 要点 | 记录 |
 |---|---|---|---|
+| v32（09-08） | 用户指定·收益优先可选档 | T3 = v30 关 speed_brake（免费 +0.22pp）+ us 底仓 10→20；proxy 12.02/-10.10/1.19、real 28.47/-4.32/6.58；**审计未过 v30 三关**：OOS Cal 0.97（-19% 劣化）、扰动 4/112、压力 7 情景全恶化（共振熊 -13.9→-18.2%）；v30 仍为稳健默认实盘，本档仅供收益优先选择（`daily_report`/`week_retrain` 默认仍读 v30） | `audit_v32.json`、`final_cfg_v32.json` |
 | v31d（08-07） | 探索·证伪 | 市场宽度信号（7 指数站上 SMA 占比，学术 Momentum+Breadth+Correlation）+ vol_target 复核 6 候选全证伪：B1 宽度20/50 real 单窗 +0.761 但 proxy +0.010 双窗不同向（宽度与沪深300 SMA20 相关 0.855 重叠度高）；vol_target 18/20、vol_buf 1.3 完全零作用（v30 下从不触发，与 dd_eq_cap 同因） | `exp_opt31d.py` / `out/exp_opt31d.json` |
 | v31c（08-06） | 探索·证伪 | GitHub 调研第二波：ADX 调节 / 反转过滤 / 黄金危机凸性 5 候选全证伪；gold 首版口径 bug 自查修复后破线（proxy MDD -11.26% 超线、real 零触发） | `exp_opt31c.py` / `out/exp_opt31c.json` |
 | v31b（08-06） | 探索·证伪 | GitHub 调研：波动率门控 / 反波动加权 / 拥挤度 4 候选全证伪；vol_gate 过一关但 real 平台悬崖拒绝 | `exp_opt31b.py` / `out/exp_opt31b.json` |

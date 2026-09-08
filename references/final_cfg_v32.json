@@ -1,0 +1,149 @@
+{
+ "state_map": {
+  "0": [
+   5,
+   30
+  ],
+  "1": [
+   15,
+   29
+  ],
+  "2": [
+   25,
+   28
+  ],
+  "3": [
+   36,
+   26
+  ],
+  "4": [
+   39,
+   21
+  ],
+  "5": [
+   44,
+   16
+  ],
+  "6": [
+   66,
+   14
+  ],
+  "7": [
+   65,
+   10
+  ],
+  "8": [
+   85,
+   6
+  ],
+  "9": [
+   81,
+   3
+  ]
+ },
+ "market_dd": {
+  "CN": [
+   0.07,
+   0.05,
+   0.18,
+   0.14
+  ],
+  "US": [
+   0.13,
+   0.12,
+   0.24,
+   0.15
+  ]
+ },
+ "dd_eq_cap": [
+  [
+   -0.08,
+   85
+  ],
+  [
+   -0.12,
+   75
+  ],
+  [
+   -0.16,
+   65
+  ],
+  [
+   -0.2,
+   55
+  ]
+ ],
+ "hyst_up": 0.66,
+ "hyst_down": 0.24,
+ "min_cash": 0.03,
+ "max_eq": 0.98,
+ "vol_target": 0.19,
+ "gate_win": 100,
+ "growth_split_bull": {
+  "159952": 0.3,
+  "159941": 0.63,
+  "513500": 0.07
+ },
+ "dd_cap_unconditional": true,
+ "defense_momentum": true,
+ "defense_momentum_win": 80,
+ "defense_momentum_t": 4.0,
+ "defense_clamp": [
+  0.4,
+  0.6
+ ],
+ "premium_gate": true,
+ "premium_thr": [
+  0.05,
+  0.08,
+  0.12
+ ],
+ "premium_cut": [
+  0.45,
+  0.22,
+  0.08
+ ],
+ "corr_risk": true,
+ "corr_risk_win": 40,
+ "corr_risk_thr": [
+  0.3,
+  0.42
+ ],
+ "corr_risk_cut": [
+  0.8,
+  0.6
+ ],
+ "speed_brake": false,
+ "speed_brake_win": 5,
+ "speed_brake_thr": -0.04,
+ "speed_brake_cut": 0.5,
+ "speed_brake_recover": 12,
+ "tranche_weights": [
+  1.0
+ ],
+ "version": "v32",
+ "repo_rate": 0.022,
+ "floor_pct": {
+  "cn": 2.0,
+  "us": 20.0
+ },
+ "_note": "v32(2026-09-08, 用户指定进取档T3, 收益优先可选档, 审计未过v30三关: OOS 0.97/扰动4/压力全恶化; v30仍为稳健默认): 在v30基础上关speed_brake(零代价+0.22pp, 2019-21牛市踏空反弹段) + us底仓10->20(收益优先); proxy 12.02%/-10.10%/Cal1.19, real 28.47%/-4.32%/Cal6.58, OOS 0.97(v30 1.20劣化-19%预判三关可能不过); v30仍为稳健默认可回退; 2026-08-24分红口径数据",
+ "cash_bond_pct": 0.75,
+ "cash_bond_code": "511010",
+ "signal_lag": 1,
+ "premium_shift": 2,
+ "score_confirm_weeks": 2,
+ "rebal_weekday": 4,
+ "rebal_freq": "weekly",
+ "growth_split_bear": {
+  "159952": 0.45,
+  "159941": 0.4,
+  "513500": 0.15
+ },
+ "min_delta": 0.035,
+ "confirm_weekday": 2,
+ "premium_tilt": true,
+ "premium_tilt_thr": 0.02,
+ "premium_tilt_cap": 0.05,
+ "premium_tilt_max": 1.0
+}
