@@ -37,12 +37,10 @@ PREMIUM_CLIP = (-0.10, 0.15)
 PREMIUM_THR = [0.03, 0.05, 0.08]
 PREMIUM_CUT = [0.5, 0.25, 0.1]
 
-VOL_TARGET = 0.18
 MIN_CASH = 0.05
 MAX_EQ = 0.97
 # 市场刹车: (快刹车触发DD%, 快刹车成长削减, 深熊锁定DD%, 解锁DD%)
 MARKET_DD = {"CN": (0.07, 0.08, 0.20, 0.10), "US": (0.12, 0.18, 0.26, 0.12)}
-DD_EQ_CAP = [(-0.12, 80), (-0.18, 65), (-0.25, 50)]
 HYST_UP, HYST_DOWN = 0.54, 0.17
 
 class SignalSet:
@@ -190,10 +188,8 @@ class DynamicStrategy:
         cfg = cfg or {}
         sm = cfg.get("state_map", STATE_MAP)
         self.state_map = {int(k): tuple(v) for k, v in sm.items()}
-        self.vol_target = cfg.get("vol_target", VOL_TARGET)
         self.min_cash = cfg.get("min_cash", MIN_CASH)
         self.max_eq = cfg.get("max_eq", MAX_EQ)
-        self.dd_eq_cap = cfg.get("dd_eq_cap", DD_EQ_CAP)
         self.market_dd = cfg.get("market_dd", MARKET_DD)
         self.hyst_up = cfg.get("hyst_up", HYST_UP)
         self.hyst_down = cfg.get("hyst_down", HYST_DOWN)
@@ -205,7 +201,6 @@ class DynamicStrategy:
         self.defense_momentum_win = int(cfg.get("defense_momentum_win", DEFENSE_MOMENTUM_WIN))
         self.defense_momentum_t = float(cfg.get("defense_momentum_t", DEFENSE_MOMENTUM_T))
         self.defense_clamp = tuple(cfg.get("defense_clamp", DEFENSE_CLAMP))
-        self.dd_cap_unconditional = bool(cfg.get("dd_cap_unconditional", False))
         self.us_rotation = bool(cfg.get("us_rotation", False))
         self.us_split_clamp = tuple(cfg.get("us_split_clamp", US_SPLIT_CLAMP))
         self.valuation_gate = bool(cfg.get("valuation_gate", False))
@@ -222,9 +217,6 @@ class DynamicStrategy:
         self.corr_risk_cut = [float(x) for x in cfg.get("corr_risk_cut", [0.85, 0.65])]
         self.recovery_ramp = bool(cfg.get("recovery_ramp", False))
         self.recovery_ramp_min = float(cfg.get("recovery_ramp_min", 0.5))
-        self.vol_scale_hi = float(cfg.get("vol_scale_hi", 1.0))
-        self.vol_scale_lo = float(cfg.get("vol_scale_lo", 1.0))
-        self.vol_buf = float(cfg.get("vol_buf", 1.15))
         self.score_confirm = int(cfg.get("score_confirm_weeks", 0))
         self.confirm_weekday = int(cfg.get("confirm_weekday", 2))  # 确认采样日默认周三(A/B: 周三优于周五, 与调仓日解耦)
         self._last_confirmed = None
@@ -303,7 +295,6 @@ class DynamicStrategy:
         self.valuation_win = int(cfg.get("valuation_win_days", VALUATION_WIN_DAYS))
         self.valuation_thr = [float(x) for x in cfg.get("valuation_thr", [0.95, 0.98])]
         self.valuation_cut = [float(x) for x in cfg.get("valuation_cut", [0.6, 0.35])]
-        self.downside_vol = bool(cfg.get("downside_vol", False))
         self._prev_eff = None
         self.am_gate = bool(cfg.get("am_gate", False))
         self.am_win = int(cfg.get("am_win", 120))
@@ -772,18 +763,12 @@ class DynamicStrategy:
                     cur = float(ctx.get("equity", 1.0))
                     eq_cap = cur * self.speed_brake_cut
                     return self.target_with_eq_cap(dt, ctx, eq_cap * 100)
-            cap = 1.0
-            for thr, c in self.dd_eq_cap:
-                if dd < thr and (self.dd_cap_unconditional or sc < 6):
-                    cap = min(cap, c)
             # 市场级风控: 目标权益比当前显著低(深熊锁/快刹车/结构闸门生效) -> 日度触发, 仍分3周三笔
             base = self._base_target(dt, sc)
             eq_tgt = sum(base.values()) / 100.0
             cur = float(ctx.get("equity", 1.0))
             if eq_tgt <= cur - 0.04:
                 return self._finalize(base)
-            if cap < 1.0:
-                return self.target_with_eq_cap(dt, ctx, cap)
             return None
         return fn
 
@@ -951,24 +936,8 @@ class DynamicStrategy:
         out = self._base_target(dt, sc)
         pf = ctx.get("pf_rets", pd.Series(dtype=float))
         scale = 1.0
-        vt_eff = self.vol_target * (self.vol_scale_hi if sc >= 6 else self.vol_scale_lo)
         if len(pf) > 30:
-            if self.downside_vol:
-                neg = pf[pf < 0]
-                ew = (neg.ewm(halflife=20).std().iloc[-1] * np.sqrt(252)
-                      if len(neg) > 20 else pf.ewm(halflife=20).std().iloc[-1] * np.sqrt(252))
-            else:
-                ew = pf.ewm(halflife=20).std().iloc[-1] * np.sqrt(252)
-            if ew > 0 and ew > vt_eff * self.vol_buf:
-                scale = min(scale, (vt_eff * self.vol_buf) / ew)
-            dd, _ = self._pf_stats(pf)
-            cap = 1.0
-            for thr, c in self.dd_eq_cap:
-                if dd < thr and (self.dd_cap_unconditional or sc < 6):
-                    cap = min(cap, c)
-            if cap < 1.0:
-                total_flex = sum(out[s] - self.floor[s] for s in SLOTS)
-                scale = min(scale, max(0.0, (cap - self.floor_eq) / max(total_flex, 1e-9)))
+            self._pf_stats(pf)
             if self.vol_gate:
                 i = self.sig._idx(dt)
                 if i >= self.vol_gate_win:

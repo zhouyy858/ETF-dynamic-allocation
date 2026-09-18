@@ -1,0 +1,129 @@
+{
+ "state_map": {
+  "0": [
+   5,
+   30
+  ],
+  "1": [
+   15,
+   29
+  ],
+  "2": [
+   25,
+   28
+  ],
+  "3": [
+   36,
+   26
+  ],
+  "4": [
+   39,
+   21
+  ],
+  "5": [
+   44,
+   16
+  ],
+  "6": [
+   66,
+   14
+  ],
+  "7": [
+   65,
+   10
+  ],
+  "8": [
+   85,
+   6
+  ],
+  "9": [
+   81,
+   3
+  ]
+ },
+ "market_dd": {
+  "CN": [
+   0.07,
+   0.05,
+   0.18,
+   0.14
+  ],
+  "US": [
+   0.13,
+   0.12,
+   0.24,
+   0.15
+  ]
+ },
+ "hyst_up": 0.66,
+ "hyst_down": 0.24,
+ "min_cash": 0.03,
+ "max_eq": 0.98,
+ "gate_win": 100,
+ "growth_split_bull": {
+  "159952": 0.3,
+  "159941": 0.63,
+  "513500": 0.07
+ },
+ "defense_momentum": true,
+ "defense_momentum_win": 80,
+ "defense_momentum_t": 4.0,
+ "defense_clamp": [
+  0.4,
+  0.6
+ ],
+ "premium_gate": true,
+ "premium_thr": [
+  0.05,
+  0.08,
+  0.12
+ ],
+ "premium_cut": [
+  0.45,
+  0.22,
+  0.08
+ ],
+ "corr_risk": true,
+ "corr_risk_win": 40,
+ "corr_risk_thr": [
+  0.3,
+  0.42
+ ],
+ "corr_risk_cut": [
+  0.8,
+  0.6
+ ],
+ "speed_brake": false,
+ "speed_brake_win": 5,
+ "speed_brake_thr": -0.04,
+ "speed_brake_cut": 0.5,
+ "speed_brake_recover": 12,
+ "tranche_weights": [
+  1.0
+ ],
+ "version": "v33",
+ "repo_rate": 0.022,
+ "floor_pct": {
+  "cn": 2.0,
+  "us": 10.0
+ },
+ "_note": "v33(2026-09-18) = v30 + 现金层债券 511010(5Y) -> 511260(10Y): 债券端久期拉长, 与股票端相关性几乎不变(-0.226 -> -0.232), 超额全部来自久期 beta。proxy 11.31%/-9.92%/Cal1.14, OOS Cal 1.17->1.32, real Cal 6.91->6.99, 7 压力情景全过(最差共振熊 -13.97% vs v30 -13.93%, 差 0.04pp)。数据: assets/data/511260_nav.csv 为腾讯前复权(含分红再投资)拼接序列——2017-08-24 上市前用 511010 拼接, 无未来函数。边界: 511260 仅 2017-08 起有数据(有效证据 9 年), 且样本内没有中国债熊(2013 钱荒在区间外), 2017/2019/2025 债券端跑输 5Y; 组合超额 2024 一年贡献 33%。久期 4.3->8, 现金层利率敏感度约翻倍, 而 v30 的回撤控制只盯股票端。与 v30 并存, v30 仍为稳健默认。",
+ "cash_bond_pct": 0.75,
+ "cash_bond_code": "511260",
+ "signal_lag": 1,
+ "premium_shift": 2,
+ "score_confirm_weeks": 2,
+ "rebal_weekday": 4,
+ "rebal_freq": "weekly",
+ "growth_split_bear": {
+  "159952": 0.45,
+  "159941": 0.4,
+  "513500": 0.15
+ },
+ "min_delta": 0.035,
+ "confirm_weekday": 2,
+ "premium_tilt": true,
+ "premium_tilt_thr": 0.02,
+ "premium_tilt_cap": 0.05,
+ "premium_tilt_max": 1.0
+}

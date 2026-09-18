@@ -25,7 +25,7 @@ START = "2014-06-23"
 
 def run(cfg):
     ds = DynamicStrategy(R, cfg=cfg)
-    bond = rets_from(read_table("511010_nav.csv"), "cum_nav") if cfg.get("cash_bond_pct") else None
+    bond = rets_from(read_table(f"{cfg.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg.get("cash_bond_pct") else None
     res = run_backtest(R, target_weights_fn=ds.target_fn(), daily_override_fn=ds.daily_fn(),
                        start=START, name="DYN", min_delta=cfg.get("min_delta", 0.02), repo=cfg.get("repo_rate", 0.022),
                        tranche_weights=TW, cash_bond_rets=bond, cash_bond_pct=cfg.get("cash_bond_pct", 0.0),
@@ -72,12 +72,15 @@ def mut_market_dd(cfg, mkt, f):
 
 
 def mut_growth_split(cfg, key, f):
+    """扰动创业板(159952)权重, 其余两个成长资产按原比例归一。
+    陷阱: 早期版本对三资产同时乘 f 再归一 = 恒等变换(空转轴), 已修正为只动 159952 份额。"""
     c = copy.deepcopy(cfg)
     gs = dict(c.get(key))
-    total = sum(gs.values())
-    gs = {s: max(0.01, round(v * f, 4)) for s, v in gs.items()}
-    t2 = sum(gs.values())
-    gs = {s: round(v / t2, 6) for s, v in gs.items()}
+    w = min(0.95, max(0.05, float(gs.get("159952", 0.3)) * f))
+    rest = {s: float(v) for s, v in gs.items() if s != "159952"}
+    tot = sum(rest.values()) or 1.0
+    gs = {s: round((1.0 - w) * v / tot, 6) for s, v in rest.items()}
+    gs["159952"] = round(w, 6)
     c[key] = gs
     return c
 PERTURBS = [

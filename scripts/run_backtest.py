@@ -67,7 +67,7 @@ def run_all(R, label, start, end, dyn_cfg):
     ds = DynamicStrategy(R, cfg=dyn_cfg)
     bond = None
     if dyn_cfg.get("cash_bond_pct"):
-        bond = rets_from(read_table("511010_nav.csv"), "cum_nav")
+        bond = rets_from(read_table(f"{dyn_cfg.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav")
     res = run_backtest(R, target_weights_fn=ds.target_fn(), daily_override_fn=ds.daily_fn(),
                        start=start, end=end, name=f"DYN {label}",
                        min_delta=dyn_cfg.get("min_delta", 0.02), repo=dyn_cfg.get("repo_rate", 0.022),
