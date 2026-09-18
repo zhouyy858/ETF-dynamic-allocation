@@ -14,7 +14,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL = os.environ.get("ETF_SKILL_DIR", os.path.expanduser("~/.codex/skills/etf-dynamic-allocation"))
 SCRIPTS = os.path.join(SKILL, "scripts")
 WORK = os.environ.get("ETF_REPORT_DIR", os.path.expanduser("~/ETF策略日报"))
-DATA_DIR = os.path.join(WORK, "data")
+# 单一数据源: 直接用 skill 的 assets/data(与回测/README 同源, 已 commit)。
+# 旧实现用 WORK/data 独立副本, 删掉 daily_automation 的播种逻辑后该目录会空,
+# 空目录跑 daily_fetch 只会写出最近 45 天数据 -> 面板失真。
+DATA_DIR = os.environ.get("ETF_DATA_DIR") or os.path.join(SKILL, "assets", "data")
 DASH_JSON = os.path.join(WORK, "dashboard.json")
 GEN = os.path.join(HERE, "gen_dashboard.py")
 PORT = 8787

@@ -11,7 +11,7 @@ metadata:
 
 > **🚀 v30（2026-08-05 定稿，2026-09-08 更新·当前默认）**：用户验收线为全历史回撤 **<10%**（v29 的 -10.51% 破线），并要求"4 条前提继续生效、创业板方差大（前提②）弱化"。只动两处：**CN 红利底仓 4%→2%**（159232/515100 各 1%，2015/2016 CN 熊承压减半）、**创业板 bull 28→30 / 纳指 65→63**（前提②弱化为中性，前提③ AI 超配保留）；US 底仓 10% 不变。proxy **10.95% / -9.92% / Cal 1.10**；real **27.15% / -3.75% / Cal 7.24**（数据至 2026-09-04）。OOS Cal 1.20；扰动 2/112（gate_win±20% 时 MDD -11.36% 破线，其余轴稳健）。**2026-08-12 数据管道修复**：代理序列去重改稳定排序。**2026-08-13 分红口径修复**：proxy 层红利类指数（515100/159232）原用价格指数漏计分红，加股息率近似（4.5%/3.5%）。**2026-09-08 关 speed_brake**（事件级评估：11 年仅触发 3 次——2019-08-06/2020-09-10/2021-02-26，全部踏空 0 保护，关版窗口多赚 +0.63/+0.30/+1.42pp 累计净损 -2.35pp；深熊段因提前降仓从不触发 → 置 False，2019-21 牛 +44.1→+46.7%）。配置：`references/final_cfg_v30.json`。
 
-> **v32（2026-09-08）收益优先可选档（用户指定 T3，非默认）**：在 v30 上关 speed_brake（免费 +0.22pp，收益来自 2019-21 牛市踏空反弹段、回撤零变化）+ us 底仓 10→20。proxy **12.02% / -10.10% / Cal 1.19**、real 28.47% / -4.32% / Cal 6.58；**审计未过 v30 三关**（OOS Cal 0.97 -19%、扰动 4/112、压力 7 情景全恶化），仅供收益优先选择。**实盘默认仍为 v30**（`daily_report.py`/`week_retrain.py` 硬编码读 v30，不会被自动切换）。配置：`references/final_cfg_v32.json`。
+> **v32（2026-09-08）收益优先可选档（用户指定 T3，非默认）**：在 v30 上关 speed_brake（免费 +0.22pp，收益来自 2019-21 牛市踏空反弹段、回撤零变化）+ us 底仓 10→20。proxy **12.02% / -10.10% / Cal 1.19**、real 28.47% / -4.32% / Cal 6.58；**审计未过 v30 三关**（OOS Cal 0.97 -19%、扰动 4/112、压力 7 情景全恶化），仅供收益优先选择。**实盘默认仍为 v30**（原 `daily_report.py`/`week_retrain.py` 硬编码读 v30，不会自动切换；两脚本已于 2026-09-18 删除）。配置：`references/final_cfg_v32.json`。
 >
 > **🚀 v29（2026-08-05）AI/科技时代纳指超配（v30 前身）**：在 v28 基础上加入用户第4前提"未来是AI和科技的时代"——成长拆分 bull 28/57.6/14.4→**28/65/7**、bear 45/33/22→**45/40/15**。proxy **10.73% / -10.51% / Cal 1.02**（破 10% 验收线，v30 修复）；real 28.37% / -3.59% / Cal 7.91。
 >
@@ -123,9 +123,9 @@ $PY /path/to/skill/scripts/search.py 120 23
 
 ## 自动化（由 Codex 定时任务触发，已停用 launchd）
 
-- 入口：`scripts/daily_automation.py`（Codex 定时任务「每日交易建议」：每个交易日 09:00；运行本 skill 安装目录 `~/.codex/skills/etf-dynamic-allocation/scripts/` 下的生产副本，工作区 `backtest/` 下同名文件为镜像、无 git 仓库，不用于定时任务）。
-- 流程：`scripts/daily_fetch.py` 增量拉取最近约20个交易日数据 → 重建面板 → `scripts/daily_report.py` 生成日报 → **自动更新 README「📊 当前持仓现状」段（实际持仓 vs 下周五目标 + 信号/市场/QDII溢价状态）→ 同步数据回 `assets/data/` → git commit + push 到 GitHub** → macOS 通知（可选微信/iOS 推送）。
-- 推送凭据：`~/.config/etf_skill/git_token`（chmod 600，不入库）或环境变量 `ETF_GIT_TOKEN`；无 token 时仅本地更新并记日志。
+- 现状（2026-09-18）：ETF 定时任务未安装（`~/.codex/automations/` 内只有其它任务），launchd 已删除。`daily_automation.py`/`daily_report.py`/`week_retrain.py` 已删除；保留 `scripts/daily_fetch.py`（增量拉数），数据源统一为 `assets/data/`。
+- 流程：`scripts/daily_fetch.py` 增量拉取最近约20个交易日数据 → `save_cache()` 重建面板 → 用 `run_backtest.py` 的仓位现状段更新 README「📊 当前持仓现状」（实际 vs 目标 + 信号/市场/QDII 溢价）→ git commit + push。网页数据：`scripts/dashboard/gen_dashboard.py`。
+- 推送凭据：`gh auth token`（旧 `~/.config/etf_skill/git_token` 已失效）。
 - **工作流规则（每次迭代/数据更新后必须执行）**：把 `run_backtest.py`/日报的仓位现状（实际 vs 目标、有效打分、市场状态、QDII 溢价）更新进 README「当前持仓现状」段并推送到 GitHub；数据文件同步 `assets/data/`。
 - 环境变量：`ETF_DATA_DIR` 数据目录（默认 `assets/data`）；`ETF_REPORT_DIR` 报告目录（默认 `~/ETF策略日报`，含 `data/`、`reports/`、`logs/`）。
 - 交易日判定：以 ETF 净值最后日期是否更新为准，节假日/无新数据自动跳过、不发送。
@@ -133,10 +133,10 @@ $PY /path/to/skill/scripts/search.py 120 23
 
 ## 收盘后每周重训（Codex 定时任务「每周训练计划」：每周五 16:00）
 
-- 入口：`scripts/week_retrain.py`（确定性复检；真正的"自训练参数/方案"由 Codex 定时任务执行，prompt 见 README）。
+- 入口：无脚本（`week_retrain.py` 已于 2026-09-18 删除）；由 Codex 任务执行确定性复检：双窗口回测 + `audit_robustness.py` 扰动审计 + `audit_lookahead.py` 断言，prompt 见 README。
 - 流程：① 增量拉取当日数据（场内收盘/指数当日值）→ ② 重建面板 → ③ **全参数复检**（8 轴×邻域、proxy+real 双窗口）→ ④ 三关验证（双窗口同向改善>0.15Cal + 平台平坦 + OOS 不劣化）→ 通过则升级新版本配置并记录，否则维持 v27 → ⑤ 生成日报+更新 README 持仓段 → ⑥ git commit + push 到 GitHub → ⑦ macOS 通知。
 - 防过拟合硬纪律：**拒绝孤峰/尖峰/单窗口改善**，只接受「平台+双窗口+OOS」三关全过的改进；每周只做邻域复检，不做全参数重挖（每周新增样本点不足以支撑自由网格搜索，那正是过拟合的温床）。
-- 复检日志：`~/ETF策略日报/logs/retrain_YYYYMMDD.log`；`--no-fetch` 只复检不拉数，`--no-push` 不推送。
+- 复检日志：`~/ETF策略日报/logs/retrain_YYYYMMDD.log`。复检记录：`out/audit_v*.json` 与 `out/iterations.json`（原 `~/ETF策略日报/logs/` 已随工作目录删除）。
 - 升级产物：`references/final_cfg_v{新版本}.json`，并在配置中记录 `_auto_upgrade` 来源，版本号只增不减、全程留档可回溯。
 
 ## 策略核心（简述，细节看手册）
