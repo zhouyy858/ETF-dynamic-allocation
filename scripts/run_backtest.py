@@ -105,7 +105,8 @@ def term_line_chart(series, title, height=16, width=86, log=True, syms=None):
         s = series[lab]
         ch = syms.get(lab, "D" if lab == "DYN" else lab[0])
         for c in range(width):
-            v = s.asof(tgrid[c])
+            t = pd.Timestamp(tgrid[c]).as_unit(s.index.unit)
+            v = s.asof(t)
             if pd.isna(v):
                 continue
             if log:
@@ -144,7 +145,8 @@ def term_dd_chart(series, title, height=12, width=86):
         s = series[lab]
         ch = "D" if lab == "DYN" else lab[0]
         for c in range(width):
-            v = s.asof(tgrid[c])
+            t = pd.Timestamp(tgrid[c]).as_unit(s.index.unit)
+            v = s.asof(t)
             if pd.isna(v):
                 continue
             r = int(round((v - lo) / (hi - lo) * (height - 1)))

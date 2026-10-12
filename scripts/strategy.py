@@ -333,6 +333,8 @@ class DynamicStrategy:
         tot = sum(ds.values())
         self.defense_split_base = {k: v / tot for k, v in ds.items()} if tot > 0 else {}
         self._lock = {"CN": False, "US": False}
+        self.gate_band = float(cfg.get("gate_band", 0.0))  # 结构闸门滞回带: 0=硬阈值(原行为); >0 跌破SMA×(1-b)关闸/站上SMA×(1+b)开闸
+        self._gate_st = {}
         self.state_log = []
         self.risk_log = []
         # ---- 性能缓存(仅加速, 与逐日重算数值等价; 配置为关时留空, 走原路径) ----
@@ -781,6 +783,29 @@ class DynamicStrategy:
             self._prev_eff = w * sc + (1 - w) * self._prev_eff
         return int(round(self._prev_eff))
 
+    def _gate_state(self, dt, market):
+        """结构闸门滞回带状态(gate_band>0 时启用): 初始状态与硬阈值一致;
+        关闸需跌破 SMA_g×(1-b), 开闸需站上 SMA_g×(1+b) —— 消除均线附近反复穿越的whipsaw"""
+        i = self.sig._idx(dt)
+        nm = "a_mkt" if market == "CN" else "u_m"
+        x = self.sig.a_mkt if market == "CN" else self.sig.u_m
+        if i >= len(x):
+            return True
+        px = float(x.iloc[i])
+        sg = float(self.sig.sma[nm][self.gate_win].iloc[i])
+        st = self._gate_st.get(market)
+        if st is None:
+            st = bool(px > sg)  # NaN比较为False, 与原始硬阈值一致
+            self._gate_st[market] = st
+            return st
+        if not st and px > sg * (1.0 + self.gate_band):
+            self._gate_st[market] = True
+            return True
+        if st and px < sg * (1.0 - self.gate_band):
+            self._gate_st[market] = False
+            return False
+        return st
+
     def _market_mult(self, dt, market):
         """返回 (成长弹性乘数, 全弹性乘数)"""
         dd, ok20, ok20_60, rec, ok120 = self.sig.mkt_info(dt, market, self.gate_win)
@@ -796,7 +821,8 @@ class DynamicStrategy:
             self._lock[market] = True
             return 0.0, 0.0
         # 结构闸门
-        if not ok120:
+        gst = self._gate_state(dt, market) if self.gate_band > 0 else ok120
+        if not gst:
             m_g = 0.0
         # 快刹车
         if dd < -fb_thr and not (ok20 and ok20_60):
