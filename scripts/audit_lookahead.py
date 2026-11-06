@@ -160,5 +160,50 @@ for name, Rs, ps, pe, am in scen:
     res.setdefault("stress", {})[name] = {"OLD": [round(a["cagr"], 4), round(a["max_dd"], 4)],
                                           "严格": [round(b["cagr"], 4), round(b["max_dd"], 4)]}
 
+def assert_lc_mom_causal(R):
+    """旁路低相关/动量共振: 生产 _idx 至少滞后 1 日; 改写决策日收益不改变该日信号, 改写信号日则改变。
+    缺键与显式 false 的目标权重逐日一致(默认路径不被旁路改写)。"""
+    from strategy import low_corr_softpool, momentum_resonance_weights
+    base = dict(CFG30)
+    assert "low_corr_pool" not in CFG30 and "mom_resonance" not in CFG30
+    ds_off = DynamicStrategy(R, cfg=base)
+    ds_false = DynamicStrategy(R, cfg=dict(base, low_corr_pool=False, mom_resonance=False))
+    dates = list(R.loc["2018-01-02":"2018-06-29"].index[::10])
+    max_diff = 0.0
+    for dt in dates:
+        a = ds_off.regular_target(dt, {})
+        b = ds_false.regular_target(dt, {})
+        for k in set(a) | set(b):
+            max_diff = max(max_diff, abs(float(a[k]) - float(b[k])))
+    assert max_diff == 0.0, f"旁路关与缺键权重不一致: {max_diff}"
+    cfg_on = dict(base, low_corr_pool=True, low_corr_win=60, low_corr_rho=0.30, low_corr_lam=4.0,
+                  mom_resonance=True, mom_res_win=40, mom_res_alpha=1.0, mom_res_clamp=[0.05, 0.80])
+    ds = DynamicStrategy(R, cfg=cfg_on)
+    j = int(len(R) * 0.7)
+    dt = R.index[j]
+    i = ds.sig._idx(dt)
+    assert i <= j - 1, f"信号未滞后: i={i} j={j}"
+    R_dec = R.copy(); R_dec.iloc[j] = 0.25
+    ds_dec = DynamicStrategy(R_dec, cfg=cfg_on)
+    assert np.allclose(ds._rho_bar.iloc[i].to_numpy(), ds_dec._rho_bar.iloc[i].to_numpy(), equal_nan=True)
+    assert np.allclose(ds._mom_score.iloc[i].to_numpy(), ds_dec._mom_score.iloc[i].to_numpy(), equal_nan=True)
+    R_sig = R.copy(); R_sig.iloc[i] = 0.25
+    ds_sig = DynamicStrategy(R_sig, cfg=cfg_on)
+    assert not np.allclose(ds._rho_bar.iloc[i].fillna(0).to_numpy(), ds_sig._rho_bar.iloc[i].fillna(0).to_numpy())
+    # 公式烟测: 底仓保留、弹性总和不变; 单正分 fail-closed
+    w = {"159952": 10.0, "159941": 20.0, "513500": 8.0}
+    fl = {"159952": 0.0, "159941": 5.0, "513500": 5.0}
+    rho = {"159952": 0.50, "159941": 0.20, "513500": 0.20}
+    nw = low_corr_softpool(w, fl, rho, 4.0, 0.30, list(w))
+    assert abs(sum(nw[c] - fl[c] for c in w) - sum(w[c] - fl[c] for c in w)) < 1e-9
+    assert all(nw[c] >= fl[c] - 1e-9 for c in w)
+    props, fired = momentum_resonance_weights(
+        {"159952": 0.2, "159941": -0.1, "513500": -0.2},
+        {"159952": 0.3, "159941": 0.63, "513500": 0.07}, 1.0, (0.05, 0.80), 2)
+    assert fired is False and abs(props["159941"] - 0.63) < 1e-9
+    res["lc_mom_causal"] = {"weight_max_abs_diff_flags_off": max_diff, "lag_gap": int(j - i), "ok": True}
+    print(f"\n[ok] 低相关/动量共振旁路因果断言通过 (关=缺键, 决策日不入信号, lag_gap={j - i})")
+
+assert_lc_mom_causal(R)
 json.dump(res, open(f"{OUT}/audit_lookahead.json", "w"), ensure_ascii=False, indent=1, default=str)
 print("\n[ok] out/audit_lookahead.json")
