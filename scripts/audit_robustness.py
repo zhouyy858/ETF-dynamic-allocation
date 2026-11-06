@@ -71,6 +71,45 @@ def mut_market_dd(cfg, mkt, f):
     return c
 
 
+def _optional_axis_on(cfg, name):
+    """旁路轴: 模块关或未配置时不进入扰动分母, v30 的 104 次口径保持不变。"""
+    if name.startswith("low_corr"):
+        return bool(cfg.get("low_corr_pool"))
+    if name.startswith("mom_res"):
+        return bool(cfg.get("mom_resonance"))
+    return True
+
+
+def mut_low_corr_win(cfg, f):
+    c = copy.deepcopy(cfg)
+    c["low_corr_win"] = max(20, int(round(float(c.get("low_corr_win", 120)) * f)))
+    return c
+
+
+def mut_low_corr_lam(cfg, f):
+    c = copy.deepcopy(cfg)
+    c["low_corr_lam"] = round(float(c.get("low_corr_lam", 4.0)) * f, 6)
+    return c
+
+
+def mut_low_corr_rho(cfg, f):
+    c = copy.deepcopy(cfg)
+    c["low_corr_rho"] = round(min(0.95, max(0.0, float(c.get("low_corr_rho", 0.30)) * f)), 6)
+    return c
+
+
+def mut_mom_res_win(cfg, f):
+    c = copy.deepcopy(cfg)
+    c["mom_res_win"] = max(10, int(round(float(c.get("mom_res_win", 60)) * f)))
+    return c
+
+
+def mut_mom_res_alpha(cfg, f):
+    c = copy.deepcopy(cfg)
+    c["mom_res_alpha"] = round(max(0.1, float(c.get("mom_res_alpha", 1.0)) * f), 6)
+    return c
+
+
 def mut_growth_split(cfg, key, f):
     """扰动创业板(159952)权重, 其余两个成长资产按原比例归一。
     陷阱: 早期版本对三资产同时乘 f 再归一 = 恒等变换(空转轴), 已修正为只动 159952 份额。"""
@@ -112,11 +151,18 @@ PERTURBS = [
     ("premium_tilt_thr", lambda c, f: mut_scalar(c, "premium_tilt_thr", f)),
     ("premium_tilt_cap", lambda c, f: mut_scalar(c, "premium_tilt_cap", f)),
     ("premium_tilt_max", lambda c, f: mut_scalar(c, "premium_tilt_max", f)),
+    ("low_corr_win", lambda c, f: mut_low_corr_win(c, f)),
+    ("low_corr_lam", lambda c, f: mut_low_corr_lam(c, f)),
+    ("low_corr_rho", lambda c, f: mut_low_corr_rho(c, f)),
+    ("mom_res_win", lambda c, f: mut_mom_res_win(c, f)),
+    ("mom_res_alpha", lambda c, f: mut_mom_res_alpha(c, f)),
 ]
 FACTORS = [0.8, 0.9, 1.1, 1.2]
 
 rows = []
 for name, fn in PERTURBS:
+    if not _optional_axis_on(CFG, name):
+        continue
     for f in FACTORS:
         try:
             cfg2 = fn(CFG, f)

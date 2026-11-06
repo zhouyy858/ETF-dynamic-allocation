@@ -37,6 +37,147 @@ PREMIUM_CLIP = (-0.10, 0.15)
 PREMIUM_THR = [0.03, 0.05, 0.08]
 PREMIUM_CUT = [0.5, 0.25, 0.1]
 
+def _fill_after_list(s):
+    """上市后缺口记 0 收益(与防御动量 fillna(0) 一致); 上市前保持 NaN, 避免把长串 0 灌进相关窗。"""
+    vals = s.to_numpy(dtype=float).copy()
+    finite = np.isfinite(vals)
+    if not finite.any():
+        return pd.Series(vals, index=s.index)
+    i0 = int(np.argmax(finite))
+    tail = vals[i0:]
+    tail[~np.isfinite(tail)] = 0.0
+    vals[i0:] = tail
+    return pd.Series(vals, index=s.index)
+
+
+def _rolling_ols_score(ret, win):
+    """窗口内 log 价格 OLS: score = (exp(β·252)-1)·R²。窗内含非有限值则该点为 NaN(调用方 fail-closed)。
+    β·252 仅做 exp 溢出保护裁到 ±20, 不作为策略参数; 日收益量级下不会碰到。
+    用 sliding_window_view, 各自 strides, 避免把 float 步长套到 bool 掩码上读飞。"""
+    r = np.ascontiguousarray(ret, dtype=float)
+    n = len(r)
+    out = np.full(n, np.nan)
+    if n < win or win < 5:
+        return out
+    finite = np.isfinite(r)
+    rw = np.lib.stride_tricks.sliding_window_view(r, win)
+    fw = np.lib.stride_tricks.sliding_window_view(finite, win)
+    ok = fw.all(axis=1)
+    rw_safe = np.where(ok[:, None], rw, 0.0)
+    inc = np.log1p(np.clip(rw_safe, -0.999999, None))
+    y = np.cumsum(inc, axis=1)
+    y_c = y - y.mean(axis=1, keepdims=True)
+    x = np.arange(win, dtype=float)
+    x_c = x - x.mean()
+    varx = float(np.dot(x_c, x_c))
+    beta = (y_c @ x_c) / varx
+    ss_tot = np.sum(y_c * y_c, axis=1)
+    resid = y_c - beta[:, None] * x_c
+    ss_res = np.sum(resid * resid, axis=1)
+    r2 = np.ones(ss_tot.shape, dtype=float)
+    good = ss_tot > 1e-18
+    r2[good] = 1.0 - ss_res[good] / ss_tot[good]
+    np.clip(r2, 0.0, 1.0, out=r2)
+    ann = np.exp(np.clip(beta * 252.0, -20.0, 20.0)) - 1.0
+    score = np.where(ok & np.isfinite(ann), ann * r2, np.nan)
+    out[win - 1:] = score
+    return out
+
+
+def _project_simplex_box(weights, lo, hi):
+    """把比例投影到 sum=1 且每个分量落在 [lo, hi]。不可行则返回 None。"""
+    codes = list(weights)
+    n = len(codes)
+    lo, hi = float(lo), float(hi)
+    if n == 0 or lo * n > 1.0 + 1e-9 or hi * n < 1.0 - 1e-9 or lo > hi:
+        return None
+    v = np.array([float(weights[c]) for c in codes], dtype=float)
+    v = np.clip(v, lo, hi)
+    for _ in range(16):
+        s = float(v.sum())
+        if abs(s - 1.0) <= 1e-10 and np.all(v >= lo - 1e-10) and np.all(v <= hi + 1e-10):
+            if abs(s - 1.0) > 0:
+                v = v / s
+            return {c: float(v[i]) for i, c in enumerate(codes)}
+        if s > 1.0:
+            free = v > lo + 1e-12
+        else:
+            free = v < hi - 1e-12
+        if not np.any(free):
+            return None
+        mass = float(v[free].sum())
+        if mass <= 1e-18:
+            return None
+        v[free] += (1.0 - s) * (v[free] / mass)
+        v = np.clip(v, lo, hi)
+    if abs(float(v.sum()) - 1.0) < 1e-6:
+        v = np.clip(v / v.sum(), lo, hi)
+        v = v / v.sum()
+        return {c: float(v[i]) for i, c in enumerate(codes)}
+    return None
+
+
+def low_corr_softpool(weights, floors, rho_bar, lam, rho_star, codes):
+    """低相关软池。弹性 w_i^0 = max(w_i - floor_i, 0),
+    w_i ∝ w_i^0 · exp(-λ · max(0, ρ̄_i - ρ*))，弹性总和与底仓不变。
+    任一 ρ̄ 非有限则原样返回(fail-closed)。weights/floors 同一单位(策略内为百分数)。"""
+    codes = list(codes)
+    elast = {c: max(0.0, float(weights[c]) - float(floors[c])) for c in codes}
+    tot = float(sum(elast.values()))
+    if tot <= 1e-12:
+        return dict(weights)
+    pen = {}
+    for c in codes:
+        rho = float(rho_bar[c])
+        if not np.isfinite(rho):
+            return dict(weights)
+        pen[c] = float(np.exp(-float(lam) * max(0.0, rho - float(rho_star))))
+    raw = {c: elast[c] * pen[c] for c in codes}
+    s = float(sum(raw.values()))
+    if s <= 1e-12:
+        return dict(weights)
+    out = dict(weights)
+    for c in codes:
+        out[c] = float(floors[c]) + raw[c] / s * tot
+    return out
+
+
+def momentum_resonance_weights(scores, fixed_split, alpha, clamp, min_pos=2):
+    """桶内共振比例, 和为 1。同桶内严格为正的 score 少于 min_pos 时 fail-closed 到 fixed_split。
+    score 已是 (exp(β·252)-1)·R²; 权重 ∝ max(score, 0)^α, 再投影到 clamp。
+    返回 (proportions, fired)。"""
+    codes = list(fixed_split.keys())
+    base_s = float(sum(float(fixed_split[c]) for c in codes))
+    if not codes or base_s <= 1e-12:
+        return ({c: 1.0 / max(len(codes), 1) for c in codes}, False)
+    fixed = {c: float(fixed_split[c]) / base_s for c in codes}
+    n_pos = 0
+    for c in codes:
+        sc = scores.get(c, np.nan)
+        try:
+            sc = float(sc)
+        except (TypeError, ValueError):
+            return fixed, False
+        if not np.isfinite(sc):
+            return fixed, False
+        if sc > 0.0:
+            n_pos += 1
+    if n_pos < int(min_pos):
+        return fixed, False
+    a = float(alpha)
+    raw = {}
+    for c in codes:
+        sc = max(float(scores[c]), 0.0)
+        raw[c] = sc ** a if sc > 0.0 else 0.0
+    s = float(sum(raw.values()))
+    if s <= 1e-18:
+        return fixed, False
+    proj = _project_simplex_box({c: raw[c] / s for c in codes}, clamp[0], clamp[1])
+    if proj is None:
+        return fixed, False
+    return proj, True
+
+
 MIN_CASH = 0.05
 MAX_EQ = 0.97
 # 市场刹车: (快刹车触发DD%, 快刹车成长削减, 深熊锁定DD%, 解锁DD%)
@@ -210,6 +351,17 @@ class DynamicStrategy:
         self.premium_tilt_thr = float(cfg.get("premium_tilt_thr", 0.02))
         self.premium_tilt_cap = float(cfg.get("premium_tilt_cap", 0.05))
         self.premium_tilt_max = float(cfg.get("premium_tilt_max", 0.5))
+        # 旁路(默认关, 缺键=关): 低相关软池 / 动量共振。关时不建缓存、不改权重。
+        self.low_corr_pool = bool(cfg.get("low_corr_pool", False))
+        self.low_corr_win = int(cfg.get("low_corr_win", 120))
+        self.low_corr_rho = float(cfg.get("low_corr_rho", 0.30))
+        self.low_corr_lam = float(cfg.get("low_corr_lam", 4.0))
+        self.mom_resonance = bool(cfg.get("mom_resonance", False))
+        self.mom_res_win = int(cfg.get("mom_res_win", 60))
+        self.mom_res_alpha = float(cfg.get("mom_res_alpha", 1.0))
+        self.mom_res_clamp = [float(x) for x in cfg.get("mom_res_clamp", [0.05, 0.80])]
+        self.mom_res_min_pos = int(cfg.get("mom_res_min_pos", 2))
+        self.mom_res_defense = bool(cfg.get("mom_res_defense", False))
         self.corr_risk = bool(cfg.get("corr_risk", False))
         self.corr_conditional = bool(cfg.get("corr_conditional", False))
         self.corr_risk_win = int(cfg.get("corr_risk_win", 60))
@@ -379,6 +531,93 @@ class DynamicStrategy:
                 self._mom_cache[_s] = (1 + self.R[_s].fillna(0.0)).rolling(
                     self.defense_momentum_win).apply(np.prod, raw=True)
         self._pf_n = None; self._pf_wv = 0.0; self._pf_cmax = 1.0; self._pf_dd = 0.0
+        self._build_lc_mom_cache()
+
+    def _build_lc_mom_cache(self):
+        """ρ̄ 与共振 score 按收益面板逐日滚动, 决策时只取 sig._idx (已含 signal_lag) 及以前。关则留空。"""
+        self._rho_bar = None
+        self._mom_score = None
+        self._lc_calls = self._lc_changed = 0
+        self._mom_calls = self._mom_fires = self._mom_changed = 0
+        if not self.low_corr_pool and not self.mom_resonance:
+            return
+        cols = [c for c in SLOTS if c in self.R.columns]
+        filled = pd.DataFrame({c: _fill_after_list(self.R[c]) for c in cols})
+        if self.low_corr_pool:
+            W = self.low_corr_win
+            n = len(cols)
+            acc = pd.DataFrame(np.nan, index=self.R.index, columns=cols)
+            for a in cols:
+                s = None
+                for b in cols:
+                    if a == b:
+                        continue
+                    pair = filled[a].rolling(W, min_periods=W).corr(filled[b]).abs()
+                    s = pair if s is None else (s + pair)
+                acc[a] = s / (n - 1)
+            self._rho_bar = acc
+        if self.mom_resonance:
+            W = self.mom_res_win
+            self._mom_score = pd.DataFrame(
+                {c: _rolling_ols_score(filled[c].to_numpy(), W) for c in cols},
+                index=self.R.index)
+
+    def _low_corr_apply(self, dt, out):
+        """state_map 权重之后、市场乘数之前: 标的级两两 |corr| 软挪弹性, 底仓不动。"""
+        if not self.low_corr_pool:
+            return out
+        self._lc_calls += 1
+        i = self.sig._idx(dt)
+        if self._rho_bar is None or i < self.low_corr_win or i >= len(self._rho_bar):
+            return out
+        codes = [c for c in SLOTS if c not in self.exclude]
+        rho = {c: float(self._rho_bar[c].iloc[i]) for c in codes}
+        new = low_corr_softpool(out, self.floor, rho, self.low_corr_lam, self.low_corr_rho, codes)
+        if any(abs(new.get(c, 0.0) - out.get(c, 0.0)) > 1e-6 for c in codes):
+            self._lc_changed += 1
+        return new
+
+    def _mom_res_apply(self, dt, out, fixed_g):
+        """成长桶内斜率×R² 共振。不足 min_pos 只正分则回退 growth_split(fail-closed)。
+        防御桶默认不做(避免与 defense_momentum 换皮); mom_res_defense 打开时仅在共振成立时重分配。"""
+        if not self.mom_resonance:
+            return out
+        self._mom_calls += 1
+        i = self.sig._idx(dt)
+        if self._mom_score is None or i < self.mom_res_win or i >= len(self._mom_score):
+            return out
+        codes = [c for c in ("159952", "159941", "513500") if c not in self.exclude and c in fixed_g]
+        if len(codes) < 2:
+            return out
+        scores = {c: float(self._mom_score[c].iloc[i]) for c in codes}
+        fs = {c: float(fixed_g.get(c, 0.0)) for c in codes}
+        props, fired = momentum_resonance_weights(
+            scores, fs, self.mom_res_alpha, self.mom_res_clamp, self.mom_res_min_pos)
+        if fired:
+            self._mom_fires += 1
+        tot = float(sum(max(0.0, out[c] - self.floor[c]) for c in codes))
+        if tot > 1e-12:
+            new = dict(out)
+            for c in codes:
+                new[c] = self.floor[c] + props[c] * tot
+            if any(abs(new[c] - out[c]) > 1e-6 for c in codes):
+                self._mom_changed += 1
+            out = new
+        if self.mom_res_defense:
+            dcodes = [c for c in ("159232", "515100") if c not in self.exclude]
+            if len(dcodes) == 2 and i < len(self._mom_score):
+                dscores = {c: float(self._mom_score[c].iloc[i]) for c in dcodes}
+                dfixed = {c: float(self.defense_split_base.get(c, 0.0)) for c in dcodes}
+                dprops, dfired = momentum_resonance_weights(
+                    dscores, dfixed, self.mom_res_alpha, self.defense_clamp, self.mom_res_min_pos)
+                if dfired:
+                    dtot = float(sum(max(0.0, out[c] - self.floor[c]) for c in dcodes))
+                    if dtot > 1e-12:
+                        new = dict(out)
+                        for c in dcodes:
+                            new[c] = self.floor[c] + dprops[c] * dtot
+                        out = new
+        return out
 
     @staticmethod
     def _load_premium_panel(R, shift=1):
@@ -889,6 +1128,10 @@ class DynamicStrategy:
             "513500": self.floor["513500"] + split_g["513500"] * g,
             "159952": self.floor["159952"] + split_g["159952"] * g,
         }
+        # 旁路: 先软池(跨袖套)再共振(成长桶内)。两者默认关, 关时 out 逐位不变。风控乘数仍在其后。
+        fixed_g = dict(self.growth_split_bull if g >= 30 else self.growth_split_bear)
+        out = self._low_corr_apply(dt, out)
+        out = self._mom_res_apply(dt, out, fixed_g)
         m_cn_g, m_cn_all = self._market_mult(dt, "CN")
         m_us_g, m_us_all = self._market_mult(dt, "US")
         # CN弹性: 成长仓受快刹车+闸门; 防御弹性只受深熊锁定
