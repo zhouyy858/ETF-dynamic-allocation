@@ -33,16 +33,19 @@ _SIG = {}
 _ORIG_SIG = DynamicStrategy.SIG_CLASS
 
 
-def _sig_cached(R, a_mkt_override=None, lag=0, gate_win=120):
-    key = (id(R), None if a_mkt_override is None else id(a_mkt_override), int(lag), int(gate_win))
-    hit = _SIG.get(key)
-    if hit is None:
-        hit = _ORIG_SIG(R, a_mkt_override=a_mkt_override, lag=lag, gate_win=gate_win)
-        _SIG[key] = hit
-    return hit
+class _SigCache:
+    """同一面板只建一次信号。类而不是函数，避免被当成绑定方法。"""
+
+    def __new__(cls, R, a_mkt_override=None, lag=0, gate_win=120):
+        key = (id(R), None if a_mkt_override is None else id(a_mkt_override), int(lag), int(gate_win))
+        hit = _SIG.get(key)
+        if hit is None:
+            hit = _ORIG_SIG(R, a_mkt_override=a_mkt_override, lag=lag, gate_win=gate_win)
+            _SIG[key] = hit
+        return hit
 
 
-DynamicStrategy.SIG_CLASS = _sig_cached
+DynamicStrategy.SIG_CLASS = _SigCache
 
 # v37 结果文件里的生产路径与 A100。容差 1e-8。对不上就中止。
 PIN_V30 = {
@@ -516,6 +519,7 @@ def fetch_quote(code):
 
 def load_or_fetch(code):
     path = os.path.join(DATA, f"{code}.csv")
+    qpath = os.path.join(DATA, f"{code}.quote.json")
     name = None
     if os.path.exists(path):
         df = pd.read_csv(path, parse_dates=["date"])
@@ -528,14 +532,31 @@ def load_or_fetch(code):
         out["date"] = out["date"].dt.strftime("%Y-%m-%d")
         out.to_csv(path, index=False)
         time.sleep(0.35)
-    quote = {"name": name, "listed": None}
-    try:
-        quote = fetch_quote(code)
-        time.sleep(0.2)
-    except Exception as e:
-        quote["error"] = str(e)[:160]
-    if quote.get("name") is None and name:
-        quote["name"] = name
+    cached = {}
+    if os.path.exists(qpath):
+        try:
+            cached = json.load(open(qpath))
+        except Exception:
+            cached = {}
+    quote = {"name": cached.get("name") or name, "listed": cached.get("listed")}
+    if not quote.get("name") or not quote.get("listed"):
+        try:
+            fresh = fetch_quote(code)
+            time.sleep(0.2)
+            if fresh.get("name"):
+                quote["name"] = fresh["name"]
+            if fresh.get("listed"):
+                quote["listed"] = fresh["listed"]
+            if fresh.get("error"):
+                quote["error"] = fresh["error"]
+        except Exception as e:
+            quote["error"] = str(e)[:160]
+    if quote.get("name"):
+        os.makedirs(DATA, exist_ok=True)
+        with open(qpath, "w") as f:
+            json.dump({"name": quote.get("name"), "listed": quote.get("listed")},
+                      f, ensure_ascii=False)
+            f.write("\n")
     return df, quote
 
 
@@ -588,8 +609,12 @@ def place_on_calendar(rets, calendar):
     gap = max_run(miss.tolist())
     frac = float(miss.mean()) if len(sl) else 1.0
     if gap > PRE["hole_days"] or frac > PRE["hole_frac"]:
-        return aligned, {"ok": False, "reason": f"内部缺口 最长{gap}日 占比{frac:.2%}",
-                         "filled": int(miss.sum()), "max_gap": gap}
+        years = sl.index[miss].year.value_counts().sort_index()
+        top = "、".join(f"{int(y)}年{int(n)}日" for y, n in years.items() if n >= 5)
+        return aligned, {"ok": False,
+                         "reason": f"内部缺口 最长{gap}日 占比{frac:.2%}"
+                                   + (f"（{top}）" if top else ""),
+                         "filled": int(miss.sum()), "max_gap": gap, "years": top}
     filled = aligned.copy()
     filled.loc[first:end] = filled.loc[first:end].fillna(0.0)
     return filled, {"ok": True, "reason": "", "filled": int(miss.sum()), "max_gap": gap,
@@ -869,12 +894,14 @@ def main():
         if len(rets):
             ix = rets.abs().idxmax()
             spike = {"date": str(ix.date()), "ret": float(rets.loc[ix])}
+        raw = series_stats(rets) if len(rets) else None
         books[code] = {
             "code": code, "name": quote.get("name"), "listed": listed, "first_bar": first_bar,
             "last_bar": last_bar, "n_bar": int(len(close)), "list_gap_days": gap_days,
             "quote_error": quote.get("error"), "usable": usable, "reason": reason,
             "hole": hole, "money": mm, "liq": liquidity(amt), "spike": spike,
             "close0": float(close.iloc[0]), "close1": float(close.iloc[-1]),
+            "raw": raw,
         }
         em_rets[code] = rets
         if usable and code not in ("511010", "511260"):
@@ -1313,6 +1340,22 @@ def render(digest, valid, ctx):
           f"首末收盘 {b990.get('close0')} → {b990.get('close1')}。"
           "不把接近 0 的价格涨跌写成货币基金收益，也不用一个假设收益率去补。")
     A("含 511260、且窗口起点早于 2017-08-24 的臂（A100、M70g、以及全历史邻域里的 511260 腿）在上市前用的是 511010。起点不早于 2017-08-24 的缩短窗口里，这条腿是 10Y 本身。")
+    hole_notes = []
+    for code in ("511020", "511030"):
+        b = ctx["books"].get(code) or {}
+        raw = b.get("raw") or {}
+        if not raw or raw.get("cagr") is None:
+            continue
+        hole_notes.append(
+            f"{code} 自身价格（有 K 线的日子，没有填洞，也没有进策略）"
+            f" {raw.get('start')}~{raw.get('end')} / {raw.get('n')}日，"
+            f"CAGR {pct(raw.get('cagr'))}，MDD {pct(raw.get('mdd'))}，"
+            f"峰值 {raw.get('peak')}，谷值 {raw.get('trough')}。"
+        )
+    if hole_notes:
+        A("511020 与 511030 的东财 K 线在面板交易日上的缺口占比超过预注册的 2%，最长连续缺口仍只有数日，所以不把缺日记成 0，也不改用别的债券去接。策略回测没有跑。下面只是它们自己的价格路径：")
+        for line in hole_notes:
+            A(line)
     A("")
     A("与仓库已有文件的日收益绝对差（不替换回测序列）：")
     A("")
@@ -1328,6 +1371,7 @@ def render(digest, valid, ctx):
     A("### 2.2 主点")
     A("")
     A("全窗口可评才进入门槛。缩短窗口的 proxy 与同一天重新起步的 A100 比，不能叫做优于 511260。real 只要上市早于 2025-04-23，就是标准 real 窗。")
+    A("上市日晚于 2022-01-04 时，缩短后的 OOS 和缩短后的 proxy 是同一段样本，不是从 2022-01-04 另起的独立 OOS。表上这种 OOS 标了「缩短」。")
     A("")
     A("| 主点 | 权重 | proxy 起点 | 全? | proxy CAGR/MDD/Cal/换手 | Δv30 | ΔA100 | real Δv30 | real ΔA100 | OOS Cal | 标签 |")
     A("|---|---|---|---|---|---|---|---|---|---|---|")
@@ -1574,12 +1618,13 @@ def conclusion(ctx):
     gates = ctx["gates"]
     labeled = [e for e in gates if e["label"]]
     full_ids = [e["id"] for e in gates if e["full"]]
-    out.append(
-        f"看过 13 个主点。三个标准窗口都盖住的有 {len(full_ids)} 个"
-        + ( "：" + "、".join(full_ids) if full_ids else "。")
-        + ("" if full_ids else "")
-        + "这是固定名单上的比较，不是事先指定的单臂。"
-    )
+    if full_ids:
+        out.append(
+            f"看过 13 个主点。三个标准窗口都盖住的有 {len(full_ids)} 个："
+            f"{'、'.join(full_ids)}。这是固定名单上的比较，不是事先指定的单臂。"
+        )
+    else:
+        out.append("看过 13 个主点。没有一个盖住三个标准窗口。这是固定名单上的比较，不是事先指定的单臂。")
     if not labeled:
         out.append("没有主点拿到「优于 511260」的标签。全窗口门槛和「两边都高于 A100」同时成立的，一条都没有。")
     else:
@@ -1592,6 +1637,20 @@ def conclusion(ctx):
             )
         out.append("拿到标签的是：" + "；".join(bits) + "。")
 
+    both = []
+    for e in gates:
+        pr = e["desc"].get("proxy") or {}
+        rr = e["desc"].get("real") or {}
+        if pr.get("ok") and rr.get("ok") and pr["dcal_a100"] > 0 and rr["dcal_a100"] > 0:
+            scope = "全窗口" if e["full"] else f"缩短 proxy 从 {pr['start']} 起"
+            both.append(f"{e['id']}（{scope}，proxy {dlt(pr['dcal_a100'])}，real {dlt(rr['dcal_a100'])}）")
+    if both:
+        out.append("proxy 与 real 的 Calmar 都高于同一起点 A100 的主点：" + "；".join(both) + "。")
+        if not any(e["label"] for e in gates):
+            out.append("里面没有一条同时是全窗口、并且通过相对 v30 的门槛。所以仍然不能称为优于 511260。")
+    else:
+        out.append("没有任何主点在 proxy 和 real 上都高于同一起点的 A100。")
+
     # 全窗口未过的原因，每个一句
     for e in gates:
         if e["label"]:
@@ -1599,14 +1658,22 @@ def conclusion(ctx):
         if not e["full"]:
             pr = e["desc"].get("proxy") or {}
             rr = e["desc"].get("real") or {}
-            why = e["coverage_why"] or "历史盖不住 2014-06-23 起的 proxy"
+            why = (e["coverage_why"] or "历史盖不住 2014-06-23 起的 proxy").rstrip("。")
             extra = ""
             if pr.get("ok"):
                 extra += (f"缩短 proxy 从 {pr['start']} 起 {pr['n']} 日，"
                           f"Cal {calf(pr['m']['cal'])}，相对同一起点的 A100 {dlt(pr['dcal_a100'])}。")
             if rr.get("ok"):
-                extra += (f"标准 real Cal {calf(rr['m']['cal'])}，相对 A100 {dlt(rr['dcal_a100'])}。")
-            out.append(f"{e['id']} 不能称为优于 511260。{why}{extra}")
+                extra += f"标准 real Cal {calf(rr['m']['cal'])}，相对 A100 {dlt(rr['dcal_a100'])}。"
+            if pr.get("ok") and (not pr.get("full")) and pr["start"] >= OOS_START:
+                extra += "缩短 OOS 与这段 proxy 是同一段样本，不是从 2022-01-04 另起的独立检验。"
+            code = e["id"][2:] if e["id"].startswith("P_") and e["id"][2:].isdigit() else None
+            raw = (books.get(code) or {}).get("raw") if code else None
+            if raw and raw.get("cagr") is not None and not pr.get("ok"):
+                extra += (f"自身价格 {raw.get('start')}~{raw.get('end')}，"
+                          f"CAGR {pct(raw.get('cagr'))}，MDD {pct(raw.get('mdd'))}。"
+                          "这不是策略结果。")
+            out.append(f"{e['id']} 不能称为优于 511260。{why}。{extra}")
         else:
             c = e["checks"]
             failed = []
