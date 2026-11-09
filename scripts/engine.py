@@ -18,7 +18,10 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
                  min_delta=0.002, name="", tranche_weights=None,
                  cash_bond_rets=None, cash_bond_pct=0.0, exec_lag=0, accrual_mode="pre",
                  rebal_weekday=2, rebal_freq="weekly", strict=False,
-                 cash_gold_rets=None, gold_override_fn=None):
+                 cash_gold_rets=None, gold_override_fn=None,
+                 cash_sleeve_fn=None, cash_bond_alt_rets=None,
+                 weight_quantum=None, lot_prices=None, lot_nav0=1_000_000.0,
+                 lot_size=100, lot_mode="nearest"):
     if strict:
         assert accrual_mode == "pre", "严格模式必须 accrual_mode=pre (成交仓位不得计提当日收益)"
         assert exec_lag == 0, "严格模式必须 exec_lag=0 (决策日收盘成交, 前一日信号)";
@@ -29,7 +32,15 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
     rebal_freq: "weekly"(每周) / "biweekly"(隔周) / "monthly"(每月首个调仓日)
     tranche_weights: 分笔比例列表(如[1.0]立即执行、[0.5,0.5]、[1/3]*3), 默认None=等分tranches笔
     cash_bond_pct: 闲置现金中配置债券ETF的比例(0~1); cash_bond_rets: 债券ETF日收益序列(如511010),
-    缺失日按逆回购repo计息 -> 现金层 = (1-pct)*逆回购 + pct*债券ETF"""
+    缺失日按逆回购repo计息 -> 现金层 = (1-pct)*逆回购 + pct*债券ETF
+    cash_sleeve_fn: 可选。None 时现金层与上式逐位一致(生产默认路径)。若给出, 签名 fn(dt)->{"pct","alt_frac"},
+    在当日决策之后更新, 自下一交易日起计提(与黄金危机袖套同一时点, 无未来函数)。
+    cash_bond_alt_rets: 可选第二债券序列; 仅当 alt_frac>0 时按 (1-alt)*主债券 + alt*第二债券 混合。
+    weight_quantum: 可选。None=目标权重保持 float(生产路径)。>0 时在 min_delta 判断前把各资产目标
+    舍入到该组合比例粒度(如 0.0001=1bp)。不改变调仓频率与滞回。
+    lot_prices: 可选成交价表(列名=SLOTS)。None=不按手数取整。给出时用 lot_nav0 初始资金、
+    当日财富×价格把目标股数舍入到 lot_size(默认100股)后再换算回权重; 缺价的资产保持连续权重。
+    lot_mode: nearest / floor / ceil。以上钩子均为 None 时, 成交分支与改动前相同。"""
     if tranche_weights is None:
         tw = np.array([1.0 / tranches] * tranches)
     else:
@@ -57,18 +68,38 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
     if cash_gold_rets is not None:
         gold = cash_gold_rets.reindex(dates).ffill().fillna(repo_d)
     gold_pct_cur = 0.0
+    bond_alt = None
+    if cash_bond_alt_rets is not None:
+        bond_alt = cash_bond_alt_rets.reindex(dates).ffill().fillna(repo_d)
+    # 仅 cash_sleeve_fn 非空时使用; 初值=静态比例, 当日决策后更新、次日计提
+    pct_cur = float(cash_bond_pct)
+    alt_frac_cur = 0.0
+    px_df = None
+    nav_prev = 1.0
+    if lot_prices is not None:
+        # 只向前填充最多 5 个交易日; 不 bfill, 避免用未来价格
+        px_df = lot_prices.reindex(dates).ffill(limit=5)
 
     def cash_ret_at(i):
         # 严格口径: 用上一收盘已生效的黄金配置计提当日收益, 当日决策收盘后生效、次日计收益
         # 语义: gold_pct_cur = 现金层中黄金占比(0~1), 危机时替代债券+逆回购基准收益
         gp = gold_pct_cur
+        # 生产路径: 不传 sleeve / 第二债券时, 公式与改动前逐字相同
+        if cash_sleeve_fn is None and bond_alt is None:
+            if gold is not None:
+                base = (1.0 - cash_bond_pct) * repo_d + cash_bond_pct * (
+                    float(bond.iloc[i]) if bond is not None else 0.0)
+                return gp * float(gold.iloc[i]) + (1.0 - gp) * base
+            if bond is not None:
+                return (1.0 - cash_bond_pct) * repo_d + cash_bond_pct * float(bond.iloc[i])
+            return repo_d
+        bret = float(bond.iloc[i]) if bond is not None else repo_d
+        if bond_alt is not None and alt_frac_cur > 0.0:
+            bret = (1.0 - alt_frac_cur) * bret + alt_frac_cur * float(bond_alt.iloc[i])
+        base = (1.0 - pct_cur) * repo_d + pct_cur * bret
         if gold is not None:
-            base = (1.0 - cash_bond_pct) * repo_d + cash_bond_pct * (
-                float(bond.iloc[i]) if bond is not None else 0.0)
             return gp * float(gold.iloc[i]) + (1.0 - gp) * base
-        if bond is not None:
-            return (1.0 - cash_bond_pct) * repo_d + cash_bond_pct * float(bond.iloc[i])
-        return repo_d
+        return base
 
     def fixed_target():
         t = np.array([fixed_weights[s] for s in SLOTS], dtype=float)
@@ -149,6 +180,39 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
             total = target.sum()
             if total > 1.0 + 1e-9:
                 target = target / total
+            if weight_quantum is not None and weight_quantum > 0:
+                q = float(weight_quantum)
+                target = np.round(np.clip(target, 0.0, None) / q) * q
+                s = float(target.sum())
+                if s > 1.0 + 1e-12:
+                    target = target / s
+            if px_df is not None and accrual_mode == "pre":
+                nav_now = nav_prev * (1.0 + pf_ret)
+                port = float(lot_nav0) * nav_now
+                if port > 0:
+                    snapped = target.copy()
+                    for si, sname in enumerate(SLOTS):
+                        if sname not in px_df.columns:
+                            continue
+                        try:
+                            px = float(px_df[sname].iloc[i])
+                        except (TypeError, ValueError):
+                            continue
+                        if not np.isfinite(px) or px <= 0:
+                            continue
+                        raw = float(target[si]) * port / px
+                        if raw <= 0:
+                            lots = 0.0
+                        elif lot_mode == "floor":
+                            lots = np.floor(raw / lot_size + 1e-12)
+                        elif lot_mode == "ceil":
+                            lots = np.ceil(raw / lot_size - 1e-12)
+                        else:
+                            lots = np.round(raw / lot_size)  # numpy 银行家舍入
+                        snapped[si] = lots * lot_size * px / port
+                    if float(snapped.sum()) > 1.0 + 1e-9:
+                        snapped = snapped / snapped.sum()
+                    target = snapped
             delta = target - w
             if i == 0 or np.abs(delta).max() >= min_delta:
                 if is_emergency:
@@ -190,10 +254,16 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
             except Exception:
                 gp_new = 0.0
             gold_pct_cur = min(max(gp_new, 0.0), 1.0)
+        if cash_sleeve_fn is not None:
+            spec = cash_sleeve_fn(dt) or {}
+            pct_cur = min(max(float(spec.get("pct", cash_bond_pct)), 0.0), 1.0)
+            alt_frac_cur = min(max(float(spec.get("alt_frac", 0.0)), 0.0), 1.0)
         # 记录日终持仓(成交后): 资产权重与现金必须同口径一致, 供展示/avg_cash使用
         weights_history[i] = np.concatenate([w, [1.0 - w.sum()]])
         rets[i] = pf_ret
         pf_rets_ctx.append(pf_ret)
+        if px_df is not None:
+            nav_prev *= (1.0 + pf_ret)
 
     rs = pd.Series(rets, index=dates)
     W = (1 + rs).cumprod()
