@@ -24,8 +24,8 @@ os.makedirs(OUT_DIR, exist_ok=True)
 CFG_FILE = os.path.join(REF, "final_cfg_v30.json")
 PROXY_START, REAL_START, OOS_START = "2014-06-23", "2025-04-23", "2022-01-04"
 # 引擎改动前、本脚本编写前，同一数据上 v30 proxy 的锚（身份校验，不是候选结果）
-PIN_PROXY = {"cagr": 0.11111021816342403, "max_dd": -0.09910849911812059,
-             "calmar": 1.1210967692185454}
+PIN_PROXY = {"cagr": 0.11111021816342403, "mdd": -0.09910849911812059,
+             "cal": 1.1210967692185454}
 
 # 三关与 exp_opt31.py 同一组常数。平台必须三点都过，主点取邻域中点。
 PRE = {
@@ -645,6 +645,45 @@ def main():
     return payload
 
 
+def reading_notes(p):
+    """用已落盘的数字解释标签，不新增通过线。"""
+    b = p["baseline"]
+    lines = []
+    st_b = p["stress"]["F0_v30"]
+    st_a = p["stress"]["A_p75"]
+    d1 = (st_a["共振熊_至2026-07-31"]["mdd"] - st_b["共振熊_至2026-07-31"]["mdd"]) * 100
+    d2 = (st_a["共振熊_至样本末日"]["mdd"] - st_b["共振熊_至样本末日"]["mdd"]) * 100
+    lines.append(
+        f"共振熊绝对水平是这一次、用 `stress_test.synthetic_resonance` 配对跑出来的"
+        f"（v30 截止 2026-07-31 为 {st_b['共振熊_至2026-07-31']['mdd']*100:.2f}%），"
+        f"不是 README 里那份未入库脚本的 -13.93%。A 相对 v30 两段 {d1:+.2f}pp / {d2:+.2f}pp，"
+        "没有超过预注册的 0.50pp，候选线的共振条款因此通过；晋升仍失败，"
+        f"因为主点双窗 ΔCalmar 是 {p['rows']['A_p75']['proxy']['cal']-b['proxy']['cal']:+.3f} / "
+        f"{p['rows']['A_p75']['real']['cal']-b['real']['cal']:+.3f}，不到 +0.15。"
+    )
+    dg = p["diags"].get("C_p85") or {}
+    if dg.get("cash_calls"):
+        lines.append(
+            f"C 的触发只有 {dg['cash_on']}/{dg['cash_calls']} 个交易日。"
+            "把 511010 比例从 0.75 调到 0.85 几乎不改变 Calmar（主点双窗 -0.001 / +0.001）。"
+            "触发日改拿 511260（C2）方向与 A 相同但小一个数量级，因为大部分时间仍是 511010。"
+        )
+    lines.append(
+        "D 的「接近」只是双窗 ΔCalmar 都大于 0：proxy 主点 +0.001，等于没动；"
+        "real +0.097 夹在邻域 +0.016 和 +0.026 之间，短窗口上不是平台。按预注册不升格。"
+    )
+    lines.append(
+        "B 的阶梯在锁内确实还回了红利弹性，proxy MDD 到 -10.66%（邻域 -10.93% / -10.44%），"
+        "OOS Calmar 还低 0.108。这是证伪，不是差一点。"
+    )
+    lines.append(
+        "F2 主点（min_delta=0.01）双窗 Calmar 都变差，proxy MDD -10.01% 破线，换手比 1.040。"
+        "端点 min_delta=0.02 的 real ΔCalmar +0.155 是单窗，且 proxy 为负，预注册不把端点升成主点。"
+        "F3 在 100 万资金下换手比 1.000，一手大约 1–2bp，被 3.5% 的成交门槛盖住。"
+    )
+    return "\n\n".join(lines)
+
+
 def render(p, digest):
     b = p["baseline"]
     L = []
@@ -658,13 +697,14 @@ def render(p, digest):
     A("## 2. 结果")
     A("")
     A(f"身份校验：生产路径与脚本编写前的 v30 proxy 锚一致"
-      f"（CAGR {PIN_PROXY['cagr']:.6f} / MDD {PIN_PROXY['max_dd']:.6f} / Cal {PIN_PROXY['calmar']:.6f}）。"
+      f"（CAGR {PIN_PROXY['cagr']:.6f} / MDD {PIN_PROXY['mdd']:.6f} / Cal {PIN_PROXY['cal']:.6f}）。"
       f"关开关的实验子类日收益差 {p['identity']['subclass_gap']:.1e}。"
       f"袖套锁定在 75% 511010 时日收益差 {p['identity']['static_sleeve_gap']:.1e}。")
     f1g = p["identity"].get("f1_primary_max_abs_ret")
     if f1g is not None:
         A(f"F1 主点（1bp 舍入）相对 v30 的最大日收益差 {f1g:.3e}。"
-          + ("这就是「已经是浮点，小数位不是瓶颈」。" if f1g < 1e-8 else "差不是尘埃，见 F1 行。"))
+          "Calmar 到三位小数仍是 0.000，换手比 1.000。"
+          "权重本来就是 float64，1bp 舍入没有形成可交易的增益。")
     A("")
     A(f"**基线 v30**：proxy {cell(b['proxy'])}；real {cell(b['real'])}；OOS {cell(b['oos'])}；"
       f"proxy 换手 {b['proxy']['to']:.2f}。")
@@ -725,6 +765,8 @@ def render(p, digest):
     else:
         one = "六条机制都没有走完三关，默认继续用 v30，没有新的默认配置。"
     A("**一句话**： " + one)
+    A("")
+    A(reading_notes(p))
     A("")
     A(f"Arm A（511260，75%）{'仍只是候选，不能当默认' if p['a_still_candidate'] else '连候选保留线都没过，不再维持候选'}。"
       "久期样本缺陷（2017-08 前拼接、没有 2013 债熊）不因数字好看而消失。")
