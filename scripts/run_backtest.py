@@ -8,6 +8,7 @@ from data_prep import build_panel, read_table, rets_from
 from engine import run_backtest, evaluate, fmt_eval, SLOTS
 from strategy import DynamicStrategy
 from metrics import drawdown_series
+from swaps import pnl_panel, traded_code, traded_name
 
 OUT = os.path.join(os.getcwd(), "out")
 os.makedirs(OUT, exist_ok=True)
@@ -48,7 +49,7 @@ def risk_parity_weights(R, start, end):
     w = 1 / vols
     return {s: float(w[s] / w.sum() * 100) for s in SLOTS}
 
-def run_all(R, label, start, end, dyn_cfg):
+def run_all(R, label, start, end, dyn_cfg, R_pnl=None):
     results = {}
     wealths = {}
     periods = make_periods(R.index[-1].date() if end is None else pd.Timestamp(end).date())
@@ -68,7 +69,7 @@ def run_all(R, label, start, end, dyn_cfg):
     bond = None
     if dyn_cfg.get("cash_bond_pct"):
         bond = rets_from(read_table(f"{dyn_cfg.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav")
-    res = run_backtest(R, target_weights_fn=ds.target_fn(), daily_override_fn=ds.daily_fn(),
+    res = run_backtest(R if R_pnl is None else R_pnl, target_weights_fn=ds.target_fn(), daily_override_fn=ds.daily_fn(),
                        start=start, end=end, name=f"DYN {label}",
                        min_delta=dyn_cfg.get("min_delta", 0.02), repo=dyn_cfg.get("repo_rate", 0.022),
                        tranche_weights=dyn_cfg.get("tranche_weights"),
@@ -176,16 +177,29 @@ def term_bars(rows, title, width=42):
 # ---------- 主流程 ----------
 def main():
     _here = os.path.dirname(os.path.abspath(__file__))
-    _p1 = os.path.join(_here, "..", "references", "final_cfg_v37.json")
-    _p2 = os.path.join(_here, "references", "final_cfg_v37.json")
+    _p1 = os.path.join(_here, "..", "references", "final_cfg_v39.json")
+    _p2 = os.path.join(_here, "references", "final_cfg_v39.json")
     cfg_file = sys.argv[1] if len(sys.argv) > 1 else (_p1 if os.path.exists(_p1) else _p2)
-    tag = sys.argv[2] if len(sys.argv) > 2 else "v37"
+    tag = sys.argv[2] if len(sys.argv) > 2 else "v39"
     cfg = json.load(open(cfg_file))
+    R_proxy_pnl = pnl_panel(R_PROXY, "proxy", cfg)
+    R_real_pnl = pnl_panel(R_REAL, "real", cfg)
     wd = cfg.get("rebal_weekday", 2); wd_cn = "一二三四五"[wd]
     freq = cfg.get("rebal_freq", "weekly"); n_tw = len(cfg.get("tranche_weights", [1.0]))
     print(f"===== 迭代 {tag} | 周{wd_cn}-{freq}-{n_tw}笔(前一日信号, 无未来函数, strict) =====")
-    rp = run_all(R_PROXY, tag, BACKTEST_START, None, cfg)
-    rr = run_all(R_REAL, tag, REAL_START, None, cfg)
+    rp = run_all(R_PROXY, tag, BACKTEST_START, None, cfg, R_proxy_pnl)
+    rr = run_all(R_REAL, tag, REAL_START, None, cfg, R_real_pnl)
+    ds_oos = DynamicStrategy(R_PROXY, cfg=cfg)
+    bond_oos = rets_from(read_table(f"{cfg.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg.get("cash_bond_pct") else None
+    res_oos = run_backtest(R_proxy_pnl, target_weights_fn=ds_oos.target_fn(), daily_override_fn=ds_oos.daily_fn(),
+                           start="2022-01-04", name="DYN OOS", min_delta=cfg.get("min_delta", 0.02),
+                           repo=cfg.get("repo_rate", 0.022), tranche_weights=cfg.get("tranche_weights"),
+                           cash_bond_rets=bond_oos, cash_bond_pct=cfg.get("cash_bond_pct", 0.0),
+                           rebal_weekday=cfg.get("rebal_weekday", 2), rebal_freq=cfg.get("rebal_freq", "weekly"),
+                           strict=True)
+    oos_dyn = evaluate(res_oos)
+    print(f"\n===== OOS（proxy 独立起点 2022-01-04）DYN CAGR={oos_dyn['cagr']*100:.2f}%  "
+          f"MDD={oos_dyn['max_dd']*100:.2f}%  Calmar={oos_dyn['calmar']:.4f} =====")
     json.dump({k: v for k, v in rp.items() if not k.startswith("_")},
               open(f"{OUT}/iter_{tag}_proxy.json", "w"), ensure_ascii=False, indent=2, default=str)
     json.dump({k: v for k, v in rr.items() if not k.startswith("_")},
@@ -223,17 +237,41 @@ def main():
     else:
         cash_nm = f"现金(逆回购{1-bond_pct:.0%}+{bond_code} {bond_pct:.0%})"
     print("\n===== 当前仓位管理现状 (数据截至 %s, 配置 %s) =====" % (str(wdf.index[-1].date()), cfg_file))
-    print("  实际持仓(含权重漂移, 以最新交易日收盘计):")
+    print("  实际持仓(含权重漂移, 以最新交易日收盘计; 代码是成交标的):")
     for s in SLOTS + ["cash"]:
-        nm = ETF_NAMES.get(s, cash_nm)
-        print(f"    {s:<8} {nm:<22} {w_last[s]*100:6.2f}%")
+        code = "cash" if s == "cash" else traded_code(s, cfg)
+        nm = cash_nm if s == "cash" else traded_name(s, cfg)
+        print(f"    {code:<8} {nm:<22} {w_last[s]*100:6.2f}%")
     ds_live = DynamicStrategy(R_PROXY, cfg=dict(cfg, signal_lag=0))
     # 信号口径: 最新数据日=T-1, 以lag=0实例在T-1数据上计算下一个调仓日目标。只打印, 不下单。
     tgt_last = ds_live.regular_target(wdf.index[-1], {"pf_rets": rets})
     print(f"  目标权重(下一个周{wd_cn}决策目标, 用最新可得数据, 纸面):")
     for s in SLOTS + ["cash"]:
-        nm = ETF_NAMES.get(s, cash_nm)
-        print(f"    {s:<8} {nm:<22} {tgt_last[s]*100:6.2f}%")
+        code = "cash" if s == "cash" else traded_code(s, cfg)
+        nm = cash_nm if s == "cash" else traded_name(s, cfg)
+        print(f"    {code:<8} {nm:<22} {tgt_last[s]*100:6.2f}%")
+    v37_file = os.path.join(os.path.dirname(cfg_file), "final_cfg_v37.json")
+    if cfg.get("instrument_swaps") and os.path.exists(v37_file):
+        cfg37 = json.load(open(v37_file))
+        ds37 = DynamicStrategy(R_PROXY, cfg=cfg37)
+        bond37 = rets_from(read_table(f"{cfg37.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg37.get("cash_bond_pct") else None
+        res37 = run_backtest(R_PROXY, target_weights_fn=ds37.target_fn(), daily_override_fn=ds37.daily_fn(),
+                             start=BACKTEST_START, name="v37", min_delta=cfg37.get("min_delta", 0.02),
+                             repo=cfg37.get("repo_rate", 0.022), tranche_weights=cfg37.get("tranche_weights"),
+                             cash_bond_rets=bond37, cash_bond_pct=cfg37.get("cash_bond_pct", 0.0),
+                             rebal_weekday=cfg37.get("rebal_weekday", 2), rebal_freq=cfg37.get("rebal_freq", "weekly"),
+                             strict=True)
+        w37 = res37["weights"].iloc[-1]
+        print("  相对当前 v37 持仓的切换（纸面，不下单）:")
+        for s in SLOTS:
+            code = traded_code(s, cfg)
+            held = float(w37[s]) * 100
+            tgt = float(tgt_last[s]) * 100
+            if code != s:
+                print(f"    卖出 {s} {held:.2f}%  →  买入 {code} {tgt:.2f}%")
+            else:
+                print(f"    {s} 维持  现仓 {held:.2f}%  目标 {tgt:.2f}%  差额 {tgt-held:+.2f}pp")
+        print(f"    现金 {float(w37['cash'])*100:.2f}% → 目标 {float(tgt_last['cash'])*100:.2f}%")
     sc_last = ds.state_log[-1] if ds.state_log else None
     print(f"  最近信号: 有效打分={sc_last[1] if sc_last else '-'} (0-9), CN深熊锁={ds._lock['CN']}, US深熊锁={ds._lock['US']}")
     for mkt in ["CN", "US"]:

@@ -107,7 +107,7 @@
   "cn": 2.0,
   "us": 10.0
  },
- "_note": "v39 提议、未激活。默认仍是 final_cfg_v37.json。引擎不读 instrument_swaps，把本文件交给 run_backtest.py 不会换券。只记录同时过关的替换。 proxy 12.22%/-9.56%/Cal1.28 real 25.57%/-3.72%/Cal6.87 OOS Cal 1.5324。",
+ "_note": "v39（2026-11-09 用户批准）现为默认。v37 与 v30 保留为回退。规则与 v37 相同，只换两只成交标的：自由现金流槽 159232→159222（国证自由现金流，不是中证全指自由现金流），红利低波槽 515100→563020（中证红利低波动，不是红利低波100）。现金仍是 100% 511260。不含 QDII 最低溢价载体。信号仍用原槽代理；上市前损益沿用原槽，上市后用这两只的前复权价（assets/data/159222_qfq.csv、563020_qfq.csv）。增益主要在 2025-04 之后的 real 窗口，全历史 proxy ΔCal 只有约 +0.01。proxy 12.22%/-9.56%/Cal1.28，real 25.57%/-3.72%/Cal6.87，OOS Cal 1.532。scripts/swaps.py 读取 instrument_swaps。",
  "cash_bond_pct": 1.0,
  "cash_bond_code": "511260",
  "signal_lag": 1,
