@@ -15,10 +15,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "out")
 if not os.path.isdir(OUT):
     OUT = os.path.join(HERE, "out")
-_p1 = os.path.join(HERE, "..", "references", "final_cfg_v30.json")
-_p2 = os.path.join(HERE, "references", "final_cfg_v30.json")
+_p1 = os.path.join(HERE, "..", "references", "final_cfg_v37.json")
+_p2 = os.path.join(HERE, "references", "final_cfg_v37.json")
 CFG = json.load(open(sys.argv[1] if len(sys.argv) > 1 else (_p1 if os.path.exists(_p1) else _p2)))
-TAG = sys.argv[2] if len(sys.argv) > 2 else "v21"
+TAG = sys.argv[2] if len(sys.argv) > 2 else "v37"
 TW = json.loads(sys.argv[3]) if len(sys.argv) > 3 else CFG.get("tranche_weights")
 R, W = build_panel("proxy")
 START = "2014-06-23"

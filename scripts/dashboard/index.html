@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ETF 动态配置仪表盘 · v30</title>
+<title>ETF 动态配置仪表盘 · v37</title>
 <style>
 :root{
   --bg:#05080f; --bg2:#0a101d; --card:rgba(255,255,255,.035); --line:rgba(255,255,255,.08);
@@ -163,7 +163,7 @@ footer .gold{color:var(--gold2)}
       <div class="logo">ETF</div>
       <div>
         <h1>ETF 动态配置仪表盘</h1>
-        <div class="sub">v30 定稿 · 周五前日信号决策 · 溢价 T-2 门控 · 无未来函数口径</div>
+        <div class="sub">v37 定稿 · 现金 100% 511260 · 周五前日信号决策 · 溢价 T-2 门控 · 无未来函数口径</div>
       </div>
     </div>
     <div class="top-right">
@@ -218,7 +218,7 @@ footer .gold{color:var(--gold2)}
   </section>
 
   <footer>
-    <div><span class="gold">ETF 动态配置策略 v30</span> · 周五前日信号决策 + 1 笔当日成交 + 溢价门控削减增强 + 相关性风控 + 速度刹车</div>
+    <div><span class="gold">ETF 动态配置策略 v37</span> · 周五前日信号决策 + 1 笔当日成交 + 现金 100% 511260 + 溢价门控削减增强 + 相关性风控</div>
     <div>策略历史表现不代表未来 · 本页面仅供参考，不构成投资建议</div>
   </footer>
 </div>
@@ -253,7 +253,7 @@ function renderKpis(d){
     {lb:"距历史高点", val:fmtPct(p.dd), cls:p.dd<-0.005?"dn":"up", sub:"当前回撤"},
     {lb:"近 20 日", val:fmtPct(p.r20), cls:colorOf(p.r20), sub:"最近一个月"},
     {lb:"近 5 日", val:fmtPct(p.r5), cls:colorOf(p.r5), sub:"最近一周"},
-    {lb:"现金占比", val:(cash?cash.actual:0).toFixed(1)+"<small>%</small>", cls:"", sub:"逆回购 + 国债ETF 511010"},
+    {lb:"现金占比", val:(cash?cash.actual:0).toFixed(1)+"<small>%</small>", cls:"", sub:(cash&&cash.name)?cash.name:"国债ETF 511260"},
   ];
   $("#kpis").innerHTML=kpis.map(k=>`<div class="kpi"><div class="lb">${k.lb}</div><div class="val ${k.cls||""}">${k.html||k.val||"—"}</div><div class="sub2">${k.sub||""}</div></div>`).join("");
 }

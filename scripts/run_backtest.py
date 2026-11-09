@@ -176,10 +176,10 @@ def term_bars(rows, title, width=42):
 # ---------- 主流程 ----------
 def main():
     _here = os.path.dirname(os.path.abspath(__file__))
-    _p1 = os.path.join(_here, "..", "references", "final_cfg_v30.json")
-    _p2 = os.path.join(_here, "references", "final_cfg_v30.json")
+    _p1 = os.path.join(_here, "..", "references", "final_cfg_v37.json")
+    _p2 = os.path.join(_here, "references", "final_cfg_v37.json")
     cfg_file = sys.argv[1] if len(sys.argv) > 1 else (_p1 if os.path.exists(_p1) else _p2)
-    tag = sys.argv[2] if len(sys.argv) > 2 else "v30"
+    tag = sys.argv[2] if len(sys.argv) > 2 else "v37"
     cfg = json.load(open(cfg_file))
     wd = cfg.get("rebal_weekday", 2); wd_cn = "一二三四五"[wd]
     freq = cfg.get("rebal_freq", "weekly"); n_tw = len(cfg.get("tranche_weights", [1.0]))
@@ -216,18 +216,24 @@ def main():
 
     wdf = rp["_weights"]; rets = rp["_rets"]; ds = rp["_ds"]
     w_last = wdf.iloc[-1]
-    print("\n===== 当前仓位管理现状 (数据截至 %s) =====" % str(wdf.index[-1].date()))
+    bond_code = cfg.get("cash_bond_code", "511010")
+    bond_pct = float(cfg.get("cash_bond_pct", 0.0))
+    if bond_pct >= 1.0 - 1e-9:
+        cash_nm = f"现金(100% {bond_code})"
+    else:
+        cash_nm = f"现金(逆回购{1-bond_pct:.0%}+{bond_code} {bond_pct:.0%})"
+    print("\n===== 当前仓位管理现状 (数据截至 %s, 配置 %s) =====" % (str(wdf.index[-1].date()), cfg_file))
     print("  实际持仓(含权重漂移, 以最新交易日收盘计):")
     for s in SLOTS + ["cash"]:
-        nm = ETF_NAMES.get(s, "现金(逆回购25%+511010 75%)")
-        print(f"    {s:<8} {nm:<12} {w_last[s]*100:6.2f}%")
+        nm = ETF_NAMES.get(s, cash_nm)
+        print(f"    {s:<8} {nm:<22} {w_last[s]*100:6.2f}%")
     ds_live = DynamicStrategy(R_PROXY, cfg=dict(cfg, signal_lag=0))
-    # 实盘口径: 最新数据日=T-1, 以lag=0实例在T-1数据上计算"下一个周三目标"(等价于周三早盘决策)
+    # 信号口径: 最新数据日=T-1, 以lag=0实例在T-1数据上计算下一个调仓日目标。只打印, 不下单。
     tgt_last = ds_live.regular_target(wdf.index[-1], {"pf_rets": rets})
-    print(f"  目标权重(下一个周{wd_cn}决策目标, 用最新可得数据):")
+    print(f"  目标权重(下一个周{wd_cn}决策目标, 用最新可得数据, 纸面):")
     for s in SLOTS + ["cash"]:
-        nm = ETF_NAMES.get(s, "现金(逆回购25%+511010 75%)")
-        print(f"    {s:<8} {nm:<12} {tgt_last[s]*100:6.2f}%")
+        nm = ETF_NAMES.get(s, cash_nm)
+        print(f"    {s:<8} {nm:<22} {tgt_last[s]*100:6.2f}%")
     sc_last = ds.state_log[-1] if ds.state_log else None
     print(f"  最近信号: 有效打分={sc_last[1] if sc_last else '-'} (0-9), CN深熊锁={ds._lock['CN']}, US深熊锁={ds._lock['US']}")
     for mkt in ["CN", "US"]:
@@ -250,12 +256,16 @@ def main():
     def val(lab):
         k = dict(canon)[lab]
         return its2[k]
-    rows_c = [(t, val(t)["proxy_cagr"] * 100, f"{val(t)['proxy_cagr']*100:.2f}%") for t in tags_ok]
-    term_bars(rows_c, "迭代优化进展: 全历史年化收益 (v10→%s)" % tag)
-    rows_cr = [(t, val(t)["real_cagr"] * 100, f"{val(t)['real_cagr']*100:.2f}%") for t in tags_ok if "real_cagr" in val(t)]
-    term_bars(rows_cr, "迭代优化进展: 真实窗口年化收益 (v10→%s)" % tag)
-    rows_m = [(t, val(t)["proxy_mdd"] * 100, f"{val(t)['proxy_mdd']*100:.2f}%") for t in tags_ok]
-    term_bars(rows_m, "迭代优化进展: 全历史最大回撤 (越短越好)")
+    if tags_ok:
+        rows_c = [(t, val(t)["proxy_cagr"] * 100, f"{val(t)['proxy_cagr']*100:.2f}%") for t in tags_ok]
+        term_bars(rows_c, "迭代优化进展: 全历史年化收益 (v10→%s)" % tag)
+        rows_cr = [(t, val(t)["real_cagr"] * 100, f"{val(t)['real_cagr']*100:.2f}%") for t in tags_ok if "real_cagr" in val(t)]
+        if rows_cr:
+            term_bars(rows_cr, "迭代优化进展: 真实窗口年化收益 (v10→%s)" % tag)
+        rows_m = [(t, val(t)["proxy_mdd"] * 100, f"{val(t)['proxy_mdd']*100:.2f}%") for t in tags_ok]
+        term_bars(rows_m, "迭代优化进展: 全历史最大回撤 (越短越好)")
+    else:
+        print("  (out/iterations.json 没有 v10–v26 历史键, 跳过迭代图)")
     print("\n[ok] 已保存: %s/iter_%s_proxy.json, %s/iter_%s_real.json, %s/iterations.json" % (OUT, tag, OUT, tag, OUT))
 
 if __name__ == "__main__":
