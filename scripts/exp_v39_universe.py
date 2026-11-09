@@ -792,7 +792,7 @@ def main():
             rec["ytd_proxy"] = ytd_of(rec["proxy_rets"], min(common, rec["proxy_rets"].index.max()))
 
     report = render(digest, meta, info_bond, anchor, anchor_bad, base, rows, verdicts,
-                    slot_pass, carrier_pass, carrier_why, combo, ytd, common, cfg_path)
+                    slot_pass, carrier_pass, carrier_why, combo, combo_pass, ytd, common, cfg_path)
     rep_path = os.path.join(REF, "exp_v39_universe_report.md")
     with open(rep_path, "w") as f:
         f.write(report)
@@ -836,7 +836,7 @@ def _align_real_carrier(Rr, R, Rp):
 
 
 def render(digest, meta, info_bond, anchor, anchor_bad, base, rows, verdicts,
-           slot_pass, carrier_pass, carrier_why, combo, ytd, common, cfg_path):
+           slot_pass, carrier_pass, carrier_why, combo, combo_pass, ytd, common, cfg_path):
     L = []
     A = L.append
     A("# v39 纸面实验：六个槽位的全市场换券")
@@ -995,6 +995,14 @@ def render(digest, meta, info_bond, anchor, anchor_bad, base, rows, verdicts,
                 A(f"组合再过关，已写提议 `{os.path.basename(cfg_path)}`，未接入默认路径。")
             else:
                 A("组合没有再过关，不写配置文件。")
+            A("512890 与 159547 的全样本 ΔCal 为正，但自有窗口的 proxy ΔCal 为负，识别不过。"
+              "159222 与 563020 的全样本 proxy ΔCal 只有大约 +0.01，过 +0.10 的是 real。"
+              "159222 跟踪国证自由现金流，不是 159232 的中证全指自由现金流。563020 跟踪中证红利低波动，不是红利低波100。")
+            A("现金三只都盖不住 2014-06-23，不能过 (a)。缩短窗口上只有 511270 双窗为正，仍不替换 511260。")
+            if carrier_pass:
+                A("最低溢价载体在数字上另外过关，但不写进配置：引擎没有这个开关。"
+                  "相对 v37 的大头来自把 QDII 从净值改成场内价（对照臂已经更高）。"
+                  "规则要看的是它是否还高于对照臂。纳指决策没有集中在一只上。")
         elif carrier_pass:
             A("只有载体规则过关。它不改变配置文件里的代码，本实验不为此写 `final_cfg_v39.json`（引擎也没有这条规则的开关）。")
         else:

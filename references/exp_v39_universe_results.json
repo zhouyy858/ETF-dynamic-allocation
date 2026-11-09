@@ -1,0 +1,556 @@
+{
+ "digest": "26387b1b5dfce214",
+ "anchor_bad": [],
+ "bond": {
+  "ok": true,
+  "reason": "",
+  "appended": 30,
+  "old_end": "2026-09-18",
+  "new_end": "2026-11-09",
+  "overlap_n": 2201,
+  "overlap_max_abs": 1.1102230246251565e-16
+ },
+ "common": "2026-11-04",
+ "base": {
+  "proxy": {
+   "cagr": 0.12050439146517644,
+   "mdd": -0.09563306611941624,
+   "cal": 1.2600703538533793,
+   "to": 123.35281544762032,
+   "end": "2026-11-06",
+   "n": 3018
+  },
+  "real": {
+   "cagr": 0.24292943726688554,
+   "mdd": -0.03744283692152839,
+   "cal": 6.488008314541177,
+   "to": 13.976093368698633,
+   "end": "2026-11-05",
+   "n": 373
+  },
+  "oos": {
+   "cagr": 0.10983497124261543,
+   "mdd": -0.07446729341874136,
+   "cal": 1.4749424371448017,
+   "to": 38.68696788260133,
+   "end": "2026-11-06",
+   "n": 1175
+  }
+ },
+ "anchor": {
+  "proxy": {
+   "cagr": 0.12041732788095327,
+   "mdd": -0.09563306611941624,
+   "cal": 1.2591599617917626,
+   "to": 123.35260877863008,
+   "end": "2026-11-06",
+   "n": 3018
+  },
+  "real": {
+   "cagr": 0.24323726154202463,
+   "mdd": -0.03744283692152839,
+   "cal": 6.496229493822656,
+   "to": 13.976567222310297,
+   "end": "2026-11-05",
+   "n": 373
+  },
+  "oos": {
+   "cagr": 0.10961349033808165,
+   "mdd": -0.07446729341874136,
+   "cal": 1.4719682333787487,
+   "to": 38.686761213611106,
+   "end": "2026-11-06",
+   "n": 1175
+  }
+ },
+ "verdicts": {
+  "fcf:159201": {
+   "gate": {
+    "ok": true,
+    "same": true,
+    "one": true,
+    "mdd": true,
+    "dp": 0.004868186016684595,
+    "dr": 0.10459456198660799,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": true,
+   "dp_own": 0.07765098084572308,
+   "pass_alone": true
+  },
+  "fcf:159222": {
+   "gate": {
+    "ok": true,
+    "same": true,
+    "one": true,
+    "mdd": true,
+    "dp": 0.010939392281756444,
+    "dr": 0.11562395550441451,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": true,
+   "dp_own": 0.20557585178803794,
+   "pass_alone": true
+  },
+  "fcf:563760": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": 0.002224953541710706,
+    "dr": null,
+    "full": false
+   },
+   "oos_ok": true,
+   "identified": true,
+   "dp_own": 0.05189194639739636,
+   "pass_alone": false
+  },
+  "div:512890": {
+   "gate": {
+    "ok": true,
+    "same": true,
+    "one": true,
+    "mdd": true,
+    "dp": 0.011715187728838616,
+    "dr": 0.22926194066507222,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": false,
+   "dp_own": -0.09443534984802926,
+   "pass_alone": false
+  },
+  "div:563020": {
+   "gate": {
+    "ok": true,
+    "same": true,
+    "one": true,
+    "mdd": true,
+    "dp": 0.0066179137844859515,
+    "dr": 0.26504486054915777,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": true,
+   "dp_own": 0.2082314087019137,
+   "pass_alone": true
+  },
+  "div:159547": {
+   "gate": {
+    "ok": true,
+    "same": true,
+    "one": true,
+    "mdd": true,
+    "dp": 0.0035033878223196258,
+    "dr": 0.2850502227493017,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": false,
+   "dp_own": -0.04778972224323219,
+   "pass_alone": false
+  },
+  "nasdaq:513100": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": 0.1011002272385797,
+    "dr": -0.031109211763369338,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": true,
+   "dp_own": 0.1011002272385797,
+   "pass_alone": false
+  },
+  "nasdaq:513300": {
+   "gate": {
+    "ok": true,
+    "same": true,
+    "one": true,
+    "mdd": true,
+    "dp": 0.04155188144457744,
+    "dr": 0.22062371755115695,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": true,
+   "dp_own": 0.13317343483180122,
+   "pass_alone": true
+  },
+  "nasdaq:159632": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": 0.020379061689498768,
+    "dr": -0.030091033529804356,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": false,
+   "dp_own": -0.014723676305747446,
+   "pass_alone": false
+  },
+  "spx:513650": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": -0.0056925698969425564,
+    "dr": -0.09505405145788526,
+    "full": true
+   },
+   "oos_ok": false,
+   "identified": true,
+   "dp_own": -0.04538571931754998,
+   "pass_alone": false
+  },
+  "spx:159655": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": -0.0068844157918148685,
+    "dr": -0.05847209391163766,
+    "full": true
+   },
+   "oos_ok": false,
+   "identified": true,
+   "dp_own": -0.05535685024503012,
+   "pass_alone": false
+  },
+  "spx:159612": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": -0.005361219399823813,
+    "dr": -0.09823692827881736,
+    "full": true
+   },
+   "oos_ok": false,
+   "identified": true,
+   "dp_own": -0.037351534140041665,
+   "pass_alone": false
+  },
+  "cyb:159915": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": -0.01325725661923749,
+    "dr": 0.06361575886076665,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": true,
+   "dp_own": -0.01325725661923749,
+   "pass_alone": false
+  },
+  "cyb:159967": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": 0.033902205827760934,
+    "dr": -1.1614262335885126,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": false,
+   "dp_own": -0.19715481479114616,
+   "pass_alone": false
+  },
+  "cyb:159977": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": -0.005050543543924091,
+    "dr": -0.018931038702045377,
+    "full": true
+   },
+   "oos_ok": false,
+   "identified": true,
+   "dp_own": -0.01593420804365464,
+   "pass_alone": false
+  },
+  "cash:511100": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": -0.1279344338273769,
+    "dr": 0.029947350338233925,
+    "full": false,
+    "why_cash": "现金不拼接，proxy 不是 2014 起的全窗口"
+   },
+   "oos_ok": false,
+   "identified": true,
+   "dp_own": -0.1279344338273769,
+   "pass_alone": false
+  },
+  "cash:511270": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": 0.06292435920296047,
+    "dr": 0.16990554502641153,
+    "full": false,
+    "why_cash": "现金不拼接，proxy 不是 2014 起的全窗口"
+   },
+   "oos_ok": false,
+   "identified": true,
+   "dp_own": 0.06292435920296047,
+   "pass_alone": false
+  },
+  "cash:159972": {
+   "gate": {
+    "ok": false,
+    "same": false,
+    "one": false,
+    "mdd": true,
+    "dp": -0.04486538071438839,
+    "dr": -0.06056503924562762,
+    "full": false,
+    "why_cash": "现金不拼接，proxy 不是 2014 起的全窗口"
+   },
+   "oos_ok": false,
+   "identified": true,
+   "dp_own": -0.04486538071438839,
+   "pass_alone": false
+  },
+  "carrier:both": {
+   "gate": {
+    "ok": true,
+    "same": true,
+    "one": true,
+    "mdd": true,
+    "dp": 0.5170091015190401,
+    "dr": 1.023863115859041,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": true,
+   "dp_own": 0.5170091015190401,
+   "pass_alone": true
+  },
+  "carrier:nasdaq": {
+   "gate": {
+    "ok": true,
+    "same": true,
+    "one": true,
+    "mdd": true,
+    "dp": 0.403148348923003,
+    "dr": 0.9485649356642893,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": true,
+   "dp_own": 0.403148348923003,
+   "pass_alone": true
+  },
+  "carrier:spx": {
+   "gate": {
+    "ok": true,
+    "same": true,
+    "one": true,
+    "mdd": true,
+    "dp": 0.08485976890427938,
+    "dr": 0.10084238627503783,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": true,
+   "dp_own": 0.08485976890427938,
+   "pass_alone": true
+  },
+  "carrier:control": {
+   "gate": {
+    "ok": true,
+    "same": true,
+    "one": true,
+    "mdd": true,
+    "dp": 0.3416239954047311,
+    "dr": 0.5494477122723387,
+    "full": true
+   },
+   "oos_ok": true,
+   "identified": true,
+   "dp_own": 0.3416239954047311,
+   "pass_alone": true
+  }
+ },
+ "slot_pass": {
+  "fcf": {
+   "robust": true,
+   "good_dir": [
+    "fcf:159201",
+    "fcf:159222"
+   ],
+   "alone": [
+    "fcf:159201",
+    "fcf:159222"
+   ],
+   "winner": "fcf:159222"
+  },
+  "div": {
+   "robust": true,
+   "good_dir": [
+    "div:512890",
+    "div:563020",
+    "div:159547"
+   ],
+   "alone": [
+    "div:563020"
+   ],
+   "winner": "div:563020"
+  },
+  "nasdaq": {
+   "robust": false,
+   "good_dir": [
+    "nasdaq:513300"
+   ],
+   "alone": [
+    "nasdaq:513300"
+   ],
+   "winner": null
+  },
+  "spx": {
+   "robust": false,
+   "good_dir": [],
+   "alone": [],
+   "winner": null
+  },
+  "cyb": {
+   "robust": false,
+   "good_dir": [],
+   "alone": [],
+   "winner": null
+  },
+  "cash": {
+   "robust": false,
+   "good_dir": [],
+   "alone": [],
+   "winner": null
+  }
+ },
+ "carrier_pass": true,
+ "carrier_why": [],
+ "combo_pass": true,
+ "combo": {
+  "proxy": {
+   "cagr": 0.12218366412644954,
+   "mdd": -0.09563306611941624,
+   "cal": 1.2776298939728628,
+   "to": 123.35827623451664,
+   "end": "2026-11-06",
+   "n": 3018
+  },
+  "real": {
+   "cagr": 0.25571062264795885,
+   "mdd": -0.037226252269268345,
+   "cal": 6.869093907125792,
+   "to": 13.968359372068448,
+   "end": "2026-11-05",
+   "n": 373
+  },
+  "oos": {
+   "cagr": 0.11411215313557088,
+   "mdd": -0.07446729341874136,
+   "cal": 1.5323794903341015,
+   "to": 38.69242866949767,
+   "end": "2026-11-06",
+   "n": 1175
+  },
+  "own": {
+   "cagr": 0.25188068133716235,
+   "mdd": -0.03675919635636282,
+   "cal": 6.852181394155075,
+   "to": 14.774893867539749,
+   "end": "2026-11-06",
+   "n": 377
+  },
+  "own_base": {
+   "cagr": 0.23774681555254418,
+   "mdd": -0.03690130098296229,
+   "cal": 6.442775978611548,
+   "to": 14.77184966822799,
+   "end": "2026-11-06",
+   "n": 377
+  },
+  "own_start": "2025-04-18",
+  "own_n": 377,
+  "winners": {
+   "fcf": "fcf:159222",
+   "div": "div:563020"
+  },
+  "gate": {
+   "ok": true,
+   "same": true,
+   "one": true,
+   "mdd": true,
+   "dp": 0.017559540119483463,
+   "dr": 0.38108559258461483,
+   "full": true
+  },
+  "oos_ok": true,
+  "identified": true,
+  "pass": true
+ },
+ "ytd": {
+  "v37_proxy": {
+   "total": 0.11242010206542141,
+   "mdd": -0.029630902643269397,
+   "n": 201,
+   "start": "2026-01-05",
+   "end": "2026-11-04"
+  },
+  "v37_real": {
+   "total": 0.11040233211844397,
+   "mdd": -0.0347790710563155,
+   "n": 201,
+   "start": "2026-01-05",
+   "end": "2026-11-04"
+  },
+  "anchor_proxy": {
+   "total": 0.11242010206542141,
+   "mdd": -0.029630902643269397,
+   "n": 201,
+   "start": "2026-01-05",
+   "end": "2026-11-04"
+  },
+  "old_proxy": {
+   "total": 0.11323162170844792,
+   "mdd": -0.029630902643269397,
+   "n": 201,
+   "start": "2026-01-05",
+   "end": "2026-11-04"
+  },
+  "old_real": {
+   "total": 0.11120761251226785,
+   "mdd": -0.0347790710563155,
+   "n": 201,
+   "start": "2026-01-05",
+   "end": "2026-11-04"
+  }
+ },
+ "cfg": "/agent/repos/ETF-dynamic-allocation/references/final_cfg_v39.json"
+}

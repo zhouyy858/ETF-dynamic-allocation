@@ -1,0 +1,133 @@
+{
+ "state_map": {
+  "0": [
+   5,
+   30
+  ],
+  "1": [
+   15,
+   29
+  ],
+  "2": [
+   25,
+   28
+  ],
+  "3": [
+   36,
+   26
+  ],
+  "4": [
+   39,
+   21
+  ],
+  "5": [
+   44,
+   16
+  ],
+  "6": [
+   66,
+   14
+  ],
+  "7": [
+   65,
+   10
+  ],
+  "8": [
+   85,
+   6
+  ],
+  "9": [
+   81,
+   3
+  ]
+ },
+ "market_dd": {
+  "CN": [
+   0.07,
+   0.05,
+   0.18,
+   0.14
+  ],
+  "US": [
+   0.13,
+   0.12,
+   0.24,
+   0.15
+  ]
+ },
+ "hyst_up": 0.66,
+ "hyst_down": 0.24,
+ "min_cash": 0.03,
+ "max_eq": 0.98,
+ "gate_win": 100,
+ "growth_split_bull": {
+  "159952": 0.3,
+  "159941": 0.63,
+  "513500": 0.07
+ },
+ "defense_momentum": true,
+ "defense_momentum_win": 80,
+ "defense_momentum_t": 4.0,
+ "defense_clamp": [
+  0.4,
+  0.6
+ ],
+ "premium_gate": true,
+ "premium_thr": [
+  0.05,
+  0.08,
+  0.12
+ ],
+ "premium_cut": [
+  0.45,
+  0.22,
+  0.08
+ ],
+ "corr_risk": true,
+ "corr_risk_win": 40,
+ "corr_risk_thr": [
+  0.3,
+  0.42
+ ],
+ "corr_risk_cut": [
+  0.8,
+  0.6
+ ],
+ "speed_brake": false,
+ "speed_brake_win": 5,
+ "speed_brake_thr": -0.04,
+ "speed_brake_cut": 0.5,
+ "speed_brake_recover": 12,
+ "tranche_weights": [
+  1.0
+ ],
+ "version": "v39",
+ "repo_rate": 0.022,
+ "floor_pct": {
+  "cn": 2.0,
+  "us": 10.0
+ },
+ "_note": "v39 提议、未激活。默认仍是 final_cfg_v37.json。引擎不读 instrument_swaps，把本文件交给 run_backtest.py 不会换券。只记录同时过关的替换。 proxy 12.22%/-9.56%/Cal1.28 real 25.57%/-3.72%/Cal6.87 OOS Cal 1.5324。",
+ "cash_bond_pct": 1.0,
+ "cash_bond_code": "511260",
+ "signal_lag": 1,
+ "premium_shift": 2,
+ "score_confirm_weeks": 2,
+ "rebal_weekday": 4,
+ "rebal_freq": "weekly",
+ "growth_split_bear": {
+  "159952": 0.45,
+  "159941": 0.4,
+  "513500": 0.15
+ },
+ "min_delta": 0.035,
+ "confirm_weekday": 2,
+ "premium_tilt": true,
+ "premium_tilt_thr": 0.02,
+ "premium_tilt_cap": 0.05,
+ "premium_tilt_max": 1.0,
+ "instrument_swaps": {
+  "159232": "159222",
+  "515100": "563020"
+ }
+}
