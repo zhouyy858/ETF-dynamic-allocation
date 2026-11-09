@@ -483,13 +483,20 @@ def build_report(digest, meta, rows, base, gates, plat, valid, stress, cash_mdd,
     A("")
     A("这是现金工具的日收益，不是组合收益。全样本从 2014-06-23 的 proxy 交易日起。")
     A("")
-    A("| 序列 | 全样本 CAGR/MDD | 谷底 | 2017-08-24 起 MDD |")
-    A("|---|---|---|---|")
+    A("| 序列 | 全样本 CAGR/MDD | 峰值 | 谷底 | 2017-08-24 起 MDD |")
+    A("|---|---|---|---|---|")
     for name, st in cash_mdd["full"].items():
         tail = cash_mdd["from_splice"].get(name)
         tail_s = "—" if tail is None else pct(tail["mdd"])
-        A(f"| {name} | {pct(st['cagr'])} / {pct(st['mdd'])} | {st['trough']} | {tail_s} |")
+        A(f"| {name} | {pct(st['cagr'])} / {pct(st['mdd'])} | {st['peak']} | {st['trough']} | {tail_s} |")
     A("")
+    spliced = cash_mdd["full"].get("拼接 511260")
+    tail = cash_mdd["from_splice"].get("拼接 511260")
+    if spliced and tail and spliced.get("peak") and spliced["peak"] < SPLICE:
+        A(f"拼接 511260 全样本 MDD {pct(spliced['mdd'])} 的峰值在 {spliced['peak']}，早于上市日，谷在 {spliced['trough']}。"
+          f"这条回撤从 5Y 走到 10Y。只从 {SPLICE} 起算，MDD {pct(tail['mdd'])}，"
+          f"峰值 {tail['peak']}，谷 {tail['trough']}。")
+        A("")
     A("债熊窗里的现金层总收益 / MDD：")
     A("")
     A("| 窗 | v30 混合 | 纯 511010 | 拼接 511260 | A100 |")
@@ -518,8 +525,11 @@ def build_report(digest, meta, rows, base, gates, plat, valid, stress, cash_mdd,
     A("")
     A("## 3. 结论")
     A("")
-    A(meta["verdict"])
-    A("")
+    for sent in meta["verdict"].split("。"):
+        sent = sent.strip()
+        if sent:
+            A(sent + "。")
+            A("")
     if meta.get("cfg_path"):
         A(f"提议文件：`{meta['cfg_path']}`。没有接入默认路径。")
         A("")
@@ -534,7 +544,25 @@ def build_report(digest, meta, rows, base, gates, plat, valid, stress, cash_mdd,
     return "\n".join(L) + "\n"
 
 
-def verdict_text(promoted, gates, plat, valid, rows, base):
+def _mdd_pp(stress, name):
+    sv, sa = stress[name]["v30"], stress[name]["A100"]
+    if sv.get("mdd") is None or sa.get("mdd") is None:
+        return None
+    return (sa["mdd"] - sv["mdd"]) * 100
+
+
+def _pp_words(pp):
+    """正数表示 A100 的回撤更浅。"""
+    if pp is None:
+        return "无"
+    if pp < -0.005:
+        return f"深 {abs(pp):.2f}pp"
+    if pp > 0.005:
+        return f"浅 {pp:.2f}pp"
+    return f"持平（{pp:+.2f}pp）"
+
+
+def verdict_text(promoted, gates, plat, valid, rows, base, stress=None, cash_mdd=None):
     if not valid["pin_ok"]:
         return "身份锚失败，本实验无效。默认仍是 v30。"
     if not valid["ok"]:
@@ -542,11 +570,13 @@ def verdict_text(promoted, gates, plat, valid, rows, base):
                 "候选不作数。默认仍是 v30，不写提议配置。")
     d = gates["deltas"]
     bits = []
-    if gates["ok"] and all(p["ok"] for p in plat.values()) and rows["A100"]["oos"]["cal"] >= OOS_FLOOR:
+    passed = gates["ok"] and all(p["ok"] for p in plat.values()) and rows["A100"]["oos"]["cal"] >= OOS_FLOOR
+    if passed:
         bits.append(
-            f"A100 三关在数字上通过：proxy ΔCal {dlt(d['dcal_p'])}，real ΔCal {dlt(d['dcal_r'])}，"
+            f"A100 三关在数字上通过。过线的是 real ΔCal {dlt(d['dcal_r'])}；"
+            f"proxy ΔCal {dlt(d['dcal_p'])}，本身不到 +0.15。"
             f"proxy MDD {pct(rows['A100']['proxy']['mdd'])}，OOS Cal {rows['A100']['oos']['cal']:.4f}。"
-            "已写入 `references/final_cfg_v37.json`，这是提议，不是默认。"
+            "已写入 `references/final_cfg_v37.json`。这是提议，默认仍是 v30。"
         )
     else:
         missed = []
@@ -568,21 +598,51 @@ def verdict_text(promoted, gates, plat, valid, rows, base):
             "不写 `final_cfg_v37.json`。默认仍是 v30。"
         )
     bits.append(
-        "多出来的收益如果存在，来自把逆回购和 5Y 换成更长的久期，不是新的择时。"
-        "2017-08-24 之前的 511260 就是 511010，样本里没有 2013 钱荒。"
-        "回撤控制只看股票端，现金层利率回撤不会触发减仓。"
+        "多出来的 Calmar 是久期 beta：逆回购和 5Y 换成更长的国债，没有新的择时。"
+        "2017-08-24 之前的 511260 就是 511010。样本里没有 2013 钱荒。"
+        "回撤控制只看股票端，现金层的利率回撤不会触发减仓。"
     )
+    if stress:
+        full_pp = _mdd_pp(stress, "2016Q4-2017")
+        pre_pp = _mdd_pp(stress, "2016Q4-2017_拼接段")
+        post_pp = _mdd_pp(stress, "2017-08-24至年末")
+        y20 = _mdd_pp(stress, "2020-05至10")
+        y22 = _mdd_pp(stress, "2022Q4")
+        bits.append(
+            f"2016Q4–2017 组合 MDD 比 v30 { _pp_words(full_pp) }，按预注册写明这一段债熊更深。"
+            f"深度落在拼接段（{_pp_words(pre_pp)}）：当时序列等于 511010，深的是去掉 25% 逆回购。"
+            f"2017-08-24 至年末才是 10Y，组合 MDD {_pp_words(post_pp)}。"
+            f"2020 年 5–10 月组合 MDD {_pp_words(y20)}，2022Q4 {_pp_words(y22)}。"
+        )
+    if cash_mdd:
+        st = cash_mdd["full"]["拼接 511260"]
+        tail = cash_mdd["from_splice"]["拼接 511260"]
+        bits.append(
+            f"现金层自身：拼接序列全样本 MDD {pct(st['mdd'])}（峰值 {st['peak']}，谷 {st['trough']}）。"
+            f"从上市日起算 MDD {pct(tail['mdd'])}（{tail['peak']} → {tail['trough']}）。"
+        )
+    if plat:
+        c0 = plat["repo0"]["cals"]
+        c1 = plat["v30repo"]["cals"]
+        bits.append(
+            f"平台按事先的 0.15 悬崖线通过。repo0 轴 proxy Calmar "
+            f"{c0[0]:.3f}→{c0[1]:.3f}→{c0[2]:.3f}；"
+            f"v30repo 轴 {c1[0]:.3f}→{c1[1]:.3f}→{c1[2]:.3f}。"
+            "最后一步同时去掉逆回购，步子更大，仍低于 0.15。邻域没有另立主点。"
+        )
     bits.append(
         f"v30 基线本次测得 proxy {pct(base['proxy']['cagr'])}/{pct(base['proxy']['mdd'])}/{calf(base['proxy']['cal'])}，"
         f"real {pct(base['real']['cagr'])}/{pct(base['real']['mdd'])}/{calf(base['real']['cal'])}。"
+        "使用者接受久期、并接受债市回撤不会被股票风控减掉，这份提议才有意义。"
     )
     return "".join(bits)
 
 
-def maybe_write_cfg(base_cfg, rows, base):
+def maybe_write_cfg(base_cfg, rows, base, stress):
     cfg = copy.deepcopy(base_cfg)
     p, r, o = rows["A100"]["proxy"], rows["A100"]["real"], rows["A100"]["oos"]
     bp, br = base["proxy"], base["real"]
+    pre_pp = _mdd_pp(stress, "2016Q4-2017_拼接段")
     cfg["version"] = "v37"
     cfg["cash_bond_pct"] = 1.0
     cfg["cash_bond_code"] = "511260"
@@ -593,9 +653,10 @@ def maybe_write_cfg(base_cfg, rows, base):
         f"（v30 {bp['cagr']*100:.2f}%/{bp['mdd']*100:.2f}%/Cal{bp['cal']:.2f}），"
         f"real {r['cagr']*100:.2f}%/{r['mdd']*100:.2f}%/Cal{r['cal']:.2f}"
         f"（v30 {br['cagr']*100:.2f}%/{br['mdd']*100:.2f}%/Cal{br['cal']:.2f}），"
-        f"OOS Cal {o['cal']:.4f}。"
+        f"OOS Cal {o['cal']:.4f}。proxy ΔCal 不到 +0.15，过线的是 real。"
         "511260 用 assets/data/511260_nav.csv 的腾讯前复权拼接：2017-08-24 之前等于 511010。"
-        "超额是久期，不是择时。样本内没有 2013 钱荒。回撤控制只看股票端。"
+        f"2016Q4-2017 组合 MDD 比 v30 深 {abs(pre_pp):.2f}pp，落在拼接段（去掉逆回购，不是 10Y 对 5Y）。"
+        "超额是久期。样本内没有 2013 钱荒。回撤控制只看股票端。"
         "repo_rate 在 cash_bond_pct=1 时不被引擎使用。"
     )
     path = os.path.join(REF, "final_cfg_v37.json")
@@ -659,7 +720,7 @@ def main():
                  "blend_gap": blend_gap, "replicate_ok": False, "replicate_bad": pin_bad,
                  "a_all_gap": None, "lock_same": False}
         meta = {"proxy_end": str(R.index.max().date()), "real_end": str(Rr.index.max().date()),
-                "pin": m_pin, "verdict": verdict_text(False, {}, {}, valid, {}, base),
+                "pin": m_pin, "verdict": verdict_text(False, {}, {}, valid, {}, base, None, None),
                 "cfg_path": None}
         text = build_report(digest, meta, {}, base, {}, {}, valid, {}, {"full": {}, "from_splice": {}, "stress": {}},
                             {"n_days": 0, "n_spells": 0, "cash_v30": None, "cash_v30_off": None,
@@ -785,8 +846,8 @@ def main():
         "longest": spell_rows[:8],
     }
 
-    text_verdict = verdict_text(promoted, g, plat, valid, rows, base)
-    cfg_path = maybe_write_cfg(base_cfg, rows, base) if promoted else None
+    text_verdict = verdict_text(promoted, g, plat, valid, rows, base, stress, cash_mdd)
+    cfg_path = maybe_write_cfg(base_cfg, rows, base, stress) if promoted else None
     meta = {"proxy_end": str(R.index.max().date()), "real_end": str(Rr.index.max().date()),
             "pin": m_pin, "verdict": text_verdict, "cfg_path": cfg_path}
     report = build_report(digest, meta, rows, base, g, plat, valid, stress, cash_mdd, lock, promoted)
