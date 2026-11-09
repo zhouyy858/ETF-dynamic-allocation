@@ -199,7 +199,10 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
     W = (1 + rs).cumprod()
     wdf = pd.DataFrame(weights_history, index=dates, columns=SLOTS + ["cash"])
     return {"rets": rs, "wealth": W, "weights": wdf, "name": name,
-            "turnover": float(turnover_day.sum()), "schedule_n": int(sum(len(v) for v in pending.values()))}
+            "turnover": float(turnover_day.sum()),
+            # 逐日成交基数(权重 L1)。只给统计用, 不参与上面的撮合。
+            "turnover_series": pd.Series(turnover_day, index=dates),
+            "schedule_n": int(sum(len(v) for v in pending.values()))}
 
 def evaluate(result, rf=REPO, periods=None):
     r, w = result["rets"], result["wealth"]
