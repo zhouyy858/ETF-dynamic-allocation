@@ -6,7 +6,7 @@ import numpy as np, pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from data_prep import build_panel, read_table, rets_from
 from engine import run_backtest, evaluate, fmt_eval, SLOTS
-from strategy import DynamicStrategy
+from strategy import DynamicStrategy, live_rebalance_target
 from metrics import drawdown_series
 from swaps import pnl_panel, traded_code, traded_name
 
@@ -242,10 +242,10 @@ def main():
         code = "cash" if s == "cash" else traded_code(s, cfg)
         nm = cash_nm if s == "cash" else traded_name(s, cfg)
         print(f"    {code:<8} {nm:<22} {w_last[s]*100:6.2f}%")
-    ds_live = DynamicStrategy(R_PROXY, cfg=dict(cfg, signal_lag=0))
-    # 信号口径: 最新数据日=T-1, 以lag=0实例在T-1数据上计算下一个调仓日目标。只打印, 不下单。
-    tgt_last = ds_live.regular_target(wdf.index[-1], {"pf_rets": rets})
-    print(f"  目标权重(下一个周{wd_cn}决策目标, 用最新可得数据, 纸面):")
+    # 与引擎同一条路径: 调仓日目标只用前一交易日收盘. 数据若已含该周五, 取回测记下的目标;
+    # 数据若停在周四(周五 09:00), 用走完的状态现算, 信号落在周四. 不用冷启动的 signal_lag=0.
+    decision, signal_dt, tgt_last = live_rebalance_target(ds, rets, wd)
+    print(f"  目标权重(决策日 {decision.date()}，信号截至 {signal_dt.date()}，周五 09:00 清单；不含决策日收盘):")
     for s in SLOTS + ["cash"]:
         code = "cash" if s == "cash" else traded_code(s, cfg)
         nm = cash_nm if s == "cash" else traded_name(s, cfg)
@@ -273,9 +273,9 @@ def main():
                 print(f"    {s} 维持  现仓 {held:.2f}%  目标 {tgt:.2f}%  差额 {tgt-held:+.2f}pp")
         print(f"    现金 {float(w37['cash'])*100:.2f}% → 目标 {float(tgt_last['cash'])*100:.2f}%")
     sc_last = ds.state_log[-1] if ds.state_log else None
-    print(f"  最近信号: 有效打分={sc_last[1] if sc_last else '-'} (0-9), CN深熊锁={ds._lock['CN']}, US深熊锁={ds._lock['US']}")
+    print(f"  最近信号: 决策日={decision.date()} 信号截至={signal_dt.date()} 有效打分={sc_last[1] if sc_last else '-'} (0-9), CN深熊锁={ds._lock['CN']}, US深熊锁={ds._lock['US']}")
     for mkt in ["CN", "US"]:
-        dd, ok20, ok20_60, rec, ok120 = ds.sig.mkt_info(wdf.index[-1], mkt, ds.gate_win)
+        dd, ok20, ok20_60, rec, ok120 = ds.sig.mkt_info(decision, mkt, ds.gate_win)
         print(f"    {mkt}: 市场3年窗回撤={dd*100:.1f}%  站上SMA20={ok20}  双均线多头={ok20_60}  站上SMA{ds.gate_win}={ok120}  恢复度={rec*100:.0f}%")
 
     # ---- 终端ASCII图表 ----

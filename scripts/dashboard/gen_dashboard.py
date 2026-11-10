@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..")))
 
 from data_prep import build_panel, read_table, rets_from, DATA_DIR
 from engine import run_backtest
-from strategy import DynamicStrategy
+from strategy import DynamicStrategy, live_rebalance_target
 from swaps import pnl_panel, traded_code, traded_name
 
 _CFG_CANDIDATES = [
@@ -56,19 +56,18 @@ def main():
             if nav_last is None or _d > nav_last:
                 nav_last = _d
 
-    # 实盘目标: 最新数据日=T-1收盘, 用 signal_lag=0 实例计算下一调仓日目标(同日报口径)
-    ds_live = DynamicStrategy(R, cfg=dict(cfg, signal_lag=0))
-    tgt = ds_live.regular_target(last, {"pf_rets": rets})
+    # 周五 09:00 清单与回测同一时点: 信号用决策日前一交易日, 状态沿回测走完, 不冷启动
+    rebal_wd = int(cfg.get("rebal_weekday", 2))
+    decision, signal_dt, tgt = live_rebalance_target(ds, rets, rebal_wd)
     sc = ds.state_log[-1][1] if ds.state_log else 0
 
     today = pd.Timestamp.now().normalize()
-    rebal_wd = int(cfg.get("rebal_weekday", 2))
     is_rebal_day = today.weekday() == rebal_wd
     gap = max(abs(w_act[s] - tgt[s]) for s in SLOTS + ["cash"])
     if is_rebal_day:
         ver = cfg.get("version", "v39")
         action = ("今日是周" + WEEKDAY_CN[rebal_wd][1] +
-                  f"调仓日：按 {ver} 规则用前一日(T-1)收盘信号决策，目标缺口 1 笔当日收盘成交；"
+                  f"调仓日：按 {ver} 规则用 {signal_dt.date()} 收盘信号决策（决策日 {decision.date()}），目标缺口 1 笔当日收盘成交；"
                   "QDII 溢价用 T-2 口径（绝对溢价>5/8/12% 自动降仓×0.45/×0.22/×0.08；相对溢价差>2pp 转投低溢价品种），下单前查 IOPV")
     elif gap > 0.02:
         action = ("非调仓日，仓位与目标基本一致（最大偏差 " + f"{gap*100:.1f}%" +
@@ -79,7 +78,7 @@ def main():
     # 市场状态
     mkt = {}
     for m in ["CN", "US"]:
-        dd, ok20, ok20_60, rec, ok120 = ds.sig.mkt_info(last, m, ds.gate_win)
+        dd, ok20, ok20_60, rec, ok120 = ds.sig.mkt_info(decision, m, ds.gate_win)
         mkt[m] = {"dd": round(float(dd) * 100, 2), "sma20": int(ok20), "trend": int(ok20_60),
                   "sma120": int(ok120), "rec": round(float(rec) * 100)}
 
@@ -146,7 +145,9 @@ def main():
         "curves": curves,
         "config": {"version": cfg.get("version", "v39"), "signal_lag": 1,
                    "rebal_weekday": rebal_wd, "cash_bond_code": bond_code,
-                   "cash_bond_pct": cfg.get("cash_bond_pct", 0.0)},
+                   "cash_bond_pct": cfg.get("cash_bond_pct", 0.0),
+                   "decision_date": str(decision.date()),
+                   "signal_date": str(signal_dt.date())},
     }
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as f:
