@@ -512,7 +512,15 @@ def gate_c(arm):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--fingerprint-only", action="store_true")
+    ap.add_argument("--report-only", action="store_true")
     args = ap.parse_args()
+    if args.report_only:
+        results = json.load(open(RESULT_PATH))
+        judge(results)
+        open(REPORT_PATH, "w").write(render(results))
+        json.dump(results, open(RESULT_PATH, "w"), ensure_ascii=False, indent=1)
+        print("rewrote", REPORT_PATH)
+        return
     fp = fingerprint()
     if args.fingerprint_only:
         open(FP_PATH, "w").write(fp + "\n")
@@ -789,7 +797,8 @@ def judge(results):
             idinfo = arm.get("id")
             if not idinfo or not same_sign(idinfo["d"], arm["d_proxy"]):
                 dlt = None if not idinfo else idinfo["d"]
-                reasons.append(f"自有样本 ΔCal {dlt} 与全样本 proxy ΔCal {arm['d_proxy']:+.3f} 不同号")
+                reasons.append(
+                    f"自有样本 ΔCal {dlt:+.3f} 与全样本 proxy ΔCal {arm['d_proxy']:+.3f} 不同号")
             qname = f"A_{spec['rule']}{spec['win']}_{spec['leg']}_qfq"
             q = arms[qname]
             if not same_sign(q["d_proxy"], arm["d_proxy"]) or not same_sign(q["d_real"], arm["d_real"]):
@@ -841,6 +850,54 @@ def judge(results):
     results["verdict"] = {"any_pass": bool(passed), "passed": passed, "closest": closest}
 
 
+def narrative(results):
+    arms = results["arms"]
+    v = results["verdict"]
+    lock = arms["B_lock_0.50_nav"]
+    defens = arms["B_def_0.50_nav"]
+    risk = arms["B_risk_0.50_nav"]
+    mom = arms["A_mom60_511880_nav"]
+    mom_q = arms["A_mom60_511880_qfq"]
+    parts = []
+    parts.append(
+        "方向 A 没有一条主规则在 proxy、real、OOS 上同时高于 v39。"
+        f"中心规则 A-mom60 配 511880 净值是 proxy ΔCal {mom['d_proxy']:+.3f}、"
+        f"real {mom['d_real']:+.3f}、OOS {mom['d_oos']:+.3f}。"
+        f"同一条规则换成腾讯前复权后，proxy 变成 {mom_q['d_proxy']:+.3f}，real 仍是 {mom_q['d_real']:+.3f}。"
+        "前复权把全历史符号翻成正的、真实窗口仍是负的，按预注册不能拿来当升级。"
+        f"静态把现金全部换成 511880，proxy ΔCal {arms['static_511880']['d_proxy']:+.3f}，"
+        f"回撤 {arms['static_511880']['proxy']['mdd'] * 100:.2f}%，比择时更差。"
+        "511360 因为 2020-08 才有自身收益，全历史差距更小，但 real 和 OOS 仍是负的。"
+    )
+    parts.append(
+        f"方向 B 里，深熊锁在 proxy 上开了 {lock['lock_frac'] * 100:.1f}% 的交易日，不是稀有的危机开关。"
+        f"锁内把一半现金换成黄金（B-lock 50%）proxy ΔCal {lock['d_proxy']:+.3f}，"
+        f"real {lock['d_real']:+.3f}，proxy MDD {lock['proxy']['mdd'] * 100:.2f}%。"
+        "真实窗口和回撤都差于 v39。25% 那一格 real 只剩 +0.005，没有到 +0.15，而且它不是预注册的中心，不能事后改挂到 25%。"
+    )
+    parts.append(
+        f"分数≤2 的日子只占 proxy 的 {defens['def_frac'] * 100:.1f}%。"
+        f"这条中心臂 B-def 50% 的 proxy ΔCal 只有 {defens['d_proxy']:+.3f}，"
+        f"real {defens['d_real']:+.3f} 过了单窗 +0.15，OOS {defens['d_oos']:+.3f}，"
+        f"proxy MDD {defens['proxy']['mdd'] * 100:.2f}%（比 -10% 线浅 0.013 个百分点）。"
+        "75% 那一格 proxy ΔCal 变成 -0.011，MDD -10.43%。邻格反号，平台不平，所以落选。"
+        "真实窗口过线、全历史几乎不动、再加一档就反号，按预注册不是升级。"
+    )
+    parts.append(
+        f"风险关闭（成长乘数为 0）占了 {risk['risk_frac'] * 100:.1f}% 的日子。"
+        f"B-risk 50% 的 proxy ΔCal {risk['d_proxy']:+.3f}，real {risk['d_real']:+.3f}，MDD {risk['proxy']['mdd'] * 100:.2f}%。"
+        "全历史和 OOS 看着正、真实窗口 Calmar 掉 3 以上，不能包装成候选。"
+    )
+    if not v["any_pass"]:
+        parts.append(
+            f"最接近的是 `{v['closest']}`，只差在平台：{'；'.join(arms[v['closest']]['fail'])}。"
+            "没有写可执行配置，也没有改默认。"
+        )
+    else:
+        parts.append("过关的臂见第 6 节。")
+    return "\n\n".join(parts)
+
+
 def render(results):
     b = results["baseline"]
     v = results["verdict"]
@@ -853,14 +910,8 @@ def render(results):
     lines.append("")
     lines.append(f"**结论：{head}** 指纹 `{results['fingerprint']}`。对照的是同一次跑出来的 v39。")
     lines.append("")
-    if not v["any_pass"]:
-        c = results["arms"][v["closest"]]
-        lines.append(
-            f"最接近但仍落选的是 `{v['closest']}`。proxy ΔCal {c['d_proxy']:+.3f}，"
-            f"real ΔCal {c['d_real']:+.3f}，OOS ΔCal {c['d_oos']:+.3f}，"
-            f"proxy MDD {c['proxy']['mdd'] * 100:.2f}%。落选原因：{'；'.join(c['fail'])}。"
-        )
-        lines.append("")
+    lines.append(narrative(results))
+    lines.append("")
     lines.append(PRE_TEXT.strip())
     lines.append("")
     lines.append("## 2. 指纹与锁定")
