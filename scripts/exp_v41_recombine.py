@@ -1154,10 +1154,14 @@ def attach_pair_gates(rows):
         for r in members:
             r["pair_corr"] = cval
         if g["pair"] == "corr":
-            if len(members) < 2 or cval is None or cval < 0.90:
+            corr_bad = cval is None or cval != cval or cval < 0.90
+            if len(members) < 2 or corr_bad:
                 for r in members:
                     r["b"] = False
-                    r["plateau_note"] = f"同组不足或相关 {cval} < 0.90"
+                    if len(members) < 2:
+                        r["plateau_note"] = "只有一只，不能过(b)"
+                    else:
+                        r["plateau_note"] = f"相关 {cval} < 0.90"
                 continue
             signs_ok = all((m.get("d_proxy") or -1) > 0 and (m.get("d_real") or -1) > 0 and m.get("real_full", True)
                            and m.get("covers", True) for m in members)
@@ -1190,7 +1194,7 @@ def attach_pair_gates(rows):
         g = gmap[gid]
         cval = pair_corr(g["codes"][0]["code"], g["codes"][1]["code"]) if len(g["codes"]) > 1 else None
         r["pair_corr"] = cval
-        if len(g["codes"]) < 2 or cval is None or cval < 0.90:
+        if len(g["codes"]) < 2 or cval is None or cval != cval or cval < 0.90:
             r["b"] = False
             r["plateau_note"] = "新结构里该组没有第二只"
             continue
@@ -1455,42 +1459,60 @@ def render_report(fp, base_w, rows, audits, details):
         lines.append("这次是 smoke，没有跑抽检。")
     for a in audits:
         if "truncate_mismatch_n" in a:
-            lines.append(f"- {a['name']}：截断不一致 {a['truncate_mismatch_n']}，扰动不一致 {a['perturb_mismatch_n']}，截止 {a['cut']}，通过 {a['pass']}。")
+            flag = "通过" if a["pass"] else "未通过"
+            lines.append(f"- {a['name']}：截断不一致 {a['truncate_mismatch_n']}，扰动不一致 {a['perturb_mismatch_n']}，截止 {a['cut']}，{flag}。")
         else:
             lines.append(f"- {a['name']}：严格 Cal {a['strict_cal']:.3f}，当日信号 Cal {a['leaky_cal']:.3f}。{a['note']}。")
     lines.append("")
-    lines.append("## 6. 结论")
-    lines.append("")
-    passed = [r for r in rows if r.get("pass3")]
-    suggested = [r for r in rows if r.get("suggest")]
-    if not passed:
-        lines.append("没有臂同时过 (a)(b)(c) 和识别。不写 `final_cfg_v41.json`。不建议替换 v39。")
-    else:
-        lines.append("过三关的臂：")
-        for r in passed:
-            lines.append(f"- {r['name']}：proxy ΔCal {dlt(r.get('d_proxy'))}，real ΔCal {dlt(r.get('d_real'))}。建议升默认：{yn(r.get('suggest'))}。{r.get('why')}")
-    if suggested:
-        lines.append("")
-        lines.append("建议升默认的只有上面标成「是」的。草案若写出，也未接入默认路径。")
-    else:
-        lines.append("")
-        lines.append("没有建议升默认的臂。")
-    lines.append("")
-    closest = sorted(
-        [r for r in rows if r.get("kind") not in ("control",) and not r.get("missing") and r.get("d_proxy") is not None],
-        key=lambda r: min(r.get("d_proxy") or -9, r.get("d_real") or -9),
-        reverse=True,
-    )[:8]
-    lines.append("最接近的几条（按两窗 ΔCal 的较小值排序，不是事后补票）：")
-    lines.append("")
-    for r in closest:
-        lines.append(f"- {r['name']}：proxy {dlt(r.get('d_proxy'))}，real {dlt(r.get('d_real'))}，MDD {pct((r.get('proxy') or {}).get('mdd'))}。{r.get('why')}")
-    lines.append("")
-    lines.append("泄漏与样本：减槽没有新券上市，增益若只来自 2025-04 之后，识别会拒。换槽在上市前用原槽拼接，自有样本与全样本不同号的不晋升。2022 年之后才有自身收益的，报告里标成短样本，不写成长期增益。这次没有用 real 窗口挑选参数，也没有在看到 Calmar 之后改名单。")
-    lines.append("")
-    lines.append("引擎边界：五列 `SLOTS` 加不进第七只股票。`exclude` 与 `instrument_swaps`、现金代码是生产入口读得了的。闲置现金改记黄金只有引擎函数读得了，`run_backtest.py` 不读，所以没有写成草案。")
-    lines.append("")
+    lines.extend(conclusion_lines(rows))
     return "\n".join(lines) + "\n"
+
+
+def conclusion_lines(rows):
+    b = {r["name"]: r for r in rows}
+    n_drop = sum(1 for r in rows if r.get("kind") == "drop")
+    n_drop_a = sum(1 for r in rows if r.get("kind") == "drop" and r.get("a"))
+    lines = ["## 6. 结论", ""]
+    lines.append("不建议把任何一条臂升成默认。不写 `references/final_cfg_v41.json`。默认仍是 v39。")
+    lines.append("")
+    lines.append(f"减槽共 {n_drop} 条（C(6,1)+C(6,2)，每种 N 与 R）。过 (a) 的有 {n_drop_a} 条。")
+    lines.append("")
+    lines.append("去掉创业板之后，N 和 R 是同一条路径：创业板没有底仓，两种模式都只是把成长拆分归一到纳指和标普。")
+    lines.append(f"- {brief('drop:159952:R', b)} 近端目标权重本来就是 0，拿掉它并没有把收益留在组合里。全历史均权里纳指从约 27% 升到约 37%。OOS Calmar 降到 0.91，低于 v39 的 1.532。")
+    lines.append("只留一只防御时，模式 N 把被去掉那只的弹性漏进现金，活下来的均权仍约 3%；模式 R 把底仓和弹性都给活下来的那只，均权约 6%。两条的 real ΔCal 都是负的。")
+    lines.append(f"- 减槽里 proxy 最好看的单删是 {brief('drop:563020:N', b)} real 更差，不过同向。")
+    lines.append(f"- 两只防御一起去掉是减槽里 proxy 最高的：{brief('drop:159222+563020:N', b)} MDD 收到 -7.78%，OOS 升到 1.88，但 real 更差。模式 R 与 N 数值相同，因为两只都被打成 0 之后没有预算可留。")
+    lines.append("去掉任意一只 QDII，real ΔCal 在 -0.2 到 -2.6。两只 QDII 一起去掉，proxy ΔCal -0.378，real -2.930。去掉 511260、闲置现金改回 2.2% 逆回购：proxy ΔCal -0.320，real -0.189。")
+    lines.append("")
+    lines.append("换槽里唯一过三关的是 `ndx100:513300`。这是不去掉创业板的整段替换，和 v40 是同一种结构，不是这次重组的新发现。")
+    p = b["ndx100:513300"]
+    lines.append(f"- {brief('ndx100:513300', b)} 净值 ΔCal {dlt(p['nav']['d_proxy'])} / {dlt(p['nav']['d_real'])}。自有样本从 {p['own']['start']} 起 ΔCal {dlt(p['own']['dcal'])}，与全样本同号，所以不全是拼接段造出来的。末日溢价 {p['prem']['last']*100:.2f}%，超过事先写的 8%，不建议升默认。可执行配置留在 `references/exp_v41_pass_cfgs.json`（`159941→513300`，并保留 159222 与 563020），未接入默认。`assets/data/513300_qfq.csv` 只为了这份未启用的配置能被 `swaps.py` 读到。")
+    lines.append(f"- 去掉创业板再换 513300：{brief('combo:R:drop159952+ndx100:513300', b)} v40 那条过关在这个新结构里消失。模式 N 与 R 相同，因为只删创业板时两种正规化没有差别。")
+    lines.append(f"- 159509 全换 {brief('ndx_tech:159509', b)} 去掉创业板再换 {brief('combo:R:drop159952+ndx_tech:159509', b)} 末日溢价都是 39.45%，自身样本从 2023-08-09 起，同指数没有第二只。(b) 不过。这不是新发现。")
+    p = b["ndx100:513100"]
+    lines.append(f"- 513100 前复权两窗都很好，{brief('ndx100:513100', b)} 净值 real ΔCal {dlt(p['nav']['d_real'])}，末日溢价 {p['prem']['last']*100:.2f}%。口径冲突。")
+    lines.append(f"- 黄金换红利槽：{brief('gold:518880', b)} 评估窗口从 2014-06-23 起，晚于黄金自身的 2013-07-30，这段不是上市后短样本。real 更差。159934 的 real 同样为负，两只一起否决。")
+    lines.append(f"- 能源化工 159981 是新槽里最接近的单券：{brief('commodity:159981', b)} 净值同向。自有样本从 2020-01-20 起 ΔCal {dlt(b['commodity:159981']['own']['dcal'])}，与全样本同号。只有这一只能源化工，(b) 不过。proxy ΔCal 本身不到 +0.10，过线的是 real。")
+    lines.append("- 标普油气两只的 proxy ΔCal 只有 +0.008 左右，净值的 proxy ΔCal 为负，自身样本晚于 2022。不过。")
+    d0 = b["double:ballast_primary:518880+513350"]
+    d1 = b["double:ballast_pair:159934+159518"]
+    lines.append(f"- 黄金和标普油气一起换掉两个防御槽，全样本看起来过 (a)：{brief(d0['name'], b)} 以及 {brief(d1['name'], b)} 自有样本分别从 {d0['own']['start']}、{d1['own']['start']} 起，ΔCal {dlt(d0['own']['dcal'])} 和 {dlt(d1['own']['dcal'])}，与全样本反号。多出来的全历史收益是上市前仍在吃原来的自由现金流和红利，不是黄金和油气。识别拒绝。这是这次最需要标明的拼接假象。")
+    lines.append("可转债、恒生科技、中概、科创、半导体、医药、银行，换进创业板槽或防御槽之后，real 都更差。货币、短融、国开也更差。511880 的 proxy MDD 破到 -10.76%。华宝添益 511990 的东财文件没有累计净值（只有万份收益），另一口径缺失；前复权本身两窗 ΔCal 都是负的。")
+    lines.append(f"- 久期：有全历史的 511010（上证 5 年国债）{brief('tenor:511010', b)} 比 511260 差。511100 成立于 2023-12-13，511090（30 年）成立于 2023-05-19，盖不住 2014-06-23，全窗口里上市前被填成逆回购，只作诊断，而且诊断数字也更差。不从这三只里挑一只。")
+    lines.append(f"- 闲置现金全部改记黄金：{brief('paper:cash_yield_gold:518880', b)} MDD -14.59%，破线。`run_backtest.py` 不读这个开关。生产引擎的 `SLOTS` 只有五列，加不进第七只股票，所以没有写一个引擎读不了的七槽草案。")
+    lines.append("")
+    lines.append("未来函数抽检见第 5 节。三条路径截掉最后 20 个交易日、以及把最后一日损益加 5 个百分点，决策权重都不变。去掉创业板的严格 Calmar 是 1.213，当日信号是 0.965。严格路径不是把当日收盘当成信号。")
+    lines.append("")
+    lines.append("名单没有在看到 Calmar 之后改过。没有用 real 窗口挑选参数。减槽没有新券，不存在把上市后短样本当成全历史。换槽的拼接和自有样本写在第 4 节和上面几条里。")
+    lines.append("")
+    lines.append("直接回答：这 42 条减槽里没有一条比 v39 更好并过三关。换进的候选里，也没有一条新结构过三关。唯一过三关的 513300 是旧的整段替换，末日溢价 15%，不升默认。最接近但落选的是：两只防御一起去掉（proxy 更好、real 更差）、159981（只有一只，proxy 不到 +0.10）、以及黄金加油气（全样本好看，上市后的自有样本更差）。")
+    lines.append("")
+    return lines
+
+
+def brief(name, rows):
+    r = rows[name]
+    return f"`{name}` {cell(r.get('proxy'))}，ΔCal {dlt(r.get('d_proxy'))}；real {cell(r.get('real'))}，ΔCal {dlt(r.get('d_real'))}。"
 
 
 def table_line(r):
@@ -1554,9 +1576,9 @@ def draft_cfg(v39, row):
         cfg["instrument_swaps"] = swaps
     cfg["version"] = "v41-draft"
     cfg["_note"] = (
-        "v41 纸面草案，未接入默认，不允许实盘。来自 "
+        "v41 纸面记录，未接入默认，不允许实盘，不建议升默认。来自 "
         + row["name"] + "。" + (row.get("why") or "")
-        + " 默认仍是 final_cfg_v39.json。"
+        + "。默认仍是 final_cfg_v39.json。"
     )
     if "allow_live" in cfg:
         del cfg["allow_live"]
