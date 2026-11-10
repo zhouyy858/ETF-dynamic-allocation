@@ -287,9 +287,17 @@ def main(n_random=30, n_friday=10):
         report["failures"].append(f"old live path unexpectedly close to backtest, max {old_max}")
     dec, sig, tgt = live_rebalance_target(full_ds, full_res["rets"], 4)
     last_fri = fridays[-1]
-    if dec != last_fri or max_abs_weights(tgt, full_ds.decisions[last_fri]) > ATOL:
-        report["failures"].append(f"post-close list {dec.date()} != last friday decision {last_fri.date()}")
-    report["post_close_list"] = {"decision": str(dec.date()), "signal": str(sig.date())}
+    # 数据末日不是周五时, 清单是"下个周五"的预演, 与回测里最后一个周五决策天然不同;
+    # 该周五的 09:00 信息集一致性由上面第 5 节逐周五校验覆盖.
+    checked = dec <= last_fri
+    if checked:
+        if dec != last_fri or max_abs_weights(tgt, full_ds.decisions[last_fri]) > ATOL:
+            report["failures"].append(f"post-close list {dec.date()} != last friday decision {last_fri.date()}")
+    else:
+        print(f"  清单 {dec.date()} / 信号 {sig.date()} 为下一调仓日预演"
+              f"(数据止于 {full_ds.R.index[-1].date()}), 不与 {last_fri.date()} 对比", flush=True)
+    report["post_close_list"] = {"decision": str(dec.date()), "signal": str(sig.date()),
+                                 "checked_against_backtest": bool(checked)}
 
     print("===== 6. 对齐与选择的反事实（不改默认配置） =====", flush=True)
 

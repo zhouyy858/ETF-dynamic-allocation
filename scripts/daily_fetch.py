@@ -55,8 +55,10 @@ def fetch_bond_nav(sym="sh511010"):
     df = df.set_index("date").sort_index()
     df["unit_nav"] = df["close"].astype(float)
     df["cum_nav"] = df["close"].astype(float)
-    df["ret_pct"] = (df["close"].pct_change().fillna(0.0) * 100).round(6)
-    return df[["unit_nav", "cum_nav", "ret_pct"]]
+    df["ret_pct"] = (df["close"].pct_change() * 100).round(6)
+    # 陷阱: 窗口首行的前收在窗口外, pct_change 得到 NaN; 若按 0 合并会覆盖历史行的真实涨幅
+    # (2026-11-10 已污染过 2026-09-28). 历史已覆盖该日, 直接丢弃首行.
+    return df[["unit_nav", "cum_nav", "ret_pct"]].iloc[1:]
 
 def fetch_nav_latest(fund):
     url = "https://api.fund.eastmoney.com/f10/lsjz"
