@@ -146,12 +146,15 @@ class SignalSet:
         return out
 
     def _idx(self, dt):
-        # 结构防线(不可配置): 信号最小滞后1个交易日 —— 决策日当天收盘数据在盘中不可得,
-        # 即使误配 lag=0 也无法读取当日数据; 审计脚本用"数据平移法"(R.shift(-1))模拟旧版
-        # 泄漏口径做历史对照, 生产策略代码本身不存在泄漏路径
-        # 性能: searchsorted(side="right")-1 与 get_indexer(method="ffill") 语义等价(<=dt 的末位)
-        i = int(self.R.index.searchsorted(dt, side="right")) - 1
-        return max(0, i - max(1, int(self.lag)))
+        # 结构防线: 信号至少滞后 1 个交易日, 读严格早于决策日的最后一根已实现 K 线.
+        # 决策日已经在索引里时, 这就是前一交易日 (signal_lag=0 与 1 都到不了当日).
+        # 决策日还不在索引里 (周五 09:00, 当日 K 线未生成) 时, 最后一根就是可用信号,
+        # 不能再多减一天; 否则清单会比回测的周五决策早用一天.
+        # signal_lag>1 时在这根已实现 K 线之上继续往前.
+        ts = pd.Timestamp(dt)
+        pos = int(self.R.index.searchsorted(ts, side="left")) - 1
+        extra = max(0, int(self.lag) - 1)
+        return max(0, pos - extra)
 
     def score(self, dt):
         i = self._idx(dt)
@@ -291,7 +294,9 @@ class DynamicStrategy:
         self.premium_thr = [float(x) for x in cfg.get("premium_thr", PREMIUM_THR)]
         self.premium_cut = [float(x) for x in cfg.get("premium_cut", PREMIUM_CUT)]
         self.premium_shift = int(cfg.get("premium_shift", 1))
-        self._premium = self._load_premium_panel(R_full, self.premium_shift) if self.premium_gate else None
+        # 溢价先按日期对齐, 滞后在 _premium_row 里用信号下标取, 这样决策日还不在索引里
+        # (周五 09:00) 时也能取到与回测同一根 K 线. 预 shift 再按决策日 loc 会在缺这天时直接拿不到.
+        self._premium = self._load_premium_panel(R_full, 0) if self.premium_gate else None
         self.valuation_win = int(cfg.get("valuation_win_days", VALUATION_WIN_DAYS))
         self.valuation_thr = [float(x) for x in cfg.get("valuation_thr", [0.95, 0.98])]
         self.valuation_cut = [float(x) for x in cfg.get("valuation_cut", [0.6, 0.35])]
@@ -337,6 +342,7 @@ class DynamicStrategy:
         self._gate_st = {}
         self.state_log = []
         self.risk_log = []
+        self.decisions = {}  # 决策日 -> regular_target, 供周五 09:00 清单与回测对齐
         # ---- 性能缓存(仅加速, 与逐日重算数值等价; 配置为关时留空, 走原路径) ----
         self._corr_cache = None
         if self.corr_risk:
@@ -398,11 +404,28 @@ class DynamicStrategy:
         out = pd.DataFrame(cols)
         return out.shift(shift)
 
-    def _premium_at(self, dt):
-        """返回决策日可用的前一日溢价(取两只QDII较高者, 保守); 无数据返回None"""
-        if self._premium is None or dt not in self._premium.index:
+    def _premium_row(self, dt):
+        """决策日可用的溢价行.
+
+        面板本身不预平移. premium_shift=2 时取信号 bar 再往前 1 根, 与旧的
+        ``reindex().shift(2).loc[决策日]`` 在决策日已在索引里时逐位相同,
+        决策日尚未入索引(周五 09:00)时也不会因为 loc 不到那一天而变成没有溢价.
+        """
+        if self._premium is None or len(self._premium) == 0:
             return None
-        row = self._premium.loc[dt]
+        j = self.sig._idx(dt) - (int(self.premium_shift) - 1)
+        if j < 0 or j >= len(self._premium):
+            return None
+        row = self._premium.iloc[j]
+        if row.dropna().empty:
+            return None
+        return row
+
+    def _premium_at(self, dt):
+        """返回决策日可用溢价(取两只 QDII 较高者); 无数据返回 None"""
+        row = self._premium_row(dt)
+        if row is None:
+            return None
         vals = row.dropna()
         if len(vals) == 0:
             return None
@@ -907,9 +930,12 @@ class DynamicStrategy:
             out["513500"] = self.floor["513500"] + (out["513500"] - self.floor["513500"]) * m_us_g * m_us_all * vg_us * prem_cut * corr_cut
             if prem_freed > 0:
                 out["159952"] = self.floor["159952"] + (out["159952"] - self.floor["159952"]) * m_cn_g * m_cn_all * vg_cn * corr_cut + prem_freed * m_cn_g * m_cn_all
-        if self.premium_tilt and self._premium is not None and dt in self._premium.index:
-            _pr = self._premium.loc[dt]
-            _p941, _p500 = _pr.get("159941"), _pr.get("513500")
+        if self.premium_tilt and self._premium is not None:
+            _pr = self._premium_row(dt)
+            if _pr is None:
+                _p941, _p500 = None, None
+            else:
+                _p941, _p500 = _pr.get("159941"), _pr.get("513500")
             if pd.notna(_p941) and pd.notna(_p500):
                 _diff = float(_p941) - float(_p500)
                 _span = max(self.premium_tilt_cap - self.premium_tilt_thr, 1e-9)
@@ -1017,7 +1043,9 @@ class DynamicStrategy:
                     for s in SLOTS:
                         out[s] = self.floor[s] + (out[s] - self.floor[s]) * max(scale2, 0.0)
                 self.risk_log.append((dt, sc, scale))
-        return self._finalize(out)
+        out = self._finalize(out)
+        self.decisions[pd.Timestamp(dt).normalize()] = {k: float(v) for k, v in out.items()}
+        return out
 
     def target_with_mkt_cut(self, dt, ctx, mkt, cut):
         """分市场刹车: 仅削减指定市场 floor 以上的弹性, 另一市场与防御仓不动"""
@@ -1053,3 +1081,36 @@ class DynamicStrategy:
                 out[s] = out[s] * (eq / total) / 100.0
         out["cash"] = cash / 100.0
         return out
+
+
+def upcoming_decision_date(last_dt, rebal_weekday):
+    """最后一根 K 线若落在调仓日, 决策日就是这一天; 否则是它之后的下一个调仓日."""
+    last_dt = pd.Timestamp(last_dt).normalize()
+    wd = int(rebal_weekday)
+    if int(last_dt.weekday()) == wd:
+        return last_dt
+    d = last_dt + pd.Timedelta(days=1)
+    while int(d.weekday()) != wd:
+        d += pd.Timedelta(days=1)
+    return d
+
+
+def live_rebalance_target(ds, pf_rets, rebal_weekday):
+    """周五 09:00 清单与回测 regular_target 用同一根信号 K 线.
+
+    数据已经包含该调仓日时, 直接取回测里记下的目标(信号是前一交易日, 不含当日收盘).
+    数据停在调仓日之前时, 用已经走完的状态在下一个调仓日上现算; _idx 会落到最后一根,
+    与「把该调仓日补进索引后再取前一日」相同.
+    返回 (决策日, 信号日, 目标权重).
+    """
+    last = pd.Timestamp(ds.R.index[-1]).normalize()
+    decision = upcoming_decision_date(last, rebal_weekday)
+    if decision <= last:
+        target = ds.decisions.get(decision)
+        if target is None:
+            raise KeyError(f"决策日 {decision.date()} 没有在这次回测里留下 regular_target")
+    else:
+        target = ds.regular_target(decision, {"pf_rets": pf_rets})
+    i = ds.sig._idx(decision)
+    signal_dt = pd.Timestamp(ds.R.index[i]).normalize()
+    return decision, signal_dt, target
