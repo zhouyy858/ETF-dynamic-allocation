@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""v42 future-function audit wrapper (v41 stays callable via args).
+"""v41 future-function audit wrapper (v42 stays callable via args).
 
 Reuses the proven v40 truncation/perturbation/09:00 audit, but substitutes the
-selected config (default v42) for the v40 slot. v40, v37 and v30 remain the
+selected config (default v41) for the v40 slot. v40, v37 and v30 remain the
 historical controls.
 """
 import json
@@ -13,9 +13,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import audit_lookahead_v40 as audit
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-V41 = os.path.join(ROOT, "references", "final_cfg_v42.json")
+V41 = os.path.join(ROOT, "references", "final_cfg_v41.json")
 CFG_PATH = sys.argv[1] if len(sys.argv) > 1 else V41
-TAG = sys.argv[2] if len(sys.argv) > 2 else "v42"
+TAG = sys.argv[2] if len(sys.argv) > 2 else "v41"
 _load_cfg = audit.load_cfg
 
 
