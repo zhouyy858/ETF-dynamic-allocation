@@ -142,7 +142,7 @@ No bootstrap script and no bond-shock script are in the repo. The fee path is th
 | v39 circular, seed 20261110 | 28.7% | 0 |
 | v39 non-circular, seed 20261110 | 29.9% | 0 |
 
-Published 20.1% and 29.8% sit next to this range. v39's 29.8% matches the non-circular draw (29.9%). v40's 20.1% was not reproduced to the digit; the independent draws are 18.3–19.3%. Median bootstrapped v40 Calmar is about 1.37–1.39, against the point estimate 1.71. The point estimate is not a tight lower bound.
+The v39 distribution matches the previous audit's published shape: circular block, seed 20261110, gives p5 / median / p95 Calmar of 0.626 / 1.225 / 2.151, which prints as the 0.63 / 1.23 / 2.15 quoted for v39. P(Calmar < 1) on that same draw is 28.7%; seed 0 is 29.25%; the non-circular draw is 29.9%. The published 29.8% is that procedure, seed-sensitive by about one percentage point. v40's published 20.1% was not hit on these three draws (18.3–19.3%). v40 circular p5 / median / p95 is 0.72 / 1.37 / 2.32, against the point estimate 1.71. The point estimate is not a tight lower bound.
 
 Fee on v40 proxy, official engine:
 
@@ -155,7 +155,7 @@ Fee on v40 proxy, official engine:
 
 20bp prints as 11.68% / -8.35% / Calmar 1.40. Match.
 
-Bond sleeve: there is no committed shock script. Replacing 20 bond sessions from 2022-02-07 with a flat path that compounds to -8% takes v40 proxy MDD from -7.83% to **-12.93%**. A single-session -8% bond return on the first bond day on or after 2022-02-07 takes it to **-13.49%**. The published "约 -13.4%" is that neighborhood, not a digit match. The 2015-06-15 20-session path takes MDD to -12.17%. Either shock breaks the 10% drawdown bar. Equity risk layers do not see the bond sleeve.
+Bond sleeve: there is no committed shock script. Replacing 20 bond sessions from 2022-02-07 with a flat path that compounds to -8% takes v40 proxy MDD from -7.83% to **-12.93%**. A single-session -8% bond return on the first bond day on or after 2022-02-07 takes it to **-13.49%**. The published "约 -13.4%" is that neighborhood, not a digit match. The 2015-06-15 20-session path takes MDD to -12.17% (Calmar 1.06). The prior v39 writeup also quoted Calmar 0.86–0.88 at both the 2015-06 and 2022-02 starts; none of these reconstructions landed there (lowest Calmar here is 0.94). Either 2022 shock breaks the 10% drawdown bar. Equity risk layers do not see the bond sleeve.
 
 ## 8. Bugs
 
