@@ -885,7 +885,10 @@ class DynamicStrategy:
         split_d = self._defense_split(dt)
         for s in self.exclude:
             split_g.setdefault(s, 0.0)
-            split_d.setdefault(s, 0.0)
+            split_d[s] = 0.0
+        tot_d = sum(split_d.values())
+        if tot_d > 0:
+            split_d = {k: v / tot_d for k, v in split_d.items()}
         if self.growth_rotation:
             split_g = self._growth_split(dt, {s: split_g.get(s, 0.0) for s in ("159952", "159941", "513500")})
         if self.growth_iv:

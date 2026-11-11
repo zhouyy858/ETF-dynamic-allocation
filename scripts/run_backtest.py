@@ -177,10 +177,10 @@ def term_bars(rows, title, width=42):
 # ---------- 主流程 ----------
 def main():
     _here = os.path.dirname(os.path.abspath(__file__))
-    _p1 = os.path.join(_here, "..", "references", "final_cfg_v40.json")
-    _p2 = os.path.join(_here, "references", "final_cfg_v40.json")
+    _p1 = os.path.join(_here, "..", "references", "final_cfg_v41.json")
+    _p2 = os.path.join(_here, "references", "final_cfg_v41.json")
     cfg_file = sys.argv[1] if len(sys.argv) > 1 else (_p1 if os.path.exists(_p1) else _p2)
-    tag = sys.argv[2] if len(sys.argv) > 2 else "v40"
+    tag = sys.argv[2] if len(sys.argv) > 2 else "v41"
     cfg = json.load(open(cfg_file))
     R_proxy_pnl = pnl_panel(R_PROXY, "proxy", cfg)
     R_real_pnl = pnl_panel(R_REAL, "real", cfg)
@@ -236,9 +236,10 @@ def main():
         cash_nm = f"现金(100% {bond_code})"
     else:
         cash_nm = f"现金(逆回购{1-bond_pct:.0%}+{bond_code} {bond_pct:.0%})"
+    active_slots = [s for s in SLOTS if s not in set(cfg.get("exclude", []))]
     print("\n===== 当前仓位管理现状 (数据截至 %s, 配置 %s) =====" % (str(wdf.index[-1].date()), cfg_file))
     print("  实际持仓(含权重漂移, 以最新交易日收盘计; 代码是成交标的):")
-    for s in SLOTS + ["cash"]:
+    for s in active_slots + ["cash"]:
         code = "cash" if s == "cash" else traded_code(s, cfg)
         nm = cash_nm if s == "cash" else traded_name(s, cfg)
         print(f"    {code:<8} {nm:<22} {w_last[s]*100:6.2f}%")
@@ -246,12 +247,12 @@ def main():
     # 数据若停在周四(周五 09:00), 用走完的状态现算, 信号落在周四. 不用冷启动的 signal_lag=0.
     decision, signal_dt, tgt_last = live_rebalance_target(ds, rets, wd)
     print(f"  目标权重(决策日 {decision.date()}，信号截至 {signal_dt.date()}，周五 09:00 清单；不含决策日收盘):")
-    for s in SLOTS + ["cash"]:
+    for s in active_slots + ["cash"]:
         code = "cash" if s == "cash" else traded_code(s, cfg)
         nm = cash_nm if s == "cash" else traded_name(s, cfg)
         print(f"    {code:<8} {nm:<22} {tgt_last[s]*100:6.2f}%")
-    prev_file = os.path.join(os.path.dirname(cfg_file), "final_cfg_v39.json")
-    if cfg.get("version", "").startswith("v40") and os.path.exists(prev_file):
+    prev_file = os.path.join(os.path.dirname(cfg_file), "final_cfg_v40.json")
+    if cfg.get("version", "").startswith("v41") and os.path.exists(prev_file):
         cfg_prev = json.load(open(prev_file))
         ds_prev = DynamicStrategy(R_PROXY, cfg=cfg_prev)
         bond_prev = rets_from(read_table(f"{cfg_prev.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg_prev.get("cash_bond_pct") else None
@@ -262,8 +263,10 @@ def main():
                              rebal_weekday=cfg_prev.get("rebal_weekday", 2), rebal_freq=cfg_prev.get("rebal_freq", "weekly"),
                              strict=True)
         w_prev = res_prev["weights"].iloc[-1]
-        print("  相对上一默认 v39 持仓的切换（纸面，不下单）:")
+        print("  相对上一默认 v40 持仓的切换（纸面，不下单）:")
         for s in SLOTS:
+            if s in cfg.get("exclude", []):
+                continue
             code = traded_code(s, cfg)
             prev_code = traded_code(s, cfg_prev)
             held = float(w_prev[s]) * 100
