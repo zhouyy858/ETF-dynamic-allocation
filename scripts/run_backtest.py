@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-"""最终运行器(ETF动态配置skill v26): 每周五用前一日信号决策、目标缺口1笔当日收盘成交(v22 S阶段45组网格实证)
-输出: 全历史/真实窗口指标、基准对比、分阶段、仓位现状、终端ASCII图表(不生成图片文件)"""
+"""最终运行器: 每周五用前一日信号决策、目标缺口1笔当日收盘成交(v22 S阶段45组网格实证)
+输出: 全历史/真实窗口指标、基准对比、分阶段、仓位现状、终端ASCII图表(不生成图片文件)
+损益口径: 默认 price(QDII 场内价), 第三个参数传 nav 切换净值口径"""
 import sys, os, json
 import numpy as np, pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -16,6 +17,24 @@ R_PROXY, W_PROXY = build_panel("proxy")
 R_REAL, W_REAL = build_panel("real")
 BACKTEST_START = "2014-06-23"
 REAL_START = "2025-04-23"
+PRICE_FILES = {"159941": "qdii_price_159941.csv", "513500": "qdii_price_513500.csv"}
+PRICE_DROP = {"159941": ["2022-07-05"], "513500": ["2022-03-30"]}
+
+
+def price_rets(code):
+    s = read_table(PRICE_FILES[code])["close"].sort_index()
+    r = s.pct_change().dropna()
+    return r.drop([pd.Timestamp(d) for d in PRICE_DROP[code]], errors="ignore")
+
+
+def exec_panel(R, layer, cfg, caliber):
+    P = pnl_panel(R, layer, cfg).copy()
+    if caliber == "price":
+        for code in PRICE_FILES:
+            P[code] = price_rets(code).reindex(P.index).combine_first(P[code])
+    return P
+
+
 PERIODS = {
     "2014H2-2015牛市": ("2014-06-23", "2015-06-12"),
     "2015股灾": ("2015-06-15", "2016-02-29"),
@@ -177,16 +196,21 @@ def term_bars(rows, title, width=42):
 # ---------- 主流程 ----------
 def main():
     _here = os.path.dirname(os.path.abspath(__file__))
-    _p1 = os.path.join(_here, "..", "references", "final_cfg_v41.json")
-    _p2 = os.path.join(_here, "references", "final_cfg_v41.json")
+    _p1 = os.path.join(_here, "..", "references", "final_cfg_v43.json")
+    _p2 = os.path.join(_here, "references", "final_cfg_v43.json")
     cfg_file = sys.argv[1] if len(sys.argv) > 1 else (_p1 if os.path.exists(_p1) else _p2)
-    tag = sys.argv[2] if len(sys.argv) > 2 else "v41"
+    tag = sys.argv[2] if len(sys.argv) > 2 else "v43"
+    caliber = sys.argv[3].lower() if len(sys.argv) > 3 else "price"
+    if caliber not in ("price", "nav"):
+        raise SystemExit("第三个参数必须是 price 或 nav")
     cfg = json.load(open(cfg_file))
-    R_proxy_pnl = pnl_panel(R_PROXY, "proxy", cfg)
-    R_real_pnl = pnl_panel(R_REAL, "real", cfg)
+    R_proxy_pnl = exec_panel(R_PROXY, "proxy", cfg, caliber)
+    R_real_pnl = exec_panel(R_REAL, "real", cfg, caliber)
     wd = cfg.get("rebal_weekday", 2); wd_cn = "一二三四五"[wd]
     freq = cfg.get("rebal_freq", "weekly"); n_tw = len(cfg.get("tranche_weights", [1.0]))
-    print(f"===== 迭代 {tag} | 周{wd_cn}-{freq}-{n_tw}笔(前一日信号, 无未来函数, strict) =====")
+    cal_cn = "场内价" if caliber == "price" else "净值"
+    cal_suffix = "" if caliber == "nav" else "_price"
+    print(f"===== 迭代 {tag} | 周{wd_cn}-{freq}-{n_tw}笔(前一日信号, 无未来函数, strict) | 损益口径={cal_cn} =====")
     rp = run_all(R_PROXY, tag, BACKTEST_START, None, cfg, R_proxy_pnl)
     rr = run_all(R_REAL, tag, REAL_START, None, cfg, R_real_pnl)
     ds_oos = DynamicStrategy(R_PROXY, cfg=cfg)
@@ -201,15 +225,15 @@ def main():
     print(f"\n===== OOS（proxy 独立起点 2022-01-04）DYN CAGR={oos_dyn['cagr']*100:.2f}%  "
           f"MDD={oos_dyn['max_dd']*100:.2f}%  Calmar={oos_dyn['calmar']:.4f} =====")
     json.dump({k: v for k, v in rp.items() if not k.startswith("_")},
-              open(f"{OUT}/iter_{tag}_proxy.json", "w"), ensure_ascii=False, indent=2, default=str)
+              open(f"{OUT}/iter_{tag}{cal_suffix}_proxy.json", "w"), ensure_ascii=False, indent=2, default=str)
     json.dump({k: v for k, v in rr.items() if not k.startswith("_")},
-              open(f"{OUT}/iter_{tag}_real.json", "w"), ensure_ascii=False, indent=2, default=str)
+              open(f"{OUT}/iter_{tag}{cal_suffix}_real.json", "w"), ensure_ascii=False, indent=2, default=str)
 
-    print(f"\n===== 扩展代理回测 ({BACKTEST_START} ~ {R_PROXY.index[-1].date()}, 含2015/2018/2021-22三轮大熊) =====")
+    print(f"\n===== 扩展代理回测 ({BACKTEST_START} ~ {R_PROXY.index[-1].date()}, 含2015/2018/2021-22三轮大熊; DYN {cal_cn}口径, 基准净值口径) =====")
     for k, e in rp.items():
         if not k.startswith("_"):
             print(fmt_eval(e))
-    print(f"\n===== 真实ETF回测 ({REAL_START} ~ {R_REAL.index[-1].date()}) =====")
+    print(f"\n===== 真实ETF回测 ({REAL_START} ~ {R_REAL.index[-1].date()}; DYN {cal_cn}口径, 基准净值口径) =====")
     for k, e in rr.items():
         if not k.startswith("_"):
             print(fmt_eval(e))
@@ -222,10 +246,15 @@ def main():
     itfile = f"{OUT}/iterations.json"
     its = json.load(open(itfile)) if os.path.exists(itfile) else {}
     er = rr["DYN " + tag]
-    its[tag] = {"proxy_cagr": dyn["cagr"], "proxy_mdd": dyn["max_dd"], "proxy_sharpe": dyn["sharpe"],
+    its[tag] = {"caliber": caliber,
+                "proxy_cagr": dyn["cagr"], "proxy_mdd": dyn["max_dd"], "proxy_sharpe": dyn["sharpe"],
                 "proxy_calmar": dyn["calmar"], "real_cagr": er["cagr"], "real_mdd": er["max_dd"],
                 "real_sharpe": er["sharpe"], "real_calmar": er["calmar"],
                 "avg_cash": dyn["avg_cash"], "turnover": dyn["turnover"]}
+    if caliber == "price":
+        its[tag].update({"price_proxy_cagr": dyn["cagr"], "price_proxy_mdd": dyn["max_dd"],
+                         "price_proxy_calmar": dyn["calmar"], "price_real_cagr": er["cagr"],
+                         "price_real_mdd": er["max_dd"], "price_real_calmar": er["calmar"]})
     json.dump(its, open(itfile, "w"), ensure_ascii=False, indent=2)
 
     wdf = rp["_weights"]; rets = rp["_rets"]; ds = rp["_ds"]
@@ -251,19 +280,19 @@ def main():
         code = "cash" if s == "cash" else traded_code(s, cfg)
         nm = cash_nm if s == "cash" else traded_name(s, cfg)
         print(f"    {code:<8} {nm:<22} {tgt_last[s]*100:6.2f}%")
-    prev_file = os.path.join(os.path.dirname(cfg_file), "final_cfg_v40.json")
-    if cfg.get("version", "").startswith("v41") and os.path.exists(prev_file):
+    prev_file = os.path.join(os.path.dirname(cfg_file), "final_cfg_v41.json")
+    if cfg.get("version", "").startswith("v43") and os.path.exists(prev_file):
         cfg_prev = json.load(open(prev_file))
         ds_prev = DynamicStrategy(R_PROXY, cfg=cfg_prev)
         bond_prev = rets_from(read_table(f"{cfg_prev.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg_prev.get("cash_bond_pct") else None
         res_prev = run_backtest(R_PROXY, target_weights_fn=ds_prev.target_fn(), daily_override_fn=ds_prev.daily_fn(),
-                             start=BACKTEST_START, name="v40", min_delta=cfg_prev.get("min_delta", 0.02),
+                             start=BACKTEST_START, name="v41", min_delta=cfg_prev.get("min_delta", 0.02),
                              repo=cfg_prev.get("repo_rate", 0.022), tranche_weights=cfg_prev.get("tranche_weights"),
                              cash_bond_rets=bond_prev, cash_bond_pct=cfg_prev.get("cash_bond_pct", 0.0),
                              rebal_weekday=cfg_prev.get("rebal_weekday", 2), rebal_freq=cfg_prev.get("rebal_freq", "weekly"),
                              strict=True)
         w_prev = res_prev["weights"].iloc[-1]
-        print("  相对上一默认 v40 持仓的切换（纸面，不下单）:")
+        print("  相对上一默认 v41 持仓的切换（纸面，不下单）:")
         for s in SLOTS:
             if s in cfg.get("exclude", []):
                 continue
@@ -308,7 +337,8 @@ def main():
         term_bars(rows_m, "迭代优化进展: 全历史最大回撤 (越短越好)")
     else:
         print("  (out/iterations.json 没有 v10–v26 历史键, 跳过迭代图)")
-    print("\n[ok] 已保存: %s/iter_%s_proxy.json, %s/iter_%s_real.json, %s/iterations.json" % (OUT, tag, OUT, tag, OUT))
+    print("\n[ok] 已保存: %s/iter_%s%s_proxy.json, %s/iter_%s%s_real.json, %s/iterations.json" %
+          (OUT, tag, cal_suffix, OUT, tag, cal_suffix, OUT))
 
 if __name__ == "__main__":
     main()
