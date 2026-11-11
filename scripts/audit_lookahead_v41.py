@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-"""v41 future-function audit wrapper.
+"""v42 future-function audit wrapper (v41 stays callable via args).
 
 Reuses the proven v40 truncation/perturbation/09:00 audit, but substitutes the
-v41 config for the v40 slot. v40, v37 and v30 remain the historical controls.
+selected config (default v42) for the v40 slot. v40, v37 and v30 remain the
+historical controls.
 """
 import json
 import os
@@ -12,30 +13,33 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import audit_lookahead_v40 as audit
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-V41 = os.path.join(ROOT, "references", "final_cfg_v41.json")
+V41 = os.path.join(ROOT, "references", "final_cfg_v42.json")
+CFG_PATH = sys.argv[1] if len(sys.argv) > 1 else V41
+TAG = sys.argv[2] if len(sys.argv) > 2 else "v42"
 _load_cfg = audit.load_cfg
 
 
 def load_cfg(ver):
-    return json.load(open(V41)) if ver == "v40" else _load_cfg(ver)
+    return json.load(open(CFG_PATH)) if ver == "v40" else _load_cfg(ver)
 
 
 audit.load_cfg = load_cfg
-audit.OUT = os.path.join(ROOT, "out", "audit_lookahead_v41")
+audit.OUT = os.path.join(ROOT, "out", f"audit_lookahead_{TAG}")
 os.makedirs(audit.OUT, exist_ok=True)
 
 
 if __name__ == "__main__":
-    print("[note] 继承审计中的 v40 标签在本轮代表 v41 候选；JSON 键已由包装层改写为 v41。", flush=True)
-    rc = audit.main()
+    print(f"[note] 继承审计中的 v40 标签在本轮代表 {TAG} 候选；JSON 键已由包装层改写为 {TAG}。", flush=True)
+    extra = sys.argv[3:]
+    rc = audit.main(n_random=10, n_friday=5) if "--quick" in extra else audit.main()
     src = os.path.join(audit.OUT, "audit_lookahead_v40.json")
-    dst = os.path.join(audit.OUT, "audit_lookahead_v41.json")
+    dst = os.path.join(audit.OUT, f"audit_lookahead_{TAG}.json")
     if os.path.exists(src):
         import json as _json
 
         def _rename(obj):
             if isinstance(obj, dict):
-                return {("v41" + k[3:] if k == "v40" or k.startswith("v40_") else k): _rename(v)
+                return {(TAG + k[3:] if k == "v40" or k.startswith("v40_") else k): _rename(v)
                         for k, v in obj.items()}
             if isinstance(obj, list):
                 return [_rename(v) for v in obj]

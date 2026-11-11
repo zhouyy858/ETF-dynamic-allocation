@@ -339,6 +339,7 @@ class DynamicStrategy:
         self.defense_split_base = {k: v / tot for k, v in ds.items()} if tot > 0 else {}
         self._lock = {"CN": False, "US": False}
         self.gate_band = float(cfg.get("gate_band", 0.0))  # 结构闸门滞回带: 0=硬阈值(原行为); >0 跌破SMA×(1-b)关闸/站上SMA×(1+b)开闸
+        self.struct_gate = bool(cfg.get("struct_gate", True))
         self._gate_st = {}
         self.state_log = []
         self.risk_log = []
@@ -844,7 +845,7 @@ class DynamicStrategy:
             self._lock[market] = True
             return 0.0, 0.0
         # 结构闸门
-        gst = self._gate_state(dt, market) if self.gate_band > 0 else ok120
+        gst = (self._gate_state(dt, market) if self.gate_band > 0 else ok120) if self.struct_gate else True
         if not gst:
             m_g = 0.0
         # 快刹车

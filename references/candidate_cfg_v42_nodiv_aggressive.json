@@ -1,0 +1,169 @@
+{
+ "state_map": {
+  "0": [
+   35.0,
+   0.0
+  ],
+  "1": [
+   44.0,
+   0.0
+  ],
+  "2": [
+   53.0,
+   0.0
+  ],
+  "3": [
+   62.0,
+   0.0
+  ],
+  "4": [
+   60.0,
+   0.0
+  ],
+  "5": [
+   60.0,
+   0.0
+  ],
+  "6": [
+   80.0,
+   0.0
+  ],
+  "7": [
+   85.0,
+   0.0
+  ],
+  "8": [
+   100.0,
+   1.0
+  ],
+  "9": [
+   94.0,
+   0.0
+  ]
+ },
+ "market_dd": {
+  "CN": [
+   0.08,
+   0.05,
+   0.18,
+   0.14
+  ],
+  "US": [
+   0.13,
+   0.12,
+   0.24,
+   0.15
+  ]
+ },
+ "hyst_up": 0.66,
+ "hyst_down": 0.24,
+ "min_cash": 0.0,
+ "max_eq": 1.0,
+ "gate_win": 100,
+ "growth_split_bull": {
+  "159952": 0.4,
+  "159941": 0.53,
+  "513500": 0.07
+ },
+ "defense_momentum": false,
+ "defense_momentum_win": 80,
+ "defense_momentum_t": 4.0,
+ "defense_clamp": [
+  0.4,
+  0.6
+ ],
+ "premium_gate": true,
+ "premium_thr": [
+  0.05,
+  0.08,
+  0.12
+ ],
+ "premium_cut": [
+  0.45,
+  0.22,
+  0.08
+ ],
+ "corr_risk": false,
+ "corr_risk_win": 40,
+ "corr_risk_thr": [
+  0.3,
+  0.42
+ ],
+ "corr_risk_cut": [
+  0.8,
+  0.6
+ ],
+ "speed_brake": true,
+ "speed_brake_win": 5,
+ "speed_brake_thr": -0.04,
+ "speed_brake_cut": 0.65,
+ "speed_brake_recover": 12,
+ "tranche_weights": [
+  1.0
+ ],
+ "version": "v42-nodiv-aggressive",
+ "repo_rate": 0.022,
+ "floor_pct": {
+  "cn": 0.0,
+  "us": 14.0
+ },
+ "cash_bond_pct": 1.0,
+ "cash_bond_code": "511260",
+ "signal_lag": 1,
+ "premium_shift": 2,
+ "score_confirm_weeks": 2,
+ "rebal_weekday": 4,
+ "rebal_freq": "weekly",
+ "growth_split_bear": {
+  "159952": 0.45,
+  "159941": 0.4,
+  "513500": 0.15
+ },
+ "min_delta": 0.035,
+ "confirm_weekday": 2,
+ "premium_tilt": true,
+ "premium_tilt_thr": 0.02,
+ "premium_tilt_cap": 0.05,
+ "premium_tilt_max": 1.0,
+ "instrument_swaps": {},
+ "cool_off_weeks": 3,
+ "exclude": [
+  "159232",
+  "515100"
+ ],
+ "asset_sb": false,
+ "asset_sb_win": 5,
+ "asset_sb_thr": 0.08,
+ "asset_sb_cut": 0.3,
+ "am_gate": true,
+ "am_win": 120,
+ "am_cut": 0.8,
+ "vol_gate": false,
+ "vol_gate_win": 20,
+ "vol_gate_bands": [
+  0.3,
+  0.4,
+  0.5
+ ],
+ "vol_gate_cuts": [
+  0.86,
+  0.7,
+  0.48
+ ],
+ "corr_conditional": false,
+ "speed_brake_mkt": false,
+ "premium_rotate": false,
+ "us_rotation": false,
+ "regime_gate": false,
+ "recovery_ramp": false,
+ "reentry_step": 0.0,
+ "growth_rotation": false,
+ "growth_iv": false,
+ "reversal_filter": false,
+ "valuation_gate": false,
+ "rsrs_gate": false,
+ "adx_gate": false,
+ "breadth_gate": false,
+ "hh_stop": false,
+ "_note": "Research candidate only, not production default. No 515100/563020, no 159232/159222; US floor 14%, ChiNext 40% of growth bucket, former defense bucket fully converted to growth. CN fast brake 8%, speed brake on, asset crash brake and vol gate off. Higher full-history return but weaker OOS/real than v41."
+}

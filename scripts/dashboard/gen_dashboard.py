@@ -17,10 +17,11 @@ from strategy import DynamicStrategy, live_rebalance_target
 from swaps import pnl_panel, traded_code, traded_name
 
 _CFG_CANDIDATES = [
+    os.path.join(SKILL, "references", "final_cfg_v42.json"),
     os.path.join(SKILL, "references", "final_cfg_v41.json"),
     os.path.join(SKILL, "references", "final_cfg_v40.json"),
-    os.path.join(SKILL, "scripts", "references", "final_cfg_v41.json"),
-    os.path.abspath(os.path.join(HERE, "..", "..", "references", "final_cfg_v41.json")),
+    os.path.join(SKILL, "scripts", "references", "final_cfg_v42.json"),
+    os.path.abspath(os.path.join(HERE, "..", "..", "references", "final_cfg_v42.json")),
 ]
 CFG_FILE = next((p for p in _CFG_CANDIDATES if os.path.exists(p)), _CFG_CANDIDATES[-1])
 NAMES = {"159232": "自由现金流", "159222": "自由现金流国证", "515100": "红利低波100",

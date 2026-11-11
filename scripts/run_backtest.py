@@ -177,10 +177,10 @@ def term_bars(rows, title, width=42):
 # ---------- 主流程 ----------
 def main():
     _here = os.path.dirname(os.path.abspath(__file__))
-    _p1 = os.path.join(_here, "..", "references", "final_cfg_v41.json")
-    _p2 = os.path.join(_here, "references", "final_cfg_v41.json")
+    _p1 = os.path.join(_here, "..", "references", "final_cfg_v42.json")
+    _p2 = os.path.join(_here, "references", "final_cfg_v42.json")
     cfg_file = sys.argv[1] if len(sys.argv) > 1 else (_p1 if os.path.exists(_p1) else _p2)
-    tag = sys.argv[2] if len(sys.argv) > 2 else "v41"
+    tag = sys.argv[2] if len(sys.argv) > 2 else "v42"
     cfg = json.load(open(cfg_file))
     R_proxy_pnl = pnl_panel(R_PROXY, "proxy", cfg)
     R_real_pnl = pnl_panel(R_REAL, "real", cfg)
@@ -251,19 +251,19 @@ def main():
         code = "cash" if s == "cash" else traded_code(s, cfg)
         nm = cash_nm if s == "cash" else traded_name(s, cfg)
         print(f"    {code:<8} {nm:<22} {tgt_last[s]*100:6.2f}%")
-    prev_file = os.path.join(os.path.dirname(cfg_file), "final_cfg_v40.json")
-    if cfg.get("version", "").startswith("v41") and os.path.exists(prev_file):
+    prev_file = os.path.join(os.path.dirname(cfg_file), "final_cfg_v41.json")
+    if cfg.get("version", "").startswith("v42") and os.path.exists(prev_file):
         cfg_prev = json.load(open(prev_file))
         ds_prev = DynamicStrategy(R_PROXY, cfg=cfg_prev)
         bond_prev = rets_from(read_table(f"{cfg_prev.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg_prev.get("cash_bond_pct") else None
         res_prev = run_backtest(R_PROXY, target_weights_fn=ds_prev.target_fn(), daily_override_fn=ds_prev.daily_fn(),
-                             start=BACKTEST_START, name="v39", min_delta=cfg_prev.get("min_delta", 0.02),
+                             start=BACKTEST_START, name="v41", min_delta=cfg_prev.get("min_delta", 0.02),
                              repo=cfg_prev.get("repo_rate", 0.022), tranche_weights=cfg_prev.get("tranche_weights"),
                              cash_bond_rets=bond_prev, cash_bond_pct=cfg_prev.get("cash_bond_pct", 0.0),
                              rebal_weekday=cfg_prev.get("rebal_weekday", 2), rebal_freq=cfg_prev.get("rebal_freq", "weekly"),
                              strict=True)
         w_prev = res_prev["weights"].iloc[-1]
-        print("  相对上一默认 v40 持仓的切换（纸面，不下单）:")
+        print("  相对上一默认 v41 持仓的切换（纸面，不下单）:")
         for s in SLOTS:
             if s in cfg.get("exclude", []):
                 continue
