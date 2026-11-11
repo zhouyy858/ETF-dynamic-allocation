@@ -17,9 +17,9 @@ from strategy import DynamicStrategy, live_rebalance_target
 from swaps import pnl_panel, traded_code, traded_name
 
 _CFG_CANDIDATES = [
-    os.path.join(SKILL, "references", "final_cfg_v39.json"),
-    os.path.join(SKILL, "scripts", "references", "final_cfg_v39.json"),
-    os.path.abspath(os.path.join(HERE, "..", "..", "references", "final_cfg_v39.json")),
+    os.path.join(SKILL, "references", "final_cfg_v40.json"),
+    os.path.join(SKILL, "scripts", "references", "final_cfg_v40.json"),
+    os.path.abspath(os.path.join(HERE, "..", "..", "references", "final_cfg_v40.json")),
 ]
 CFG_FILE = next((p for p in _CFG_CANDIDATES if os.path.exists(p)), _CFG_CANDIDATES[-1])
 NAMES = {"159232": "自由现金流", "159222": "自由现金流国证", "515100": "红利低波100",
@@ -65,7 +65,7 @@ def main():
     is_rebal_day = today.weekday() == rebal_wd
     gap = max(abs(w_act[s] - tgt[s]) for s in SLOTS + ["cash"])
     if is_rebal_day:
-        ver = cfg.get("version", "v39")
+        ver = cfg.get("version", "v40")
         action = ("今日是周" + WEEKDAY_CN[rebal_wd][1] +
                   f"调仓日：按 {ver} 规则用 {signal_dt.date()} 收盘信号决策（决策日 {decision.date()}），目标缺口 1 笔当日收盘成交；"
                   "QDII 溢价用 T-2 口径（绝对溢价>5/8/12% 自动降仓×0.45/×0.22/×0.08；相对溢价差>2pp 转投低溢价品种），下单前查 IOPV")
@@ -143,7 +143,7 @@ def main():
         "perf": {"last": round(float(rets.iloc[-1]) * 100, 2), "r5": round(r5 * 100, 2), "r20": round(r20 * 100, 2),
                  "ytd": round(ytd * 100, 2) if ytd == ytd else None, "dd": round(cur_dd * 100, 2)},
         "curves": curves,
-        "config": {"version": cfg.get("version", "v39"), "signal_lag": 1,
+        "config": {"version": cfg.get("version", "v40"), "signal_lag": 1,
                    "rebal_weekday": rebal_wd, "cash_bond_code": bond_code,
                    "cash_bond_pct": cfg.get("cash_bond_pct", 0.0),
                    "decision_date": str(decision.date()),

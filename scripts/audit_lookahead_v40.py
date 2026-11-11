@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""v39 未来函数检测（截断测试 + 未来扰动 + 周五 09:00 信息集）.
+"""v40 未来函数检测（截断测试 + 未来扰动 + 周五 09:00 信息集）.
 
 截断: 数据在 T 处截掉之后, 重算 T 及之前的信号和目标权重, 必须与全样本逐位一致.
 扰动: 只改 T 之后的价格 / 净值 / 收益, T 及之前的信号和权重必须不变.
@@ -7,8 +7,8 @@
       得到的目标必须等于全样本回测在该决策日的 regular_target.
 
 用法:
-  python3 scripts/audit_lookahead_v39.py          # 30 个随机日 + 近 10 个周五
-  python3 scripts/audit_lookahead_v39.py --quick  # 少抽样, 改代码时用
+  python3 scripts/audit_lookahead_v40.py          # 30 个随机日 + 近 10 个周五
+  python3 scripts/audit_lookahead_v40.py --quick  # 少抽样, 改代码时用
 退出码非 0 表示检测到泄漏或清单与回测不一致.
 """
 import sys, os, json
@@ -110,7 +110,7 @@ def slice_metrics(res, start):
 
 
 def main(n_random=30, n_friday=10):
-    cfg = load_cfg("v39")
+    cfg = load_cfg("v40")
     cfg37 = load_cfg("v37")
     cfg30 = load_cfg("v30")
     bond39 = rets_from(read_table("511260_nav.csv"), "cum_nav")
@@ -130,9 +130,9 @@ def main(n_random=30, n_friday=10):
     if mism:
         report["failures"].append(f"in-index _idx mismatch {mism}")
 
-    print("===== 2. 全样本 v39 / v37 / v30 =====", flush=True)
+    print("===== 2. 全样本 v40 / v37 / v30 =====", flush=True)
     runs = {}
-    for ver, c, bond in (("v39", cfg, bond39), ("v37", cfg37, bond39), ("v30", cfg30, bond30)):
+    for ver, c, bond in (("v40", cfg, bond39), ("v37", cfg37, bond39), ("v30", cfg30, bond30)):
         for layer, Rs, start in (("proxy", R, START), ("real", Rr, REAL_START), ("oos", R, OOS_START)):
             p = pnl_panel(Rs, "real" if layer == "real" else "proxy", c)
             ds, res, em = execute(Rs, p, c, start, bond)
@@ -140,15 +140,15 @@ def main(n_random=30, n_friday=10):
             runs[(ver, layer)] = (ds, res, em, e)
             print(f"  {ver:4} {layer:5} {fmt(e)}", flush=True)
             report.setdefault("metrics", {}).setdefault(ver, {})[layer] = pack(e)
-    full_ds, full_res, emergencies, _full_e = runs[("v39", "proxy")]
-    report["v39_proxy_emergencies"] = {
+    full_ds, full_res, emergencies, _full_e = runs[("v40", "proxy")]
+    report["v40_proxy_emergencies"] = {
         "n": len(emergencies),
         "first": str(emergencies[0].date()) if emergencies else None,
         "last": str(emergencies[-1].date()) if emergencies else None,
     }
     dw = full_res["weights"].diff().abs().sum(axis=1)
-    report["v39_proxy_emergencies"]["weight_change_days_gt_1pp"] = int((dw > 0.01).sum())
-    print(f"  v39 日度紧急覆盖 {len(emergencies)} 次; 权重变动>1pp 的交易日 {int((dw > 0.01).sum())} 次")
+    report["v40_proxy_emergencies"]["weight_change_days_gt_1pp"] = int((dw > 0.01).sum())
+    print(f"  v40 日度紧急覆盖 {len(emergencies)} 次; 权重变动>1pp 的交易日 {int((dw > 0.01).sum())} 次")
 
     trade_idx = full_res["weights"].index
     rng = np.random.default_rng(20261110)
@@ -308,22 +308,22 @@ def main(n_random=30, n_friday=10):
         print(f"  {label:28} {ver:4} {fmt(e)}", flush=True)
         return res
 
-    for ver, c, bond in (("v39", cfg, bond39), ("v37", cfg37, bond39), ("v30", cfg30, bond30)):
+    for ver, c, bond in (("v40", cfg, bond39), ("v37", cfg37, bond39), ("v30", cfg30, bond30)):
         for layer, Rs, start in (("proxy", R, START), ("real", Rr, REAL_START), ("oos", R, OOS_START)):
             lagged = Rs.copy()
             lagged[["159941", "513500"]] = lagged[["159941", "513500"]].shift(1)
             base_p = pnl_panel(Rs, "real" if layer == "real" else "proxy", c)
             variant(ver, c, bond, lagged, base_p, start, f"qdii_sig_lag1_{layer}")
 
-    for ver, c, bond in (("v39", cfg, bond39), ("v37", cfg37, bond39), ("v30", cfg30, bond30)):
+    for ver, c, bond in (("v40", cfg, bond39), ("v37", cfg37, bond39), ("v30", cfg30, bond30)):
         for layer, Rs, start in (("proxy", R, START), ("real", Rr, REAL_START)):
             p = pnl_panel(Rs, "real" if layer == "real" else "proxy", c).copy()
             p[["159941", "513500"]] = p[["159941", "513500"]].shift(1)
             variant(ver, c, bond, Rs, p.fillna(0.0), start, f"qdii_pnl_shift1_{layer}")
 
-    variant("v39", cfg, bond39, R, pnl.fillna(0.0), START, "pnl_fillna0_proxy")
+    variant("v40", cfg, bond39, R, pnl.fillna(0.0), START, "pnl_fillna0_proxy")
     wk = R.index.day_of_week < 5
-    variant("v39", cfg, bond39, R.loc[wk], pnl.loc[wk], START, "drop_weekend_proxy")
+    variant("v40", cfg, bond39, R.loc[wk], pnl.loc[wk], START, "drop_weekend_proxy")
 
     saved = dict(data_prep.DIV_YIELD)
     data_prep.DIV_YIELD = {}
@@ -332,18 +332,18 @@ def main(n_random=30, n_friday=10):
     finally:
         data_prep.DIV_YIELD = saved
     p_nodiv = pnl_panel(R_nodiv, "proxy", cfg)
-    variant("v39", cfg, bond39, R_nodiv, p_nodiv, START, "no_proxy_div_proxy")
-    variant("v39", cfg, bond39, R_nodiv, p_nodiv, OOS_START, "no_proxy_div_oos")
+    variant("v40", cfg, bond39, R_nodiv, p_nodiv, START, "no_proxy_div_proxy")
+    variant("v40", cfg, bond39, R_nodiv, p_nodiv, OOS_START, "no_proxy_div_oos")
 
-    r39 = runs[("v39", "proxy")][1]["rets"]
+    r39 = runs[("v40", "proxy")][1]["rets"]
     r37 = runs[("v37", "proxy")][1]["rets"]
     yearly = []
     for year, idx in r39.groupby(r39.index.year).groups.items():
         a = float((1 + r39.loc[idx]).prod() - 1)
         b = float((1 + r37.loc[idx]).prod() - 1)
-        yearly.append({"year": int(year), "v39": a, "v37": b, "excess": a - b})
-    report["v39_minus_v37_by_year"] = yearly
-    print("  v39-v37 分年收益差:", ", ".join(
+        yearly.append({"year": int(year), "v40": a, "v37": b, "excess": a - b})
+    report["v40_minus_v37_by_year"] = yearly
+    print("  v40-v37 分年收益差:", ", ".join(
         f"{row['year']} {row['excess']*100:+.2f}pp" for row in yearly))
 
     q222 = own_returns("159222")
@@ -402,13 +402,13 @@ def main(n_random=30, n_friday=10):
     report["forward_after_252"] = {
         "picked": slice_metrics(res_pick, after),
         "v37": slice_metrics(res_base, after),
-        "v39_published_combo": slice_metrics(full_res, after),
+        "v40_published_combo": slice_metrics(full_res, after),
     }
     print("  252 日之后 picked", fmt(report["forward_after_252"]["picked"]),
           " v37", fmt(report["forward_after_252"]["v37"]),
-          " v39combo", fmt(report["forward_after_252"]["v39_published_combo"]))
+          " v40combo", fmt(report["forward_after_252"]["v40_published_combo"]))
 
-    path = os.path.join(OUT, "audit_lookahead_v39.json")
+    path = os.path.join(OUT, "audit_lookahead_v40.json")
     json.dump(report, open(path, "w"), ensure_ascii=False, indent=1, default=str)
     print(f"\n[ok] {path}")
     if report["failures"]:

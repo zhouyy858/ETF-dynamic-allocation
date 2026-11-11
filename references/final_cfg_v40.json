@@ -1,0 +1,134 @@
+{
+ "state_map": {
+  "0": [
+   5,
+   30
+  ],
+  "1": [
+   15,
+   29
+  ],
+  "2": [
+   25,
+   28
+  ],
+  "3": [
+   36,
+   26
+  ],
+  "4": [
+   39,
+   21
+  ],
+  "5": [
+   44,
+   16
+  ],
+  "6": [
+   66,
+   14
+  ],
+  "7": [
+   71.5,
+   10
+  ],
+  "8": [
+   93.5,
+   6
+  ],
+  "9": [
+   89.1,
+   3
+  ]
+ },
+ "market_dd": {
+  "CN": [
+   0.07,
+   0.05,
+   0.18,
+   0.14
+  ],
+  "US": [
+   0.13,
+   0.12,
+   0.24,
+   0.15
+  ]
+ },
+ "hyst_up": 0.66,
+ "hyst_down": 0.24,
+ "min_cash": 0.03,
+ "max_eq": 0.98,
+ "gate_win": 100,
+ "growth_split_bull": {
+  "159952": 0.32,
+  "159941": 0.61,
+  "513500": 0.07
+ },
+ "defense_momentum": true,
+ "defense_momentum_win": 80,
+ "defense_momentum_t": 4.0,
+ "defense_clamp": [
+  0.4,
+  0.6
+ ],
+ "premium_gate": true,
+ "premium_thr": [
+  0.05,
+  0.08,
+  0.12
+ ],
+ "premium_cut": [
+  0.45,
+  0.22,
+  0.08
+ ],
+ "corr_risk": true,
+ "corr_risk_win": 40,
+ "corr_risk_thr": [
+  0.3,
+  0.42
+ ],
+ "corr_risk_cut": [
+  0.8,
+  0.6
+ ],
+ "speed_brake": false,
+ "speed_brake_win": 5,
+ "speed_brake_thr": -0.04,
+ "speed_brake_cut": 0.5,
+ "speed_brake_recover": 12,
+ "tranche_weights": [
+  1.0
+ ],
+ "version": "v40",
+ "repo_rate": 0.022,
+ "floor_pct": {
+  "cn": 2.0,
+  "us": 10.0
+ },
+ "_note": "v40（2026-11-11 用户批准）现为默认。相对 v39 只改三处：state7-9 成长上限 ×1.10（65/85/81→71.5/93.5/89.1）；创业板 bull 30%→32%（纳指 63%→61%，标普 7% 不变）；新增 cool_off_weeks=3（资产目标打到 floor 后至少冷却 3 周再恢复）。其余规则、标的、现金 100% 511260 不变。proxy 13.35%/-7.83%/Cal 1.71，real 27.51%/-4.19%/Cal 6.56，OOS Cal 1.63（数据至 2026-11-10）。严格审计：40 个截断/扰动样本最大差 0；周五 09:00 与回测决策逐项一致；自助法 P(Cal<1)=20.1%；20bp 费用 Cal 1.40。扰动 4/104，均为 gate_win ±10/20%。v39 保留为回退。",
+ "cash_bond_pct": 1.0,
+ "cash_bond_code": "511260",
+ "signal_lag": 1,
+ "premium_shift": 2,
+ "score_confirm_weeks": 2,
+ "rebal_weekday": 4,
+ "rebal_freq": "weekly",
+ "growth_split_bear": {
+  "159952": 0.45,
+  "159941": 0.4,
+  "513500": 0.15
+ },
+ "min_delta": 0.035,
+ "confirm_weekday": 2,
+ "premium_tilt": true,
+ "premium_tilt_thr": 0.02,
+ "premium_tilt_cap": 0.05,
+ "premium_tilt_max": 1.0,
+ "instrument_swaps": {
+  "159232": "159222",
+  "515100": "563020"
+ },
+ "cool_off_weeks": 3
+}

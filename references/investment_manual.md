@@ -1,10 +1,10 @@
-# ETF 长期动态配置投资手册（定稿 v37 · 无未来函数口径）
+# ETF 长期动态配置投资手册（定稿 v40 · 无未来函数口径）
 
-> **当前默认（2026-11-09）**：`references/final_cfg_v39.json`。v37 规则不变，成交标的改为 159222（国证自由现金流，不是中证全指自由现金流）与 563020（中证红利低波动，不是红利低波100），现金仍是 100% 511260。不含 QDII 最低溢价载体。proxy 12.22% / -9.56% / Cal 1.28，real 25.57% / -3.72% / Cal 6.87，OOS Cal 1.532。增益主要在 2025-04 之后的 real 窗口；全历史 proxy ΔCal 约 +0.02。上市前损益拼接原槽。回退：`final_cfg_v37.json`，再上一档 `final_cfg_v30.json`。下文 v30 段落是更早的记录。
+> **当前默认（2026-11-11）**：`references/final_cfg_v40.json`。在 v39 上只改三处：牛市状态 7-9 的成长上限 ×1.10（`65/85/81 → 71.5/93.5/89.1`）、bull 成长拆分 `30/63/7 → 32/61/7`、新增 `cool_off_weeks=3`（槽位目标被打到地板后至少冷却 3 周再恢复）。成交标的沿用 v39 的 159222 / 563020 / 159941 / 513500 / 159952，现金 100% 511260。proxy **13.35% / -7.83% / Cal 1.71**，real **27.51% / -4.19% / Cal 6.56**，OOS **12.07% / -7.42% / Cal 1.63**（数据至 2026-11-10）。严格审计：截断/未来扰动最大差 0、周五 09:00 信息集逐项一致、`P(Cal<1)=20.1%`、20bp 费用 Cal 1.40；扰动 4/104 均为 `gate_win`。**边界**：real MDD 比 v39 扩大 0.47pp；改善集中于 2015、2019-21、2025-26，2021-22 与共振熊略差。回退：`final_cfg_v39.json`，再上一档 `final_cfg_v37.json`、`final_cfg_v30.json`。下文 v30/v29 段落是更早的记录。
 
 > 成交标的：159222 国证自由现金流ETF / 563020 中证红利低波ETF / 159941 纳指100ETF / 513500 标普500ETF / 159952 创业板ETF。信号槽位名仍是 159232 / 515100。
-> 数据截止：2026-08-04 ｜ 回测框架：`backtest/`（Python，可复现） ｜ 上一默认记录：`references/final_cfg_v30.json`（无未来函数口径：`signal_lag:1` + `accrual_mode=pre` + `premium_shift:2` + 周五每周1笔 + 底仓2+10（CN红利底仓159232/515100各1% + US底仓159941/513500各5%）+ 成长拆分30/63/7 & 45/40/15（v30中间态：前提②弱化、前提③纳指超配保留） + `min_delta:0.035` + `cash_bond_pct:0.75`（现金75%国债ETF+25%逆回购）+ `premium_tilt`（溢价差>2pp转低溢价品种，thr2/cap5/mx100%，v28全额转投）+ `premium_cut:0.45/0.22/0.08`（v26 溢价门控削减增强）+ `speed_brake_recover:12`（v27 速度刹车恢复期延长）+ `confirm_weekday:2` + `strict=True` 强制校验）
-> **🚀 v22（2026-08-04）全参数重训**：在 v21 严格框架下对全部参数重搜——调仓时间 45 组、底仓 343 组、策略参数 33 维坐标下降×3轮+150 组随机、风控框架/标的选择 15 组。定稿：**周五-每周-1笔、底仓 cn=0/us=7.5、CN 快刹车 7%**。业绩（严格口径）：proxy 全历史 **10.49%/-6.79%/Cal1.54**；real 窗口 **28.09%/-4.26%/Cal6.59**（v21：10.09%/-9.47%/Cal1.07、23.86%/-5.15%/Cal4.63）。§0.13-§0.19 及更早均为历史记录，正文数字以 v30 为准。复现：`scripts/search_v22.py` + `scripts/audit_lookahead.py`。
+> 数据截止：2026-11-10 ｜ 回测框架：`backtest/`（Python，可复现） ｜ 当前口径：`signal_lag:1` + `accrual_mode=pre` + `premium_shift:2` + 周五每周1笔 + 底仓2+10（CN红利底仓159222/563020各1% + US底仓159941/513500各5%）+ 成长拆分32/61/7 & 45/40/15 + `min_delta:0.035` + `cash_bond_pct:1.0`（现金100%国债ETF 511260）+ `premium_tilt`（溢价差>2pp转低溢价品种，thr2/cap5/mx100%）+ `premium_cut:0.45/0.22/0.08` + `cool_off_weeks:3` + `confirm_weekday:2` + `strict=True` 强制校验
+> **🚀 v22（2026-08-04）全参数重训**：在 v21 严格框架下对全部参数重搜——调仓时间 45 组、底仓 343 组、策略参数 33 维坐标下降×3轮+150 组随机、风控框架/标的选择 15 组。定稿：**周五-每周-1笔、底仓 cn=0/us=7.5、CN 快刹车 7%**。业绩（严格口径）：proxy 全历史 **10.49%/-6.79%/Cal1.54**；real 窗口 **28.09%/-4.26%/Cal6.59**（v21：10.09%/-9.47%/Cal1.07、23.86%/-5.15%/Cal4.63）。§0.13-§0.19 及更早均为历史记录，正文数字以 v40 为准。复现：`scripts/search_v22.py` + `scripts/audit_lookahead.py`。
 
 > **🚀 v30（2026-08-05）中间态定稿（上一默认，2026-11-09 起现金层由 v37 取代）**：用户验收线为全历史回撤 **<10%**（v29 的 -10.46% 破线），同时要求"4 条前提继续生效、创业板方差大（前提②）弱化"。只动两处参数：**CN 红利底仓 4%→2%**（159232/515100 各 1%，前提④"红利周期长"仍生效但 2015/2016 CN 熊承压减半）、**创业板 bull 28→30 / 纳指 65→63**（前提②弱化为中性：不再按高方差假设过度低配，也不回到 v27 的 35% 高位；前提③ AI 超配保留）。US 底仓 10% 不变（前提①最强）。`dd_eq_cap` 上移、US 快刹车调低两轴实测**零效果**证伪弃用。
 > - **业绩（严格口径）**：proxy **11.64%** / MDD **-9.80%** / Cal **1.19**（v29: 11.72% / -10.46% / 1.12——回撤收窄 0.66pp 破线修复、Calmar 反升）；真实窗口 **29.39%** / **-3.75%** / Cal **7.83**（v29: 28.82% / -3.59% / 8.03——CAGR +0.57pp，MDD +0.16pp 仍优于 v27 的 -4.01%）；最深回撤段收缩为 2015-06→2015-08 首波 -9.80%（v29 是 2015-06→2016-02 全程 -10.46%）。
@@ -363,33 +363,34 @@
 
 ---
 
-## 3. 最终策略参数（权威配置：`references/final_cfg_v29.json`，含全部风控参数）
+## 3. 当前策略参数（权威配置：`references/final_cfg_v40.json`，含全部风控参数）
 
-> **v29 权威参数以 `final_cfg_v29.json` 为准**（含 `signal_lag:1`、`premium_shift:2`、`tranche_weights:[1.0]`（周五每周1笔）、`rebal_weekday:4`、`rebal_freq:"weekly"`、`floor_pct:{cn:4,us:10}`、`cash_bond_pct:0.75`、成长拆分 bull 28/65/7 & bear 45/40/15、`min_delta:0.035`、`score_confirm_weeks:2`、`confirm_weekday:2`、`hyst_up:0.66/hyst_down:0.24`、`market_dd.CN:[0.07,0.05,0.18,0.14]`、`market_dd.US:[0.13,0.12,0.24,0.15]`、`premium_tilt`（thr2/cap5/mx100%）与 `premium_cut:0.45/0.22/0.08`、`speed_brake_recover:12` 及全部风控参数）。下 JSON 为 **v29 当前骨架**（v10 时期的旧骨架已移除；更早版本见 `references/final_cfg_v10~v28.json` 历史档案）。
+> **v40 权威参数以 `final_cfg_v40.json` 为准**（含 `signal_lag:1`、`premium_shift:2`、`tranche_weights:[1.0]`（周五每周1笔）、`rebal_weekday:4`、`rebal_freq:"weekly"`、`floor_pct:{cn:2,us:10}`、`cash_bond_pct:1.0`、成长拆分 bull 32/61/7 & bear 45/40/15、`min_delta:0.035`、`score_confirm_weeks:2`、`confirm_weekday:2`、`hyst_up:0.66/hyst_down:0.24`、`market_dd.CN:[0.07,0.05,0.18,0.14]`、`market_dd.US:[0.13,0.12,0.24,0.15]`、`premium_tilt`（thr2/cap5/mx100%）与 `premium_cut:0.45/0.22/0.08`、`cool_off_weeks:3` 及全部风控参数）。下 JSON 为 **v40 核心骨架**（`dd_eq_cap`/`vol_target` 已于 2026-09-18 证伪删除；完整字段见配置文件）。
 
 ```json
 {
-  "state_map": {"9": [81, 3], "8": [85, 6], "7": [65, 10], "6": [66, 14],
+  "state_map": {"9": [89.1, 3], "8": [93.5, 6], "7": [71.5, 10], "6": [66, 14],
                 "5": [44, 16], "4": [39, 21], "3": [36, 26], "2": [25, 28],
                 "1": [15, 29], "0": [5, 30]},
   "market_dd": {"CN": [0.07, 0.05, 0.18, 0.14], "US": [0.13, 0.12, 0.24, 0.15]},
-  "dd_eq_cap": [[-0.08, 85], [-0.12, 75], [-0.16, 65], [-0.20, 55]],
   "hyst_up": 0.66, "hyst_down": 0.24,
-  "min_cash": 0.03, "max_eq": 0.98, "vol_target": 0.19, "gate_win": 100,
-  "floor_pct": {"cn": 4, "us": 10},
-  "growth_split_bull": {"159952": 0.28, "159941": 0.65, "513500": 0.07},
-  "growth_split_bear": {"159952": 0.45, "159941": 0.40, "513500": 0.15}
+  "min_cash": 0.03, "max_eq": 0.98, "gate_win": 100,
+  "floor_pct": {"cn": 2, "us": 10},
+  "growth_split_bull": {"159952": 0.32, "159941": 0.61, "513500": 0.07},
+  "growth_split_bear": {"159952": 0.45, "159941": 0.40, "513500": 0.15},
+  "cash_bond_code": "511260", "cash_bond_pct": 1.0,
+  "premium_cut": [0.45, 0.22, 0.08], "cool_off_weeks": 3
 }
 ```
 
 参数含义：
 - `state_map`：9 维打分 → 状态，每状态给 (成长仓%, 防御仓%)；
 - `market_dd`：每市场四个阈值 = (快刹车回撤, 快刹车后成长削减乘数, 深熊锁定回撤, 解锁回撤)；
-- `dd_eq_cap`：组合净值回撤超过 -8%/-12%/-16%/-20% 时，权益上限收缩到 85%/75%/65%/55%（`dd_cap_unconditional:true`，与打分无关）；
+- `dd_eq_cap` / `vol_target`：2026-09-18 消融与逐版复跑证伪，已从代码和配置删除，当前不生效；
 - `hyst_up/down`：打分平滑的向上/向下权重（快速追多、慢速撤离，防抖）；
 - `min_cash=3%`：任何状态下现金不低于 3%；`max_eq=98%`：权益不高于 98%；
-- `vol_target=19%`：组合滚动波动率超 21.85%（1.15 倍）时按比例降权益；
-- `growth_split_bull/bear`：成长仓在 159952/159941/513500 之间的拆分（状态 3-9 用 28/65/7，纳指超配=AI/科技时代前提；状态 0-2 用 45/40/15，更倾向 A 股创业板反弹弹性）。
+- `growth_split_bull/bear`：成长仓在 159952/159941/513500 之间的拆分（状态 3-9 用 32/61/7，纳指超配=AI/科技时代前提；状态 0-2 用 45/40/15，更倾向 A 股创业板反弹弹性）；
+- `cool_off_weeks=3`：槽位目标从地板以上落到地板后，至少 3 周内只能停留在地板，防止二次下跌前过早回补。
 
 ---
 
@@ -626,24 +627,25 @@ scripts/engine.py           # 回测引擎：rebal_weekday/freq + tranche_weight
                             # accrual_mode=pre 先计提后成交、strict=True 强制校验、费用、逆回购+国债ETF现金层
 scripts/strategy.py         # 动态策略（打分/闸门/刹车/锁定/回撤上限/日度风控；SignalSet 最小滞后1日硬编码）
 scripts/search_v22.py       # v22 全参数重训搜索（S/F/P/G 四阶段，可复现）
-scripts/audit_lookahead.py  # 未来函数审计：时序口径对照 + 旧口径复现校验（assert 16.20%/28.10% + v21-v29 回归）
-scripts/run_backtest.py     # v29 运行器（默认 final_cfg_v29.json；基准对比、仓位现状、终端ASCII图表，不生成图片）
+scripts/audit_lookahead.py  # 历史未来函数审计：时序口径对照 + 旧口径复现校验
+scripts/audit_lookahead_v40.py  # 当前严格审计：截断 + 未来扰动 + 周五 09:00 信息集
+scripts/run_backtest.py     # v40 运行器（默认 final_cfg_v40.json；基准对比、仓位现状、终端ASCII图表，不生成图片）
 scripts/stress_test.py      # 压力测试 + 合成共振熊市（含 v10-v29 行）→ out/stress_test.json
-scripts/audit_robustness.py # 防过拟合：112 次参数扰动审计 → out/audit_v29.json
+scripts/audit_robustness.py # 防过拟合：参数扰动审计 → out/audit_v40.json
 ```
 
 复现命令（runtime python，含 pandas/numpy）：
 ```
 PY=/Users/mac/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3
-$PY -W ignore scripts/run_backtest.py references/final_cfg_v29.json v29
-$PY -W ignore scripts/audit_lookahead.py
+$PY -W ignore scripts/run_backtest.py references/final_cfg_v40.json v40
+$PY -W ignore scripts/audit_lookahead_v40.py
 $PY -W ignore scripts/stress_test.py
-$PY -W ignore scripts/audit_robustness.py references/final_cfg_v29.json v29
+$PY -W ignore scripts/audit_robustness.py references/final_cfg_v40.json v40
 $PY -W ignore scripts/search_v22.py S   # 45组调度网格（F底仓343组 / P参数坐标下降+随机 / G框架）
 ```
-产出：`out/iter_v29_proxy.json`（全历史）、`out/iter_v29_real.json`（真实窗口）、`out/iterations.json`（迭代进展）、`out/audit_lookahead.json`（审计对照）、`out/stress_test.json`。
+产出：`out/iter_v40_proxy.json`（全历史）、`out/iter_v40_real.json`（真实窗口）、`out/iterations.json`（迭代进展）、`out/audit_lookahead_v40.json`（严格审计）、`out/stress_test.json`。
 
-关键设计保证（无未来函数）：① 决策信号只用截至决策日前一交易日收盘的数据（`signal_lag:1`，引擎同时传入 `R.iloc[:i]` 供校验）；② 引擎 `accrual_mode=pre` 先计提当日收益、后收盘成交——成交份额自下一交易日起计收益；③ 常规调仓周五收盘 1 笔成交（`tranche_weights:[1.0]`），紧急风控当日收盘成交；④ 计划不重叠（常规决策在上一计划完成前顺延，紧急风控可取代）；⑤ 权重逐日漂移；⑥ 单边费万5、现金逆回购 2.2%+国债ETF 全部计入。审计：`scripts/audit_lookahead.py` 用同一引擎的 post 计提模式复现旧口径（16.20%/28.10%）并断言通过，任何口径改动都会破坏该断言。
+关键设计保证（无未来函数）：① 决策信号只用截至决策日前一交易日收盘的数据（`signal_lag:1`，引擎同时传入 `R.iloc[:i]` 供校验）；② 引擎 `accrual_mode=pre` 先计提当日收益、后收盘成交——成交份额自下一交易日起计收益；③ 常规调仓周五收盘 1 笔成交（`tranche_weights:[1.0]`），紧急风控当日收盘成交；④ 计划不重叠（常规决策在上一计划完成前顺延，紧急风控可取代）；⑤ 权重逐日漂移；⑥ 单边费万5、现金 100% 国债ETF 511260 计入。审计：`scripts/audit_lookahead_v40.py` 做截断/未来扰动/周五 09:00 信息集三重校验；`scripts/audit_lookahead.py` 保留旧口径复现断言（16.20%/28.10%），任何口径改动都会破坏该断言。
 
 ---
 
@@ -683,7 +685,7 @@ $PY -W ignore scripts/search_v22.py S   # 45组调度网格（F底仓343组 / P�
 2. **回撤隐患**：全历史 proxy MDD -10.46%（真实窗口 -3.59%），6 常规压力情景 MDD ≤ -8.43%，跨境共振熊 **-14.04%** 破 10% 验收线（前提①④底仓穿越周期的测量代价，v27 为 -13.07%）；**周五1笔规则下降仓当日完成**，但若 A 股出现 2015-07 式千股跌停（连续封板无法成交），实际回撤仍可能更深——日度风控触发已把时点提前，封板时滞无法消除。
 3. **风格冲突**：159941 与 513500 相关性约 0.9，双海外仓实质是同一风险的两份暴露；v29 纳指超配（bull 65%）后美股科技回调对组合拖累加大（2021-22 熊段 MDD -7.79% 已反映，共振熊 -14.04%）。
 4. **调仓缺陷**：v29 全周期累计换手 123.5（年化约 10.3 倍），1 笔执行下信号翻转期摩擦直接兑现（费用已计入净收益，但实盘滑点可能高于万5）；2 周打分确认已过滤部分噪声，未做更激进的换手抑制（会损失牛市弹性）。
-5. **参数敏感性**：112 次扰动 **0 次 Calmar 恶化>10%**（v27 曾为 14 次）——前提驱动的底仓/拆分旋钮平台平坦；**执行必须严格按 `final_cfg_v29.json`，禁止自行微调**。
+5. **参数敏感性（v40）**：104 次扰动中 **4 次 Calmar 恶化>10%**，全部集中在 `gate_win` ±10/20%，其余轴平稳；**执行必须严格按 `final_cfg_v40.json`，禁止自行微调**。
 6. **假设条件风险**：① 逆回购 2.2% 与国债 ETF 511010 收益为历史假设，极端宽松环境下实际更低；② 回测用净值/指数，未建模 QDII 溢价冲击、涨跌停封板、申赎暂停；③ 代理指数与真实 ETF 存在跟踪误差；④ 历史 12 年样本中 A 股仅两轮完整牛熊，牛市形态外推有局限；⑤ 3 年滚动回撤窗口假设熊市长度 <3 年，若出现超 3 年的阴跌，锁定会提前解除；⑥ **未来函数已修复但需持续防御**：所有口径改动必须重跑 `scripts/audit_lookahead.py`（断言旧口径复现 16.20%/28.10% + v21-v29 回归，改动即破坏）。
 7. **未做但可做的增强**（后续迭代候选清单）：QDII 溢价率动态建模；代理→真实净值跟踪误差放大测试；熊市长度敏感性（3 年窗口）测试；1 笔成交的滑点与流动性冲击模拟（当前按固定万5）；溢价率实盘监控接入。
 

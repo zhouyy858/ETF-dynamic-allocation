@@ -177,10 +177,10 @@ def term_bars(rows, title, width=42):
 # ---------- 主流程 ----------
 def main():
     _here = os.path.dirname(os.path.abspath(__file__))
-    _p1 = os.path.join(_here, "..", "references", "final_cfg_v39.json")
-    _p2 = os.path.join(_here, "references", "final_cfg_v39.json")
+    _p1 = os.path.join(_here, "..", "references", "final_cfg_v40.json")
+    _p2 = os.path.join(_here, "references", "final_cfg_v40.json")
     cfg_file = sys.argv[1] if len(sys.argv) > 1 else (_p1 if os.path.exists(_p1) else _p2)
-    tag = sys.argv[2] if len(sys.argv) > 2 else "v39"
+    tag = sys.argv[2] if len(sys.argv) > 2 else "v40"
     cfg = json.load(open(cfg_file))
     R_proxy_pnl = pnl_panel(R_PROXY, "proxy", cfg)
     R_real_pnl = pnl_panel(R_REAL, "real", cfg)
@@ -250,28 +250,29 @@ def main():
         code = "cash" if s == "cash" else traded_code(s, cfg)
         nm = cash_nm if s == "cash" else traded_name(s, cfg)
         print(f"    {code:<8} {nm:<22} {tgt_last[s]*100:6.2f}%")
-    v37_file = os.path.join(os.path.dirname(cfg_file), "final_cfg_v37.json")
-    if cfg.get("instrument_swaps") and os.path.exists(v37_file):
-        cfg37 = json.load(open(v37_file))
-        ds37 = DynamicStrategy(R_PROXY, cfg=cfg37)
-        bond37 = rets_from(read_table(f"{cfg37.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg37.get("cash_bond_pct") else None
-        res37 = run_backtest(R_PROXY, target_weights_fn=ds37.target_fn(), daily_override_fn=ds37.daily_fn(),
-                             start=BACKTEST_START, name="v37", min_delta=cfg37.get("min_delta", 0.02),
-                             repo=cfg37.get("repo_rate", 0.022), tranche_weights=cfg37.get("tranche_weights"),
-                             cash_bond_rets=bond37, cash_bond_pct=cfg37.get("cash_bond_pct", 0.0),
-                             rebal_weekday=cfg37.get("rebal_weekday", 2), rebal_freq=cfg37.get("rebal_freq", "weekly"),
+    prev_file = os.path.join(os.path.dirname(cfg_file), "final_cfg_v39.json")
+    if cfg.get("version", "").startswith("v40") and os.path.exists(prev_file):
+        cfg_prev = json.load(open(prev_file))
+        ds_prev = DynamicStrategy(R_PROXY, cfg=cfg_prev)
+        bond_prev = rets_from(read_table(f"{cfg_prev.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg_prev.get("cash_bond_pct") else None
+        res_prev = run_backtest(R_PROXY, target_weights_fn=ds_prev.target_fn(), daily_override_fn=ds_prev.daily_fn(),
+                             start=BACKTEST_START, name="v39", min_delta=cfg_prev.get("min_delta", 0.02),
+                             repo=cfg_prev.get("repo_rate", 0.022), tranche_weights=cfg_prev.get("tranche_weights"),
+                             cash_bond_rets=bond_prev, cash_bond_pct=cfg_prev.get("cash_bond_pct", 0.0),
+                             rebal_weekday=cfg_prev.get("rebal_weekday", 2), rebal_freq=cfg_prev.get("rebal_freq", "weekly"),
                              strict=True)
-        w37 = res37["weights"].iloc[-1]
-        print("  相对当前 v37 持仓的切换（纸面，不下单）:")
+        w_prev = res_prev["weights"].iloc[-1]
+        print("  相对上一默认 v39 持仓的切换（纸面，不下单）:")
         for s in SLOTS:
             code = traded_code(s, cfg)
-            held = float(w37[s]) * 100
+            prev_code = traded_code(s, cfg_prev)
+            held = float(w_prev[s]) * 100
             tgt = float(tgt_last[s]) * 100
-            if code != s:
-                print(f"    卖出 {s} {held:.2f}%  →  买入 {code} {tgt:.2f}%")
+            if prev_code != code:
+                print(f"    卖出 {prev_code} {held:.2f}%  →  买入 {code} {tgt:.2f}%")
             else:
-                print(f"    {s} 维持  现仓 {held:.2f}%  目标 {tgt:.2f}%  差额 {tgt-held:+.2f}pp")
-        print(f"    现金 {float(w37['cash'])*100:.2f}% → 目标 {float(tgt_last['cash'])*100:.2f}%")
+                print(f"    {code} 维持  现仓 {held:.2f}%  目标 {tgt:.2f}%  差额 {tgt-held:+.2f}pp")
+        print(f"    现金 {float(w_prev['cash'])*100:.2f}% → 目标 {float(tgt_last['cash'])*100:.2f}%")
     sc_last = ds.state_log[-1] if ds.state_log else None
     print(f"  最近信号: 决策日={decision.date()} 信号截至={signal_dt.date()} 有效打分={sc_last[1] if sc_last else '-'} (0-9), CN深熊锁={ds._lock['CN']}, US深熊锁={ds._lock['US']}")
     for mkt in ["CN", "US"]:
