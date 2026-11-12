@@ -196,10 +196,10 @@ def term_bars(rows, title, width=42):
 # ---------- 主流程 ----------
 def main():
     _here = os.path.dirname(os.path.abspath(__file__))
-    _p1 = os.path.join(_here, "..", "references", "final_cfg_v43.json")
-    _p2 = os.path.join(_here, "references", "final_cfg_v43.json")
+    _p1 = os.path.join(_here, "..", "references", "final_cfg_v44.json")
+    _p2 = os.path.join(_here, "references", "final_cfg_v44.json")
     cfg_file = sys.argv[1] if len(sys.argv) > 1 else (_p1 if os.path.exists(_p1) else _p2)
-    tag = sys.argv[2] if len(sys.argv) > 2 else "v43"
+    tag = sys.argv[2] if len(sys.argv) > 2 else "v44"
     caliber = sys.argv[3].lower() if len(sys.argv) > 3 else "price"
     if caliber not in ("price", "nav"):
         raise SystemExit("第三个参数必须是 price 或 nav")
@@ -280,8 +280,10 @@ def main():
         code = "cash" if s == "cash" else traded_code(s, cfg)
         nm = cash_nm if s == "cash" else traded_name(s, cfg)
         print(f"    {code:<8} {nm:<22} {tgt_last[s]*100:6.2f}%")
-    prev_file = os.path.join(os.path.dirname(cfg_file), "final_cfg_v41.json")
-    if cfg.get("version", "").startswith("v43") and os.path.exists(prev_file):
+    _ver = cfg.get("version", "")
+    _prev_name = "final_cfg_v43.json" if _ver.startswith("v44") else "final_cfg_v41.json"
+    prev_file = os.path.join(os.path.dirname(cfg_file), _prev_name)
+    if _ver.startswith(("v43", "v44")) and os.path.exists(prev_file):
         cfg_prev = json.load(open(prev_file))
         ds_prev = DynamicStrategy(R_PROXY, cfg=cfg_prev)
         bond_prev = rets_from(read_table(f"{cfg_prev.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg_prev.get("cash_bond_pct") else None
@@ -292,7 +294,7 @@ def main():
                              rebal_weekday=cfg_prev.get("rebal_weekday", 2), rebal_freq=cfg_prev.get("rebal_freq", "weekly"),
                              strict=True)
         w_prev = res_prev["weights"].iloc[-1]
-        print("  相对上一默认 v41 持仓的切换（纸面，不下单）:")
+        print(f"  相对上一默认 {cfg_prev.get('version', 'prev')} 持仓的切换（纸面，不下单）:")
         for s in SLOTS:
             if s in cfg.get("exclude", []):
                 continue
