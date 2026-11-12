@@ -97,5 +97,5 @@
  "adx_gate": false,
  "breadth_gate": false,
  "hh_stop": false,
- "_note": "v41（2026-11-11 研究定稿；现为 v43 回退）：exclude 159232，成交端不再使用 159222；floor_pct.cn=2 在两槽平分后排除 159232，国内有效底仓只剩 563020 的 1%。释放资金优先配置美股底仓与成长仓；US 底仓 10->12，成长拆分 bull 32/61/7->36/57/7，关闭 defense_momentum（只剩一个防御槽，原逻辑无数值作用），波动率闸门收紧为 0.86/0.70/0.48；corr_risk/premium_rotate/us_rotation/regime_gate/recovery_ramp/reentry 等低贡献层关闭。proxy 13.40%/-7.26%/Cal1.85，real 29.90%/-4.53%/Cal6.60，OOS Cal1.81。含样本内近邻搜索，历史表现不代表未来。"
+ "_note": "v41（2026-11-11 研究定稿；现为 v45 历史回退）：exclude 159232，成交端不再使用 159222；floor_pct.cn=2 在两槽平分后排除 159232，国内有效底仓只剩 563020 的 1%。释放资金优先配置美股底仓与成长仓；US 底仓 10->12，成长拆分 bull 32/61/7->36/57/7，关闭 defense_momentum（只剩一个防御槽，原逻辑无数值作用），波动率闸门收紧为 0.86/0.70/0.48；corr_risk/premium_rotate/us_rotation/regime_gate/recovery_ramp/reentry 等低贡献层关闭。proxy 13.40%/-7.26%/Cal1.85，real 29.90%/-4.53%/Cal6.60，OOS Cal1.81。含样本内近邻搜索，历史表现不代表未来。"
 }

@@ -44,7 +44,7 @@ MARKET_DD = {"CN": (0.07, 0.08, 0.20, 0.10), "US": (0.12, 0.18, 0.26, 0.12)}
 HYST_UP, HYST_DOWN = 0.54, 0.17
 
 class SignalSet:
-    def __init__(self, R, a_mkt_override=None, lag=0, gate_win=120):
+    def __init__(self, R, a_mkt_override=None, lag=0, gate_win=120, score_mode="base"):
         if a_mkt_override is not None:
             hs300 = a_mkt_override
         else:
@@ -61,6 +61,7 @@ class SignalSet:
         self.ind = self._ind_panel(lvl)
         self.lag = int(lag)  # 信号时点: 0=当日收盘, 1=前一日收盘(严格无未来, 实盘T日尾盘用T-1信号)
         self.gate_win = int(gate_win)
+        self.score_mode = str(score_mode)
         self.sma = {}
         _win = sorted(set((20, 60, 120, self.gate_win)))
         for nm, x in [("a_mkt", self.a_mkt), ("a_g", self.a_g), ("u_g", self.u_g), ("u_m", self.u_m)]:
@@ -160,10 +161,26 @@ class SignalSet:
         i = self._idx(dt)
         def gt(x, nm, win):
             return 1.0 if (i < len(x) and x.iloc[i] > self.sma[nm][win].iloc[i]) else 0.0
-        comps = [gt(self.a_mkt, "a_mkt", 120), gt(self.a_mkt, "a_mkt", 60), gt(self.a_mkt, "a_mkt", 20),
-                 gt(self.a_g, "a_g", 120), gt(self.a_g, "a_g", 60), gt(self.a_g, "a_g", 20),
-                 gt(self.u_g, "u_g", 120), gt(self.u_m, "u_m", 120), gt(self.u_g, "u_g", 60)]
-        return int(sum(comps))
+        cn = [gt(self.a_mkt, "a_mkt", 120), gt(self.a_mkt, "a_mkt", 60), gt(self.a_mkt, "a_mkt", 20),
+              gt(self.a_g, "a_g", 120), gt(self.a_g, "a_g", 60), gt(self.a_g, "a_g", 20)]
+        us = [gt(self.u_g, "u_g", 120), gt(self.u_m, "u_m", 120), gt(self.u_g, "u_g", 60)]
+        if self.score_mode == "tech_confirm":
+            # 科技/海外联动: 纳指60日这一分要求创业板同时站上60日线, 避免海外科技单边上涨把A股科技分打满
+            us[2] = us[2] if gt(self.a_g, "a_g", 60) else 0.0
+            return int(round(sum(cn) + sum(us)))
+        if self.score_mode == "dedup_us":
+            # 海外科技三点降为两点: 纳指120(1) + 标普120(1), 纳指60只给0.5; 总分按9归一
+            raw = sum(cn) + us[0] + us[1] + 0.5 * us[2]
+            return int(round(raw * 9.0 / 8.5))
+        if self.score_mode == "us_lead":
+            # 科技/海外联动加强: 纳指120与60各1.5分, 标普120 1分, A股创业板3分, 沪深300 3分
+            raw = sum(cn[:3]) + sum(cn[3:]) + 1.5 * us[0] + us[1] + 1.5 * us[2]
+            return int(round(raw * 9.0 / 10.0))
+        if self.score_mode == "cn_lead":
+            # A股科技为主、海外科技确认: A股6分不变, 纳指120 1.5, 标普120 1, 纳指60 0.5
+            raw = sum(cn) + 1.5 * us[0] + us[1] + 0.5 * us[2]
+            return int(round(raw * 9.0 / 9.0))
+        return int(sum(cn) + sum(us))
 
     def mkt_info(self, dt, market, gate_win=120):
         i = self._idx(dt)
@@ -186,7 +203,8 @@ class DynamicStrategy:
     def __init__(self, R_full, cfg=None, a_mkt_override=None):
         self.sig = self.SIG_CLASS(R_full, a_mkt_override=a_mkt_override,
                                   lag=cfg.get("signal_lag", 1) if cfg else 1,
-                                  gate_win=cfg.get("gate_win", 120) if cfg else 120)
+                                  gate_win=cfg.get("gate_win", 120) if cfg else 120,
+                                  score_mode=cfg.get("score_mode", "base") if cfg else "base")
         self.R = R_full
         cfg = cfg or {}
         sm = cfg.get("state_map", STATE_MAP)
@@ -268,6 +286,34 @@ class DynamicStrategy:
         self.growth_iv = bool(cfg.get("growth_iv", False))
         self.growth_iv_win = int(cfg.get("growth_iv_win", 60))
         self.growth_iv_t = float(cfg.get("growth_iv_t", 1.0))
+        # v45 前提层: 红利/创业板跷跷板 + 纳指科技周期联动(默认关闭, 不影响 v44)
+        self.cn_seesaw = bool(cfg.get("cn_seesaw", False))
+        self.cn_seesaw_mode = str(cfg.get("cn_seesaw_mode", "contrarian"))
+        self.cn_seesaw_win = int(cfg.get("cn_seesaw_win", 60))
+        self.cn_seesaw_thr = float(cfg.get("cn_seesaw_thr", 0.10))
+        self.cn_seesaw_frac = float(cfg.get("cn_seesaw_frac", 0.25))
+        self.cn_seesaw_rebound = bool(cfg.get("cn_seesaw_rebound", False))
+        self.cn_seesaw_confirm_us = bool(cfg.get("cn_seesaw_confirm_us", False))
+        # 深熊锁下红利防御腿保留比例: 0=旧行为(只留底仓), 1=红利弹性完全保留
+        self.lock_defense_keep = float(cfg.get("lock_defense_keep", 0.0))
+        self.lock_defense_rel = bool(cfg.get("lock_defense_rel", False))
+        self.lock_defense_abs = bool(cfg.get("lock_defense_abs", False))
+        self.lock_defense_mom = bool(cfg.get("lock_defense_mom", False))
+        self.lock_defense_mom_thr = float(cfg.get("lock_defense_mom_thr", 0.0))
+        _div_lvl = (1 + R_full["515100"].fillna(0.0)).cumprod()
+        self._div_lvl = _div_lvl
+        self._div_ma = _div_lvl.rolling(120, min_periods=60).mean()
+        _div_rel = _div_lvl / self.sig.a_mkt.replace(0.0, np.nan)
+        self._div_rel = _div_rel
+        self._div_rel_ma = _div_rel.rolling(120, min_periods=60).mean()
+        self.tech_rotate = bool(cfg.get("tech_rotate", False))
+        self.tech_rotate_frac = float(cfg.get("tech_rotate_frac", 0.25))
+        self.tech_rotate_mode = str(cfg.get("tech_rotate_mode", "procyclical"))
+        self.tech_rotate_win = int(cfg.get("tech_rotate_win", 120))
+        self.tech_cap = bool(cfg.get("tech_cap", False))
+        self.tech_cap_pct = float(cfg.get("tech_cap_pct", 0.30))
+        self.tech_cap_win = int(cfg.get("tech_cap_win", 60))
+        self.tech_cap_corr = float(cfg.get("tech_cap_corr", 0.0))
         self.vol_gate = bool(cfg.get("vol_gate", False))
         self.vol_gate_win = int(cfg.get("vol_gate_win", 20))
         self.vol_gate_bands = [float(x) for x in cfg.get("vol_gate_bands", [0.30, 0.40, 0.50])]
@@ -464,6 +510,103 @@ class DynamicStrategy:
         if s > 0:
             for c in codes:
                 out[c] = out[c] / s * base_total
+        return out
+
+    def _cn_seesaw(self, dt, out):
+        """红利/创业板跷跷板: 用60日相对收益在CN防御与创业板之间做有限切换.
+        contrarian=极端相对强势时止盈创业板、弱势且站上SMA20时回补;
+        momentum=相对强势加创业板、弱势加红利。只切弹性, 不动底仓。"""
+        if not self.cn_seesaw:
+            return out
+        i = self.sig._idx(dt)
+        if i < self.cn_seesaw_win or i >= len(self.R):
+            return out
+        seg = self.R.iloc[i - self.cn_seesaw_win + 1: i + 1]
+        lc = float((1 + seg["159952"].fillna(0.0)).prod())
+        ld = float((1 + seg["515100"].fillna(0.0)).prod())
+        if ld <= 0:
+            return out
+        rel = lc / ld - 1.0
+        g = max(out.get("159952", 0.0) - self.floor["159952"], 0.0)
+        d = max(out.get("515100", 0.0) - self.floor["515100"], 0.0)
+        f = self.cn_seesaw_frac
+        if self.cn_seesaw_mode == "momentum":
+            if rel > self.cn_seesaw_thr:
+                sh = min(d * f, 100.0)
+                out["515100"] -= sh; out["159952"] += sh
+            elif rel < -self.cn_seesaw_thr:
+                sh = min(g * f, 100.0)
+                out["159952"] -= sh; out["515100"] += sh
+        else:
+            if rel > self.cn_seesaw_thr:
+                sh = min(g * f, 100.0)
+                out["159952"] -= sh; out["515100"] += sh
+            elif rel < -self.cn_seesaw_thr and self.cn_seesaw_rebound:
+                px = float(self.sig.a_g.iloc[i]); ma20 = float(self.sig.sma["a_g"][20].iloc[i])
+                ok = np.isfinite(px) and np.isfinite(ma20) and px > ma20
+                if ok and self.cn_seesaw_confirm_us:
+                    ux = float(self.sig.u_g.iloc[i]); uma = float(self.sig.sma["u_g"][20].iloc[i])
+                    ok = np.isfinite(ux) and np.isfinite(uma) and ux > uma
+                if ok:
+                    sh = min(d * f, 100.0)
+                    out["515100"] -= sh; out["159952"] += sh
+        return out
+
+    def _tech_rotate(self, dt, split):
+        """纳指科技周期 -> 成长桶内部倾斜. procyclical: 纳指多头时把标普成长的一部分转创业板,
+        纳指走弱时反向转回标普; inverse 为对照. 不改变成长总弹性。"""
+        if not self.tech_rotate:
+            return split
+        i = self.sig._idx(dt)
+        win = 120 if self.tech_rotate_win >= 120 else (60 if self.tech_rotate_win >= 60 else 20)
+        if i < win or i >= len(self.R):
+            return split
+        px = float(self.sig.u_g.iloc[i]); ma = float(self.sig.sma["u_g"][win].iloc[i])
+        ma60 = float(self.sig.sma["u_g"][60].iloc[i]); ma120 = float(self.sig.sma["u_g"][120].iloc[i])
+        if not all(np.isfinite(x) for x in (px, ma, ma60, ma120)):
+            return split
+        if win == 20:
+            up = (px > ma and ma60 > ma120) or (px > ma and ma > ma60)
+        elif win == 60:
+            up = (px > ma and ma > ma120)
+        else:
+            up = (px > ma and ma60 > ma)
+        if self.tech_rotate_mode == "inverse":
+            up = not up
+        f = self.tech_rotate_frac
+        out = dict(split)
+        if up:
+            sh = out.get("513500", 0.0) * f
+            out["513500"] = out.get("513500", 0.0) - sh
+            out["159952"] = out.get("159952", 0.0) + sh
+        else:
+            sh = out.get("159952", 0.0) * f
+            out["159952"] = out.get("159952", 0.0) - sh
+            out["513500"] = out.get("513500", 0.0) + sh
+        return out
+
+    def _tech_cap(self, dt, out):
+        """科技/海外联动风控: 纳指与创业板60日相关性高于阈值时, 给两者合计弹性设上限;
+        超限只削减、不再配置, 释放部分自动进现金. 默认关闭。"""
+        if not self.tech_cap:
+            return out
+        i = self.sig._idx(dt)
+        if i < self.tech_cap_win or i >= len(self.R):
+            return out
+        if self.tech_cap_corr > 0:
+            c = self.R["159941"].rolling(self.tech_cap_win).corr(self.R["159952"]).iloc[i]
+            if not np.isfinite(c) or c < self.tech_cap_corr:
+                return out
+        tech = max(out.get("159952", 0.0) - self.floor["159952"], 0.0) + max(out.get("159941", 0.0) - self.floor["159941"], 0.0)
+        excess = tech - self.tech_cap_pct * 100.0
+        if excess <= 0:
+            return out
+        for s in ("159952", "159941"):
+            room = max(out.get(s, 0.0) - self.floor[s], 0.0)
+            cut = min(excess, room)
+            out[s] -= cut; excess -= cut
+            if excess <= 1e-9:
+                break
         return out
 
     def _growth_split_iv(self, dt, base):
@@ -831,19 +974,43 @@ class DynamicStrategy:
         return st
 
     def _market_mult(self, dt, market):
-        """返回 (成长弹性乘数, 全弹性乘数)"""
+        """返回 (成长弹性乘数, 全弹性乘数, CN 红利防御腿保留乘数)"""
         dd, ok20, ok20_60, rec, ok120 = self.sig.mkt_info(dt, market, self.gate_win)
         fb_thr, fb_cut, deep_thr, recov = self.market_dd[market]
-        m_g, m_all = 1.0, 1.0
-        # 深熊锁定: 该市场全部弹性清零
+        m_g, m_all, m_def = 1.0, 1.0, 1.0
+        # 深熊锁定: 该市场全部弹性清零; CN 红利防御腿可按配置保留一部分(跷跷板对冲腿)
+        def _lock_def():
+            if market != "CN":
+                return 0.0
+            keep = max(0.0, min(1.0, self.lock_defense_keep))
+            if keep > 0:
+                i = self.sig._idx(dt)
+                if self.lock_defense_rel:
+                    rel = float(self._div_rel.iloc[i]) if 0 <= i < len(self._div_rel) else np.nan
+                    ma = float(self._div_rel_ma.iloc[i]) if 0 <= i < len(self._div_rel_ma) else np.nan
+                    if not (np.isfinite(rel) and np.isfinite(ma) and rel > ma):
+                        keep = 0.0
+                if keep > 0 and self.lock_defense_abs:
+                    lv = float(self._div_lvl.iloc[i]) if 0 <= i < len(self._div_lvl) else np.nan
+                    ma = float(self._div_ma.iloc[i]) if 0 <= i < len(self._div_ma) else np.nan
+                    if not (np.isfinite(lv) and np.isfinite(ma) and lv > ma):
+                        keep = 0.0
+                if keep > 0 and self.lock_defense_mom:
+                    if i < 60:
+                        keep = 0.0
+                    else:
+                        r60 = float(self._div_lvl.iloc[i] / self._div_lvl.iloc[i-60] - 1.0)
+                        if not np.isfinite(r60) or r60 <= self.lock_defense_mom_thr:
+                            keep = 0.0
+            return keep
         if self._lock[market]:
             if dd > -recov or (ok120 and ok20_60):
                 self._lock[market] = False
             else:
-                return 0.0, 0.0
+                return 0.0, 0.0, _lock_def()
         if dd < -deep_thr:
             self._lock[market] = True
-            return 0.0, 0.0
+            return 0.0, 0.0, _lock_def()
         # 结构闸门
         gst = (self._gate_state(dt, market) if self.gate_band > 0 else ok120) if self.struct_gate else True
         if not gst:
@@ -851,7 +1018,7 @@ class DynamicStrategy:
         # 快刹车
         if dd < -fb_thr and not (ok20 and ok20_60):
             m_g = min(m_g, fb_cut)
-        return m_g, m_all
+        return m_g, m_all, m_def
 
     def _confirm_score(self, dt, sc):
         """向上调仓需连续N个确认日确认, 向下立即生效(防假突破/降换手); 采样日默认周三
@@ -892,6 +1059,8 @@ class DynamicStrategy:
             split_d = {k: v / tot_d for k, v in split_d.items()}
         if self.growth_rotation:
             split_g = self._growth_split(dt, {s: split_g.get(s, 0.0) for s in ("159952", "159941", "513500")})
+        if self.tech_rotate:
+            split_g = self._tech_rotate(dt, split_g)
         if self.growth_iv:
             split_g = self._growth_split_iv(dt, {s: split_g.get(s, 0.0) for s in ("159952", "159941", "513500")})
         if self.reversal_filter:
@@ -916,12 +1085,14 @@ class DynamicStrategy:
             "513500": self.floor["513500"] + split_g["513500"] * g,
             "159952": self.floor["159952"] + split_g["159952"] * g,
         }
-        m_cn_g, m_cn_all = self._market_mult(dt, "CN")
-        m_us_g, m_us_all = self._market_mult(dt, "US")
+        if self.cn_seesaw:
+            out = self._cn_seesaw(dt, out)
+        m_cn_g, m_cn_all, m_cn_def = self._market_mult(dt, "CN")
+        m_us_g, m_us_all, _ = self._market_mult(dt, "US")
         # CN弹性: 成长仓受快刹车+闸门; 防御弹性只受深熊锁定
         out["159952"] = self.floor["159952"] + (out["159952"] - self.floor["159952"]) * m_cn_g * m_cn_all * vg_cn * corr_cut * m_adx * m_breadth
-        out["159232"] = self.floor["159232"] + (out["159232"] - self.floor["159232"]) * m_cn_all
-        out["515100"] = self.floor["515100"] + (out["515100"] - self.floor["515100"]) * m_cn_all
+        out["159232"] = self.floor["159232"] + (out["159232"] - self.floor["159232"]) * m_cn_def
+        out["515100"] = self.floor["515100"] + (out["515100"] - self.floor["515100"]) * m_cn_def
         if us_split is not None:
             us_total = (out["159941"] - self.floor["159941"] + out["513500"] - self.floor["513500"]) * m_us_g * m_us_all * vg_us * prem_cut * corr_cut
             out["159941"] = self.floor["159941"] + us_total * us_split["159941"]
@@ -982,6 +1153,8 @@ class DynamicStrategy:
             for s in targets:
                 if float(self.sig.ind[s][self.ind_name].iloc[i]) < self.ind_thr:
                     out[s] = self.floor[s] + (out[s] - self.floor[s]) * self.ind_cut
+        if self.tech_cap:
+            out = self._tech_cap(dt, out)
         return out
 
     def regular_target(self, dt, ctx):

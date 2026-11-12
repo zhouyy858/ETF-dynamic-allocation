@@ -1,6 +1,6 @@
 # v41 发布记录（2026-11-11）
 
-> 纸面研究，不执行下单。数据截至 2026-11-10，2026-11-11 盘中数据未使用。v41 现为回退配置：`references/final_cfg_v41.json`；当前默认是 v43：`references/final_cfg_v43.json`。
+> 纸面研究，不执行下单。数据截至 2026-11-10，2026-11-11 盘中数据未使用。v41 现为历史回退配置：`references/final_cfg_v41.json`；当前默认是 v45：`references/final_cfg_v45.json`。
 
 ## 1. 目标与结论
 
