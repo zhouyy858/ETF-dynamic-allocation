@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from data_prep import build_panel, read_table, rets_from
 from engine import run_backtest, evaluate
 from strategy import DynamicStrategy
-from swaps import pnl_panel
+from run_backtest import exec_panel
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "out")
@@ -21,12 +21,13 @@ _p2 = os.path.join(HERE, "references", "final_cfg_v41.json")
 CFG = json.load(open(sys.argv[1] if len(sys.argv) > 1 else (_p1 if os.path.exists(_p1) else _p2)))
 TAG = sys.argv[2] if len(sys.argv) > 2 else "v41"
 TW = json.loads(sys.argv[3]) if len(sys.argv) > 3 else CFG.get("tranche_weights")
+CALIBER = os.environ.get("ETF_AUDIT_CALIBER", "price")
 R_SIG, W = build_panel("proxy")
 START = "2014-06-23"
 
 def run(cfg):
     ds = DynamicStrategy(R_SIG, cfg=cfg)
-    R = pnl_panel(R_SIG, "proxy", cfg)
+    R = exec_panel(R_SIG, "proxy", cfg, CALIBER)
     bond = rets_from(read_table(f"{cfg.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg.get("cash_bond_pct") else None
     res = run_backtest(R, target_weights_fn=ds.target_fn(), daily_override_fn=ds.daily_fn(),
                        start=START, name="DYN", min_delta=cfg.get("min_delta", 0.02), repo=cfg.get("repo_rate", 0.022),

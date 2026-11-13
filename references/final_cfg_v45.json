@@ -166,7 +166,7 @@
  "adx_gate": false,
  "breadth_gate": false,
  "hh_stop": false,
- "_note": "v45 定稿（2026-11-12，纸面）：v44 + 深熊锁保留15%红利防御弹性 + 海外科技打分1.5/1/0.5。price proxy 16.07%/-8.20%/Cal1.96，OOS 15.19%/-6.14%/2.48，real 34.45%/-4.35%/7.93；30bp Cal1.55。",
+ "_note": "v45 定稿（2026-11-12，纸面，研究档）：v44 + 深熊锁保留15%红利防御弹性 + 海外科技打分1.5/1/0.5。price proxy 16.07%/-8.20%/Cal1.96（含QDII溢价重估，不可外推），nav 13.87%/-6.74%/Cal2.06，OOS 15.19%/-6.14%/2.48，real 34.45%/-4.35%/7.93；30bp Cal1.55；CSCV/PBO 83.8%。",
  "lock_defense_keep": 0.15,
  "score_mode": "cn_lead"
 }
