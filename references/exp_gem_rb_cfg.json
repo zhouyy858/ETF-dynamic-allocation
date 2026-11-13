@@ -1,0 +1,68 @@
+{
+  "name": "exp_gem_rb",
+  "kind": "bypass_paper",
+  "replaces_default": false,
+  "default_cfg_untouched": "references/final_cfg_v30.json",
+  "fee_one_way": 0.0005,
+  "fee_note": "单边万5，只对交易型权重变化计费（现金袖套本身不计成交费），与 engine.py 对 ETF 槽位 sum(|Δw|)*fee 一致。先按昨日权重计提当日收益，再于收盘成交，新仓次日计收益。",
+  "accrual": "pre",
+  "signal": "rebalance date 之前的收盘，不含当日",
+  "rebalance": "monthly_first_friday",
+  "rebalance_note": "与引擎 rebal_freq=monthly 且 rebal_weekday=4 相同：周五且 day<=7。窗口首日建仓。周五遇节假日则该月无常规调仓。",
+  "repo_rate": 0.022,
+  "cash_bond_pct": 0.75,
+  "cash_bond_code": "511010",
+  "sharpe_rf": 0.018,
+  "min_delta": 0.002,
+  "gem": {
+    "lookback_days": 252,
+    "relative": ["513500", "159941"],
+    "relative_note": "数据包无日经（513520）或欧洲 QDII（513030/513080）。最长干净重叠面板是标普 513500 与纳指 159941，二者都是美股 QDII，不是经典 GEM 的美股 vs 非美。相对动量只在美股内部二选一；绝对动量相对现金袖套才是主要风险开关。",
+    "spx_signal_proxy": "050025 博时标普500联接A 只补 513500 上市满 12 个月之前的动量样本。2013-12-06 起收益用场内 513500，与 v30 proxy 的标普列相同。",
+    "ndx_series": "v30 proxy 的 159941 列（270042 联接 + 场内净值，主代理优先），与基线同一条序列。",
+    "absolute_hurdle": "同一 252 日窗口上现金袖套（25% 逆回购 2.2% + 75% 511010）的总收益。权益动量 <= 该阈值则 100% 现金袖套。",
+    "tie_break": "两条权益动量相等时持有 513500。",
+    "intl_sensitivity": {
+      "pair": ["513500", "513180"],
+      "label": "513180 恒生科技是库内唯一非美权益 QDII，不是日经。净值 2021-05-26 至 2026-08-03，252 日信号大约 2022-06 才可用。不进入 50/30/20 主混合。"
+    }
+  },
+  "risk_budget": {
+    "assets": {
+      "510300": "沪深300ETF。中证800 ETF 不在库内。净值止于 2026-08-03。",
+      "513500": "标普500ETF，与 v30 proxy 标普列相同。",
+      "518880": "黄金ETF。净值止于 2026-08-03，是四资产与混合窗的截止约束。",
+      "511260": "10Y 国债ETF，最接近所要求的 7–10Y 久期。2017-08-24 前为 511010 拼接（见 scripts/fetch_cash_bond.py）。政金债 ETF 不在库内。文件止于 2026-09-18。"
+    },
+    "primary": "inverse_vol",
+    "vol_lookback": 63,
+    "fully_invested": true,
+    "erc": "同一 63 日协方差的长多头等风险贡献（坐标下降，要求四资产风险贡献相等）。债券与股票相关为负时，乘性迭代会把权重打到角落，因此不用。只作稳健性，不参与通过/失败判定，也不替换主混合里的 Arm2。",
+    "equal_weight": "同宇宙月度再平衡等权，只作参照，不参与判定。",
+    "no_macro_score": true
+  },
+  "blend": {
+    "arm2_inv_vol": 0.5,
+    "arm1_gem": 0.3,
+    "v30": 0.2,
+    "v30_missing": "cash_sleeve",
+    "note": "混合层月度再平衡，袖套收益已含各自费用，权重漂移另计单边万5。不抵消底层重复的标普持仓，费用偏保守。v30 在重叠窗全程可得，现金替代未触发。"
+  },
+  "windows": {
+    "proxy_start": "2014-06-23",
+    "oos_start": "2022-01-04",
+    "real_start": "2025-04-23",
+    "overlap_end_rule": "v30、GEM-CN、四资产风险预算三者同时有收益的最后交易日"
+  },
+  "high_cash_month": 0.5,
+  "high_cash_strict": 0.7,
+  "cn_lock_month_frac": 0.5,
+  "cn_lock_note": "CN 深熊锁来自 v30 DynamicStrategy._lock，经 _market_mult 在回测路径上逐日更新。月内至少一半交易日为真则记为锁月。",
+  "pass_fail": {
+    "scope": "重叠窗上的 50/30/20 混合 vs 纯 v30。单臂 Calmar 更高不能单独通过。",
+    "P1": "混合期末财富高于 v30，或者年化差距在 1 个百分点以内且最大回撤至少改善 1 个百分点。",
+    "P2": "样本外（2022-01-04 至重叠窗结束）混合 CAGR 不低于 v30 超过 1.5 个百分点。",
+    "P3": "v30 月均现金权重>=50% 的月份上，混合月收益复利高于 v30。",
+    "rule": "P1 且 P2 且 P3 才是 PASS，否则 FAIL。"
+  }
+}
