@@ -261,6 +261,9 @@ class DynamicStrategy:
         self.hh_thr = float(cfg.get("hh_thr", 0.08))
         self.hh_cut = float(cfg.get("hh_cut", 0.5))
         self.cool_off_weeks = int(cfg.get("cool_off_weeks", 0))
+        # 默认全部槽位、单一冷却长度，与 v40 行为一致。实验可收窄槽位或让高分状态用更短冷却。
+        self.cool_off_slots = tuple(cfg.get("cool_off_slots") or SLOTS)
+        self.cool_off_bull_weeks = int(cfg.get("cool_off_bull_weeks", 0))
         self.reentry_step = float(cfg.get("reentry_step", 0.0))  # 每周重新加仓权益上限增量(pp/week, 0=关闭)
         self.asset_sb = bool(cfg.get("asset_sb", False))  # 单资产速度刹车(某标的5日急跌->当日削该标的弹性)
         self.asset_sb_win = int(cfg.get("asset_sb_win", 5))
@@ -342,7 +345,9 @@ class DynamicStrategy:
         self.premium_shift = int(cfg.get("premium_shift", 1))
         # 溢价先按日期对齐, 滞后在 _premium_row 里用信号下标取, 这样决策日还不在索引里
         # (周五 09:00) 时也能取到与回测同一根 K 线. 预 shift 再按决策日 loc 会在缺这天时直接拿不到.
-        self._premium = self._load_premium_panel(R_full, 0) if self.premium_gate else None
+        # 溢价面板同时服务门控与倾斜。只关门控时倾斜仍要读到 T-2 溢价；v40 两者都开，加载条件不变。
+        self._premium = self._load_premium_panel(R_full, 0) if (
+            self.premium_gate or self.premium_tilt or self.premium_rotate) else None
         self.valuation_win = int(cfg.get("valuation_win_days", VALUATION_WIN_DAYS))
         self.valuation_thr = [float(x) for x in cfg.get("valuation_thr", [0.95, 0.98])]
         self.valuation_cut = [float(x) for x in cfg.get("valuation_cut", [0.6, 0.35])]
@@ -1069,7 +1074,7 @@ class DynamicStrategy:
         vg_us = self._valuation_gate(dt, "US")
         vg_cn = self._valuation_gate(dt, "CN")
         prem_cut = 1.0
-        if self._premium is not None:
+        if self.premium_gate and self._premium is not None:
             pm = self._premium_at(dt)
             if pm is not None and pm > 0:
                 for thr, c in zip(self.premium_thr, self.premium_cut):
@@ -1186,14 +1191,15 @@ class DynamicStrategy:
         if self.cool_off_weeks > 0:
             i = self.sig._idx(dt)
             dti = self.R.index[i] if i < len(self.R) else dt
-            for s in SLOTS:
+            need = self.cool_off_bull_weeks if (self.cool_off_bull_weeks > 0 and sc >= 7) else self.cool_off_weeks
+            for s in self.cool_off_slots:
                 cf = self._cool_from.get(s)
                 if cf is not None:
-                    if (dti - cf).days >= self.cool_off_weeks * 7:
+                    if (dti - cf).days >= need * 7:
                         self._cool_from.pop(s, None)
                     else:
                         out[s] = self.floor[s]
-            for s in SLOTS:
+            for s in self.cool_off_slots:
                 prev = self._prev_target.get(s, self.floor[s])
                 if prev > self.floor[s] + 1e-6 and out[s] <= self.floor[s] + 1e-6:
                     self._cool_from.setdefault(s, dti)
