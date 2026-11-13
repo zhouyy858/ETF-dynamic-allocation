@@ -196,10 +196,10 @@ def term_bars(rows, title, width=42):
 # ---------- 主流程 ----------
 def main():
     _here = os.path.dirname(os.path.abspath(__file__))
-    _p1 = os.path.join(_here, "..", "references", "final_cfg_v45.json")
-    _p2 = os.path.join(_here, "references", "final_cfg_v45.json")
+    _p1 = os.path.join(_here, "..", "references", "final_cfg_v47.json")
+    _p2 = os.path.join(_here, "references", "final_cfg_v47.json")
     cfg_file = sys.argv[1] if len(sys.argv) > 1 else (_p1 if os.path.exists(_p1) else _p2)
-    tag = sys.argv[2] if len(sys.argv) > 2 else "v45"
+    tag = sys.argv[2] if len(sys.argv) > 2 else "v47"
     caliber = sys.argv[3].lower() if len(sys.argv) > 3 else "price"
     if caliber not in ("price", "nav"):
         raise SystemExit("第三个参数必须是 price 或 nav")
@@ -281,14 +281,16 @@ def main():
         nm = cash_nm if s == "cash" else traded_name(s, cfg)
         print(f"    {code:<8} {nm:<22} {tgt_last[s]*100:6.2f}%")
     _ver = cfg.get("version", "")
-    if _ver.startswith("v45"):
+    if _ver.startswith("v47"):
+        _prev_name = "final_cfg_v45.json"
+    elif _ver.startswith("v45"):
         _prev_name = "final_cfg_v44.json"
     elif _ver.startswith("v44"):
         _prev_name = "final_cfg_v43.json"
     else:
         _prev_name = "final_cfg_v41.json"
     prev_file = os.path.join(os.path.dirname(cfg_file), _prev_name)
-    if _ver.startswith(("v43", "v44", "v45")) and os.path.exists(prev_file):
+    if _ver.startswith(("v43", "v44", "v45", "v47")) and os.path.exists(prev_file):
         cfg_prev = json.load(open(prev_file))
         ds_prev = DynamicStrategy(R_PROXY, cfg=cfg_prev)
         bond_prev = rets_from(read_table(f"{cfg_prev.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg_prev.get("cash_bond_pct") else None
@@ -349,3 +351,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

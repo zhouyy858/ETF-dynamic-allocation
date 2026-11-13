@@ -1,4 +1,5 @@
 interface:
   display_name: "ETF动态配置策略"
-  short_description: "五只ETF(159232/515100/159941/513500/159952)每周三动态调仓回测与执行手册"
-  default_prompt: "用 $etf-dynamic-allocation 对159232/515100/159941/513500/159952做每周三动态调仓回测并输出投资手册"
+  short_description: "四只ETF+现金(v47: 512890/159941/513500/159952)每周五动态调仓回测与执行手册"
+  default_prompt: "用 $etf-dynamic-allocation 对512890/159941/513500/159952做每周五动态调仓回测并输出投资手册"
+

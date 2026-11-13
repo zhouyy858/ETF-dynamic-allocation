@@ -94,10 +94,10 @@ def save_cache():
     panels = {}
     for layer in ["real", "proxy"]:
         R, W = build_panel(layer)
-        R.to_csv(f"data/panel_{layer}_rets.csv")
-        W.to_csv(f"data/panel_{layer}_wealth.csv")
+        R.to_csv(f"{DATA_DIR}/panel_{layer}_rets.csv")
+        W.to_csv(f"{DATA_DIR}/panel_{layer}_wealth.csv")
         panels[layer] = panel_info(R)
-    with open("data/panels.json", "w") as f:
+    with open(f"{DATA_DIR}/panels.json", "w", encoding="utf-8") as f:
         json.dump(panels, f, ensure_ascii=False, indent=2)
     return panels
 

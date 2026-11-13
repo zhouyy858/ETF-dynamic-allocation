@@ -44,7 +44,8 @@ MARKET_DD = {"CN": (0.07, 0.08, 0.20, 0.10), "US": (0.12, 0.18, 0.26, 0.12)}
 HYST_UP, HYST_DOWN = 0.54, 0.17
 
 class SignalSet:
-    def __init__(self, R, a_mkt_override=None, lag=0, gate_win=120, score_mode="base"):
+    def __init__(self, R, a_mkt_override=None, lag=0, gate_win=120, score_mode="base",
+                 gate_windows=None):
         if a_mkt_override is not None:
             hs300 = a_mkt_override
         else:
@@ -63,7 +64,8 @@ class SignalSet:
         self.gate_win = int(gate_win)
         self.score_mode = str(score_mode)
         self.sma = {}
-        _win = sorted(set((20, 60, 120, self.gate_win)))
+        _extra_gates = tuple(int(x) for x in (gate_windows or []) if int(x) > 0)
+        _win = sorted(set((20, 60, 120, self.gate_win, *_extra_gates)))
         for nm, x in [("a_mkt", self.a_mkt), ("a_g", self.a_g), ("u_g", self.u_g), ("u_m", self.u_m)]:
             self.sma[nm] = {w: x.rolling(w, min_periods=10).mean() for w in _win}
         # 性能缓存: 3年(756交易日)滚动窗口 max/min, 与 mkt_info 的 iloc[max(0,i-755):i+1] 逐点等价
@@ -201,12 +203,13 @@ class DynamicStrategy:
     SIG_CLASS = SignalSet  # 审计脚本可用子类注入"泄漏口径"信号集(仅审计对照, 生产代码无泄漏路径)
 
     def __init__(self, R_full, cfg=None, a_mkt_override=None):
-        self.sig = self.SIG_CLASS(R_full, a_mkt_override=a_mkt_override,
-                                  lag=cfg.get("signal_lag", 1) if cfg else 1,
-                                  gate_win=cfg.get("gate_win", 120) if cfg else 120,
-                                  score_mode=cfg.get("score_mode", "base") if cfg else "base")
-        self.R = R_full
         cfg = cfg or {}
+        self.sig = self.SIG_CLASS(R_full, a_mkt_override=a_mkt_override,
+                                  lag=cfg.get("signal_lag", 1),
+                                  gate_win=cfg.get("gate_win", 120),
+                                  score_mode=cfg.get("score_mode", "base"),
+                                  gate_windows=cfg.get("gate_windows", []))
+        self.R = R_full
         sm = cfg.get("state_map", STATE_MAP)
         self.state_map = {int(k): tuple(v) for k, v in sm.items()}
         self.min_cash = cfg.get("min_cash", MIN_CASH)
@@ -215,6 +218,8 @@ class DynamicStrategy:
         self.hyst_up = cfg.get("hyst_up", HYST_UP)
         self.hyst_down = cfg.get("hyst_down", HYST_DOWN)
         self.gate_win = cfg.get("gate_win", 120)
+        self.gate_windows = tuple(sorted({int(x) for x in cfg.get("gate_windows", []) if int(x) > 0}))
+        self.gate_mode = str(cfg.get("gate_mode", "majority"))
         self.growth_split_bull = dict(cfg.get("growth_split_bull", GROWTH_SPLIT_BULL))
         self.growth_split_bear = dict(cfg.get("growth_split_bear", GROWTH_SPLIT_BEAR))
         self.defense_momentum = bool(cfg.get("defense_momentum", False))
@@ -973,9 +978,33 @@ class DynamicStrategy:
             return False
         return st
 
+    def _gate_mult(self, dt, market, fallback):
+        """结构闸门乘数. 空 gate_windows 时与历史行为逐位一致."""
+        if not self.gate_windows:
+            if self.gate_band > 0:
+                return 1.0 if self._gate_state(dt, market) else 0.0
+            return 1.0 if fallback else 0.0
+        i = self.sig._idx(dt)
+        nm = "a_mkt" if market == "CN" else "u_m"
+        x = self.sig.a_mkt if market == "CN" else self.sig.u_m
+        if i >= len(x):
+            return 1.0
+        px = float(x.iloc[i])
+        checks = [bool(px > self.sig.sma[nm][win].iloc[i]) for win in self.gate_windows]
+        votes = sum(checks) / len(checks)
+        if self.gate_mode == "fraction":
+            return float(votes)
+        if self.gate_mode == "any":
+            return 1.0 if any(checks) else 0.0
+        if self.gate_mode == "all":
+            return 1.0 if all(checks) else 0.0
+        return 1.0 if votes >= 0.5 else 0.0
+
     def _market_mult(self, dt, market):
         """返回 (成长弹性乘数, 全弹性乘数, CN 红利防御腿保留乘数)"""
         dd, ok20, ok20_60, rec, ok120 = self.sig.mkt_info(dt, market, self.gate_win)
+        gate_mult = self._gate_mult(dt, market, ok120)
+        gate_ok = gate_mult >= 0.5
         fb_thr, fb_cut, deep_thr, recov = self.market_dd[market]
         m_g, m_all, m_def = 1.0, 1.0, 1.0
         # 深熊锁定: 该市场全部弹性清零; CN 红利防御腿可按配置保留一部分(跷跷板对冲腿)
@@ -1004,7 +1033,7 @@ class DynamicStrategy:
                             keep = 0.0
             return keep
         if self._lock[market]:
-            if dd > -recov or (ok120 and ok20_60):
+            if dd > -recov or (gate_ok and ok20_60):
                 self._lock[market] = False
             else:
                 return 0.0, 0.0, _lock_def()
@@ -1012,9 +1041,8 @@ class DynamicStrategy:
             self._lock[market] = True
             return 0.0, 0.0, _lock_def()
         # 结构闸门
-        gst = (self._gate_state(dt, market) if self.gate_band > 0 else ok120) if self.struct_gate else True
-        if not gst:
-            m_g = 0.0
+        if self.struct_gate:
+            m_g = min(m_g, gate_mult)
         # 快刹车
         if dd < -fb_thr and not (ok20 and ok20_60):
             m_g = min(m_g, fb_cut)

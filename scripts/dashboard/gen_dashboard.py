@@ -14,9 +14,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(HERE, "..")))
 from data_prep import build_panel, read_table, rets_from, DATA_DIR
 from engine import run_backtest
 from strategy import DynamicStrategy, live_rebalance_target
-from swaps import pnl_panel, traded_code, traded_name
+from swaps import traded_code, traded_name
+from run_backtest import exec_panel
 
 _CFG_CANDIDATES = [
+    os.path.abspath(os.path.join(HERE, "..", "..", "references", "final_cfg_v47.json")),
+    os.path.join(SKILL, "references", "final_cfg_v47.json"),
     os.path.abspath(os.path.join(HERE, "..", "..", "references", "final_cfg_v45.json")),
     os.path.join(SKILL, "references", "final_cfg_v45.json"),
     os.path.join(SKILL, "references", "final_cfg_v44.json"),
@@ -24,11 +27,12 @@ _CFG_CANDIDATES = [
     os.path.join(SKILL, "references", "final_cfg_v41.json"),
     os.path.join(SKILL, "references", "final_cfg_v42.json"),
     os.path.join(SKILL, "references", "final_cfg_v40.json"),
-    os.path.join(SKILL, "scripts", "references", "final_cfg_v45.json"),
+    os.path.join(SKILL, "scripts", "references", "final_cfg_v47.json"),
 ]
 CFG_FILE = next((p for p in _CFG_CANDIDATES if os.path.exists(p)), _CFG_CANDIDATES[-1])
 NAMES = {"159232": "自由现金流", "159222": "自由现金流国证", "515100": "红利低波100",
-         "563020": "红利低波", "159941": "纳指100", "513500": "标普500", "159952": "创业板"}
+         "563020": "红利低波", "512890": "红利低波", "159941": "纳指100",
+         "513500": "标普500", "159952": "创业板"}
 SLOTS = ["159232", "515100", "159941", "513500", "159952"]
 WEEKDAY_CN = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
 
@@ -37,7 +41,7 @@ def main():
     out_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(HERE), "dashboard.json")
     cfg = json.load(open(CFG_FILE))
     R, W = build_panel("proxy")
-    R_pnl = pnl_panel(R, "proxy", cfg)
+    R_pnl = exec_panel(R, "proxy", cfg, "price")
     ds = DynamicStrategy(R, cfg=cfg)
     bond_code = cfg.get("cash_bond_code", "511010")
     bond = rets_from(read_table(f"{bond_code}_nav.csv"), "cum_nav") if cfg.get("cash_bond_pct") else None
@@ -71,7 +75,7 @@ def main():
     is_rebal_day = today.weekday() == rebal_wd
     gap = max(abs(w_act[s] - tgt[s]) for s in active_slots + ["cash"])
     if is_rebal_day:
-        ver = cfg.get("version", "v45")
+        ver = cfg.get("version", "v47")
         action = ("今日是周" + WEEKDAY_CN[rebal_wd][1] +
                   f"调仓日：按 {ver} 规则用 {signal_dt.date()} 收盘信号决策（决策日 {decision.date()}），目标缺口 1 笔当日收盘成交；"
                   "QDII 溢价用 T-2 口径（绝对溢价>5/8/12% 自动降仓×0.40/×0.20/×0.08；相对溢价差>2pp 转投低溢价品种），下单前查 IOPV")
@@ -149,7 +153,7 @@ def main():
         "perf": {"last": round(float(rets.iloc[-1]) * 100, 2), "r5": round(r5 * 100, 2), "r20": round(r20 * 100, 2),
                  "ytd": round(ytd * 100, 2) if ytd == ytd else None, "dd": round(cur_dd * 100, 2)},
         "curves": curves,
-        "config": {"version": cfg.get("version", "v45"), "signal_lag": 1,
+        "config": {"version": cfg.get("version", "v47"), "signal_lag": 1,
                    "rebal_weekday": rebal_wd, "cash_bond_code": bond_code,
                    "cash_bond_pct": cfg.get("cash_bond_pct", 0.0),
                    "decision_date": str(decision.date()),
@@ -163,3 +167,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

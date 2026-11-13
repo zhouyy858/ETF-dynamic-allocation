@@ -16,10 +16,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "out")
 if not os.path.isdir(OUT):
     OUT = os.path.join(HERE, "out")
-_p1 = os.path.join(HERE, "..", "references", "final_cfg_v41.json")
-_p2 = os.path.join(HERE, "references", "final_cfg_v41.json")
+_p1 = os.path.join(HERE, "..", "references", "final_cfg_v47.json")
+_p2 = os.path.join(HERE, "references", "final_cfg_v47.json")
 CFG = json.load(open(sys.argv[1] if len(sys.argv) > 1 else (_p1 if os.path.exists(_p1) else _p2)))
-TAG = sys.argv[2] if len(sys.argv) > 2 else "v41"
+TAG = sys.argv[2] if len(sys.argv) > 2 else "v47"
 TW = json.loads(sys.argv[3]) if len(sys.argv) > 3 else CFG.get("tranche_weights")
 CALIBER = os.environ.get("ETF_AUDIT_CALIBER", "price")
 R_SIG, W = build_panel("proxy")
@@ -146,3 +146,4 @@ print(f"\nCalmar 恶化超10%的扰动次数: {n_bad}/{len(df)}")
 out = {"tag": TAG, "base": base, "rows": df.to_dict("records"), "summary": summary.to_dict("index")}
 json.dump(out, open(os.path.join(OUT, f"audit_{TAG}.json"), "w"), ensure_ascii=False, indent=1)
 print(f"[ok] out/audit_{TAG}.json")
+
