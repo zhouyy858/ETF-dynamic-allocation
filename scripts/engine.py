@@ -18,7 +18,7 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
                  min_delta=0.002, name="", tranche_weights=None,
                  cash_bond_rets=None, cash_bond_pct=0.0, exec_lag=0, accrual_mode="pre",
                  rebal_weekday=2, rebal_freq="weekly", strict=False,
-                 cash_gold_rets=None, gold_override_fn=None):
+                 cash_gold_rets=None, gold_override_fn=None, slots=None):
     if strict:
         assert accrual_mode == "pre", "严格模式必须 accrual_mode=pre (成交仓位不得计提当日收益)"
         assert exec_lag == 0, "严格模式必须 exec_lag=0 (决策日收盘成交, 前一日信号)";
@@ -42,13 +42,21 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
     其余在随后(tranches-1)个周三各成交1笔 -> 每周三调仓、三周调整完; 若上一计划仍有未执行分笔,
     常规决策顺延(计划不重叠), 紧急风控可取代未完成计划并立即重启新的3周三笔计划。
     """
+    # slots=None keeps the historical column order and .values path. A paper overlay
+    # passes the extra sleeve codes explicitly; v47 never does.
+    cols = list(SLOTS if not slots else slots)
     R = R.copy()
     if start: R = R[R.index >= start]
     if end: R = R[R.index <= end]
     R = R.ffill().fillna(0.0)
     dates = R.index
     n = len(dates)
-    k = len(SLOTS)
+    k = len(cols)
+
+    def row_ret(i):
+        if slots is None:
+            return R.iloc[i].to_numpy(dtype=float)
+        return R.iloc[i].reindex(cols).to_numpy(dtype=float)
     repo_d = (1 + repo) ** (1 / TRADING_DAYS) - 1
     bond = None
     if cash_bond_rets is not None and cash_bond_pct > 0:
@@ -71,7 +79,7 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
         return repo_d
 
     def fixed_target():
-        t = np.array([fixed_weights[s] for s in SLOTS], dtype=float)
+        t = np.array([fixed_weights[s] for s in cols], dtype=float)
         return t / t.sum()
 
     w = np.zeros(k)
@@ -108,7 +116,7 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
             # 严格口径: 先按"上一收盘持仓"计提当日收益, 再收盘执行成交 ->
             # 新买入/卖出份额自下一交易日起计收益, 不享受成交当日涨跌(消除1日超前收益)
             cash = 1.0 - w.sum()
-            r = R.iloc[i].values
+            r = row_ret(i)
             cash_ret = cash_ret_at(i)
             g = w * (1.0 + r)
             c = cash * (1.0 + cash_ret)
@@ -134,12 +142,12 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
             elif target_weights_fn is not None:
                 tgt = target_weights_fn(dt, R.iloc[:i], make_ctx())
                 if tgt is not None:
-                    target = np.array([tgt[s] for s in SLOTS], dtype=float)
+                    target = np.array([tgt[s] for s in cols], dtype=float)
         is_emergency = False
         if daily_override_fn is not None:
             tgt2 = daily_override_fn(dt, R.iloc[:i], make_ctx())
             if tgt2 is not None:
-                target = np.array([tgt2[s] for s in SLOTS], dtype=float)
+                target = np.array([tgt2[s] for s in cols], dtype=float)
                 is_emergency = True
         if target is not None:
             # 常规决策: 上一计划未执行完毕则顺延, 保证同一时点只有一份计划、三周内调整完
@@ -175,7 +183,7 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
         else:
             # 旧版口径: 按成交后权重计提当日收益并扣除费用
             cash = 1.0 - w.sum()
-            r = R.iloc[i].values
+            r = row_ret(i)
             cash_ret = cash_ret_at(i)
             g = w * (1.0 + r)
             c = cash * (1.0 + cash_ret)
@@ -197,7 +205,7 @@ def run_backtest(R, target_weights_fn=None, daily_override_fn=None, fixed_weight
 
     rs = pd.Series(rets, index=dates)
     W = (1 + rs).cumprod()
-    wdf = pd.DataFrame(weights_history, index=dates, columns=SLOTS + ["cash"])
+    wdf = pd.DataFrame(weights_history, index=dates, columns=cols + ["cash"])
     return {"rets": rs, "wealth": W, "weights": wdf, "name": name,
             "turnover": float(turnover_day.sum()), "schedule_n": int(sum(len(v) for v in pending.values()))}
 

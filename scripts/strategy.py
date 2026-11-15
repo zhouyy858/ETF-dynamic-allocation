@@ -347,7 +347,25 @@ class DynamicStrategy:
         self.premium_shift = int(cfg.get("premium_shift", 1))
         # 溢价先按日期对齐, 滞后在 _premium_row 里用信号下标取, 这样决策日还不在索引里
         # (周五 09:00) 时也能取到与回测同一根 K 线. 预 shift 再按决策日 loc 会在缺这天时直接拿不到.
-        self._premium = self._load_premium_panel(R_full, 0) if self.premium_gate else None
+        raw_sw = {str(k): str(v) for k, v in (cfg.get("instrument_swaps") or {}).items() if k and v and str(k) != str(v)}
+        # 只在 QDII 槽被换掉时改溢价输入。v47 只换 515100→512890，这条路径不走。
+        self._prem_override = {slot: raw_sw[slot] for slot in PREMIUM_FILES if raw_sw.get(slot, slot) != slot}
+        self.growth_overlay = []
+        for spec in cfg.get("growth_overlay") or []:
+            self.growth_overlay.append({
+                "parent": str(spec["parent"]),
+                "child": str(spec["child"]),
+                "share": float(spec["share"]),
+            })
+        self._overlay_dt = None
+        self._child_premium = {}
+        if self.premium_gate and self._prem_override:
+            self._premium = self._load_premium_panel_swapped(R_full, self._prem_override)
+        else:
+            self._premium = self._load_premium_panel(R_full, 0) if self.premium_gate else None
+        if self.premium_gate and self.growth_overlay:
+            self._child_premium = self._load_child_premiums(
+                R_full, [ov["child"] for ov in self.growth_overlay])
         self.valuation_win = int(cfg.get("valuation_win_days", VALUATION_WIN_DAYS))
         self.valuation_thr = [float(x) for x in cfg.get("valuation_thr", [0.95, 0.98])]
         self.valuation_cut = [float(x) for x in cfg.get("valuation_cut", [0.6, 0.35])]
@@ -455,6 +473,63 @@ class DynamicStrategy:
             cols[code] = p.clip(*PREMIUM_CLIP).reindex(R.index).ffill()
         out = pd.DataFrame(cols)
         return out.shift(shift)
+
+    @staticmethod
+    def _premium_series(code, price_fn):
+        px = pd.read_csv(_data(price_fn), parse_dates=["date"]).set_index("date")["close"].sort_index()
+        nav = pd.read_csv(_data(f"{code}_nav.csv"), parse_dates=["date"]).set_index("date")
+        nav = nav[~nav.index.duplicated(keep="last")].sort_index()["unit_nav"]
+        df = pd.concat([px.rename("px"), nav.rename("nav")], axis=1, sort=True).dropna()
+        p = df["px"] / df["nav"] - 1
+        if code in PREMIUM_SPLIT_DROP:
+            p = p.drop(pd.Timestamp(PREMIUM_SPLIT_DROP[code]), errors="ignore")
+        return p
+
+    @classmethod
+    def _load_premium_panel_swapped(cls, R, overrides):
+        """换掉的 QDII 槽用成交标的自己的溢价；该标的还没有溢价的日期沿用原槽。"""
+        base = cls._load_premium_panel(R, 0)
+        out = base.copy()
+        for slot, code in overrides.items():
+            p = cls._premium_series(code, f"qdii_price_{code}.csv").clip(*PREMIUM_CLIP)
+            col = base[slot].copy()
+            known = p.dropna()
+            if len(known):
+                aligned = known.reindex(col.index)
+                col.loc[aligned.notna()] = aligned.dropna()
+            out[slot] = col
+        return out
+
+    @classmethod
+    def _load_child_premiums(cls, R, codes):
+        """新增 QDII 袖的溢价。没有场内价/净值文件的（A股软件）留空，不新造门控。"""
+        out = {}
+        for code in codes:
+            px_fn = f"qdii_price_{code}.csv"
+            nav_fn = f"{code}_nav.csv"
+            if not (os.path.exists(_data(px_fn)) and os.path.exists(_data(nav_fn))):
+                continue
+            p = cls._premium_series(code, px_fn).clip(*PREMIUM_CLIP)
+            out[code] = p.reindex(R.index).ffill()
+        return out
+
+    def _child_prem_cut(self, code):
+        """与 v47 同一组阈值，只作用在新增袖上，不改 159941/513500 的原门控。"""
+        series = self._child_premium.get(code)
+        dt = self._overlay_dt
+        if series is None or dt is None or not self.premium_gate:
+            return 1.0
+        j = self.sig._idx(dt) - (int(self.premium_shift) - 1)
+        if j < 0 or j >= len(series):
+            return 1.0
+        pm = series.iloc[j]
+        if pd.isna(pm) or float(pm) <= 0:
+            return 1.0
+        cut = 1.0
+        for thr, c in zip(self.premium_thr, self.premium_cut):
+            if float(pm) >= thr:
+                cut = min(cut, c)
+        return cut
 
     def _premium_row(self, dt):
         """决策日可用的溢价行.
@@ -894,6 +969,7 @@ class DynamicStrategy:
 
     def daily_fn(self):
         def fn(dt, R_prev, ctx):
+            self._overlay_dt = dt
             pf = ctx.get("pf_rets", pd.Series(dtype=float))
             if len(pf) < 40:
                 return None
@@ -1186,6 +1262,7 @@ class DynamicStrategy:
         return out
 
     def regular_target(self, dt, ctx):
+        self._overlay_dt = dt
         sc = self._eff_score(dt)
         if self.score_confirm > 0:
             sc = self._confirm_score(dt, sc)
@@ -1272,6 +1349,33 @@ class DynamicStrategy:
         return self._finalize(out)
 
     def _finalize(self, out):
+        if self.growth_overlay:
+            # 底仓留在原槽，只把底仓以上的成长份额按 share 拆给新袖。新袖没有底仓。
+            # QDII 新袖再用它自己的 T-2 溢价、同一组阈值削减；削掉的权重回到现金。
+            out = dict(out)
+            slots = list(SLOTS)
+            for ov in self.growth_overlay:
+                parent, child, share = ov["parent"], ov["child"], float(ov["share"])
+                growth = max(float(out.get(parent, 0.0)) - float(self.floor.get(parent, 0.0)), 0.0)
+                moved = growth * share
+                out[parent] = float(out.get(parent, 0.0)) - moved
+                out[child] = moved * self._child_prem_cut(child)
+                if child not in slots:
+                    slots.append(child)
+            total = sum(float(out.get(s, 0.0)) for s in slots)
+            cash = 100.0 - total
+            cash = max(cash, self.min_cash * 100)
+            if 100 - cash > self.max_eq * 100:
+                cash = (1 - self.max_eq) * 100
+            eq = 100.0 - cash
+            if total <= 1e-9:
+                for s in slots:
+                    out[s] = 0.0
+            else:
+                for s in slots:
+                    out[s] = float(out.get(s, 0.0)) * (eq / total) / 100.0
+            out["cash"] = cash / 100.0
+            return out
         total = sum(out.values())
         cash = 100.0 - total
         cash = max(cash, self.min_cash * 100)
