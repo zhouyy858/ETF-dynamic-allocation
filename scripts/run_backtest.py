@@ -5,11 +5,11 @@
 import sys, os, json
 import numpy as np, pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from data_prep import build_panel, read_table, rets_from
+from data_prep import build_panel, read_table, rets_from, DATA_DIR
 from engine import run_backtest, evaluate, fmt_eval, SLOTS
 from strategy import DynamicStrategy, live_rebalance_target
 from metrics import drawdown_series
-from swaps import pnl_panel, traded_code, traded_name
+from swaps import pnl_panel, traded_code, traded_name, qfq_returns, swaps_of, _gap_fill, _real_fill
 
 OUT = os.path.join(os.getcwd(), "out")
 os.makedirs(OUT, exist_ok=True)
@@ -27,11 +27,48 @@ def price_rets(code):
     return r.drop([pd.Timestamp(d) for d in PRICE_DROP[code]], errors="ignore")
 
 
+def own_returns(code, caliber):
+    """场内价读 {code}_qfq.csv。净值口径若写了 {code}_navsplice.csv，用那条拼接，否则仍用 qfq。"""
+    if caliber == "nav":
+        path = os.path.join(DATA_DIR, f"{code}_navsplice.csv")
+        if os.path.exists(path):
+            s = pd.read_csv(path, parse_dates=["date"]).set_index("date")["close"]
+            s = s[~s.index.duplicated(keep="last")].sort_index()
+            return s.pct_change().dropna()
+    return qfq_returns(code)
+
+
+def _fill_slot(base, own, index, layer):
+    if layer == "real":
+        return _real_fill(base, own, index)
+    return _gap_fill(base, own, index)
+
+
+def book_slots(cfg):
+    cols = list(SLOTS)
+    for ov in cfg.get("growth_overlay") or []:
+        child = str(ov["child"])
+        if child not in cols:
+            cols.append(child)
+    return cols
+
+
 def exec_panel(R, layer, cfg, caliber):
-    P = pnl_panel(R, layer, cfg).copy()
+    # 场内价先铺到原 QDII 槽上，再做换券。这样新 QDII 上市前仍是原槽的场内价，
+    # 而不是净值代理。没换的槽和 v47 同一条覆盖。
+    base = R
     if caliber == "price":
+        base = R.copy()
         for code in PRICE_FILES:
-            P[code] = price_rets(code).reindex(P.index).combine_first(P[code])
+            base[code] = price_rets(code).reindex(base.index).combine_first(base[code])
+    P = pnl_panel(base, layer, cfg).copy()
+    if caliber == "nav":
+        for slot, code in swaps_of(cfg).items():
+            if os.path.exists(os.path.join(DATA_DIR, f"{code}_navsplice.csv")):
+                P[slot] = _fill_slot(R[slot], own_returns(code, "nav"), P.index, layer)
+    for ov in cfg.get("growth_overlay") or []:
+        child, parent = str(ov["child"]), str(ov["parent"])
+        P[child] = _fill_slot(P[parent], own_returns(child, caliber), P.index, layer)
     return P
 
 
@@ -68,7 +105,7 @@ def risk_parity_weights(R, start, end):
     w = 1 / vols
     return {s: float(w[s] / w.sum() * 100) for s in SLOTS}
 
-def run_all(R, label, start, end, dyn_cfg, R_pnl=None):
+def run_all(R, label, start, end, dyn_cfg, R_pnl=None, slots=None):
     results = {}
     wealths = {}
     periods = make_periods(R.index[-1].date() if end is None else pd.Timestamp(end).date())
@@ -94,7 +131,7 @@ def run_all(R, label, start, end, dyn_cfg, R_pnl=None):
                        tranche_weights=dyn_cfg.get("tranche_weights"),
                        cash_bond_rets=bond, cash_bond_pct=dyn_cfg.get("cash_bond_pct", 0.0),
                        rebal_weekday=dyn_cfg.get("rebal_weekday", 2), rebal_freq=dyn_cfg.get("rebal_freq", "weekly"),
-                       strict=True)
+                       strict=True, slots=slots)
     results[f"DYN {label}"] = evaluate(res, periods=periods)
     wealths[f"DYN {label}"] = res["wealth"]
     results["_weights"] = res["weights"]
@@ -206,13 +243,15 @@ def main():
     cfg = json.load(open(cfg_file))
     R_proxy_pnl = exec_panel(R_PROXY, "proxy", cfg, caliber)
     R_real_pnl = exec_panel(R_REAL, "real", cfg, caliber)
+    slots = book_slots(cfg)
+    slots_arg = slots if slots != list(SLOTS) else None
     wd = cfg.get("rebal_weekday", 2); wd_cn = "一二三四五"[wd]
     freq = cfg.get("rebal_freq", "weekly"); n_tw = len(cfg.get("tranche_weights", [1.0]))
     cal_cn = "场内价" if caliber == "price" else "净值"
     cal_suffix = "" if caliber == "nav" else "_price"
     print(f"===== 迭代 {tag} | 周{wd_cn}-{freq}-{n_tw}笔(前一日信号, 无未来函数, strict) | 损益口径={cal_cn} =====")
-    rp = run_all(R_PROXY, tag, BACKTEST_START, None, cfg, R_proxy_pnl)
-    rr = run_all(R_REAL, tag, REAL_START, None, cfg, R_real_pnl)
+    rp = run_all(R_PROXY, tag, BACKTEST_START, None, cfg, R_proxy_pnl, slots_arg)
+    rr = run_all(R_REAL, tag, REAL_START, None, cfg, R_real_pnl, slots_arg)
     ds_oos = DynamicStrategy(R_PROXY, cfg=cfg)
     bond_oos = rets_from(read_table(f"{cfg.get('cash_bond_code', '511010')}_nav.csv"), "cum_nav") if cfg.get("cash_bond_pct") else None
     res_oos = run_backtest(R_proxy_pnl, target_weights_fn=ds_oos.target_fn(), daily_override_fn=ds_oos.daily_fn(),
@@ -220,7 +259,7 @@ def main():
                            repo=cfg.get("repo_rate", 0.022), tranche_weights=cfg.get("tranche_weights"),
                            cash_bond_rets=bond_oos, cash_bond_pct=cfg.get("cash_bond_pct", 0.0),
                            rebal_weekday=cfg.get("rebal_weekday", 2), rebal_freq=cfg.get("rebal_freq", "weekly"),
-                           strict=True)
+                           strict=True, slots=slots_arg)
     oos_dyn = evaluate(res_oos)
     print(f"\n===== OOS（proxy 独立起点 2022-01-04）DYN CAGR={oos_dyn['cagr']*100:.2f}%  "
           f"MDD={oos_dyn['max_dd']*100:.2f}%  Calmar={oos_dyn['calmar']:.4f} =====")
@@ -266,9 +305,10 @@ def main():
     else:
         cash_nm = f"现金(逆回购{1-bond_pct:.0%}+{bond_code} {bond_pct:.0%})"
     active_slots = [s for s in SLOTS if s not in set(cfg.get("exclude", []))]
+    extra_slots = [s for s in (slots_arg or []) if s not in active_slots]
     print("\n===== 当前仓位管理现状 (数据截至 %s, 配置 %s) =====" % (str(wdf.index[-1].date()), cfg_file))
     print("  实际持仓(含权重漂移, 以最新交易日收盘计; 代码是成交标的):")
-    for s in active_slots + ["cash"]:
+    for s in active_slots + extra_slots + ["cash"]:
         code = "cash" if s == "cash" else traded_code(s, cfg)
         nm = cash_nm if s == "cash" else traded_name(s, cfg)
         print(f"    {code:<8} {nm:<22} {w_last[s]*100:6.2f}%")
@@ -276,7 +316,7 @@ def main():
     # 数据若停在周四(周五 09:00), 用走完的状态现算, 信号落在周四. 不用冷启动的 signal_lag=0.
     decision, signal_dt, tgt_last = live_rebalance_target(ds, rets, wd)
     print(f"  目标权重(决策日 {decision.date()}，信号截至 {signal_dt.date()}，周五 09:00 清单；不含决策日收盘):")
-    for s in active_slots + ["cash"]:
+    for s in active_slots + extra_slots + ["cash"]:
         code = "cash" if s == "cash" else traded_code(s, cfg)
         nm = cash_nm if s == "cash" else traded_name(s, cfg)
         print(f"    {code:<8} {nm:<22} {tgt_last[s]*100:6.2f}%")
