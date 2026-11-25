@@ -1,0 +1,4690 @@
+{
+ "asof": "2026-11-25",
+ "premium_date": "2026-11-24",
+ "default_config": "references/final_cfg_v47.json",
+ "default_unchanged": true,
+ "change_default": false,
+ "any_three_calmar_pass": false,
+ "bars": {
+  "liq_min_cny": 20000000.0,
+  "corr_veto": 0.9,
+  "premium_veto": 0.08,
+  "oos_start": "2022-01-04"
+ },
+ "baseline": {
+  "metrics": {
+   "proxy": {
+    "cagr": 0.1609468481830294,
+    "max_dd": -0.07983071306532696,
+    "sharpe": 1.5050199360076497,
+    "calmar": 2.016101848562014,
+    "vol": 0.0900302698553487,
+    "turnover": 107.53545274826092
+   },
+   "oos": {
+    "cagr": 0.14748191394538335,
+    "max_dd": -0.058911152029251346,
+    "sharpe": 1.5791613592578149,
+    "calmar": 2.503463416776397,
+    "vol": 0.077751562882864,
+    "turnover": 39.9171622177026
+   },
+   "real": {
+    "cagr": 0.32461912823367056,
+    "max_dd": -0.043455893447549854,
+    "sharpe": 2.5830337677276805,
+    "calmar": 7.470082938818816,
+    "vol": 0.10407365403910263,
+    "turnover": 16.80955882088468
+   },
+   "train": {
+    "cagr": 0.16809017703835694,
+    "max_dd": -0.07983071306532696,
+    "sharpe": 1.4638810095669539,
+    "calmar": 2.105582808721821,
+    "vol": 0.09721697938365206,
+    "turnover": 67.06453152578278
+   }
+  },
+  "yearly_proxy": {
+   "2014": 0.014605453492632536,
+   "2015": 0.33872578601036807,
+   "2016": 0.06647238577369485,
+   "2017": 0.06976514852305638,
+   "2018": 0.08409704878762803,
+   "2019": 0.17277486929446662,
+   "2020": 0.41691252319481253,
+   "2021": 0.11592543546295664,
+   "2022": -0.0420796188924909,
+   "2023": 0.13185630906366774,
+   "2024": 0.20610218784135648,
+   "2025": 0.2587373960554542,
+   "2026": 0.17526258087465574
+  },
+  "yearly_oos": {
+   "2022": -0.05182667887317083,
+   "2023": 0.13185630906366774,
+   "2024": 0.20610218784135648,
+   "2025": 0.2587373960554542,
+   "2026": 0.17526258087465574
+  },
+  "yearly_real": {
+   "2025": 0.31013778816823656,
+   "2026": 0.1753844852018409
+  }
+ },
+ "universe_n": 1740,
+ "families": [
+  {
+   "id": "gold",
+   "label": "黄金",
+   "slot": "515100",
+   "kind": "sleeve",
+   "n_members": 14,
+   "members": [
+    {
+     "code": "159812",
+     "name": "黄金ETF前海开源"
+    },
+    {
+     "code": "159830",
+     "name": "金ETF天弘"
+    },
+    {
+     "code": "159831",
+     "name": "金ETF嘉实"
+    },
+    {
+     "code": "159834",
+     "name": "金ETF南方"
+    },
+    {
+     "code": "159934",
+     "name": "黄金ETF易方达"
+    },
+    {
+     "code": "159937",
+     "name": "黄金ETF博时"
+    },
+    {
+     "code": "518600",
+     "name": "金ETF广发"
+    },
+    {
+     "code": "518660",
+     "name": "黄金ETF工银"
+    },
+    {
+     "code": "518680",
+     "name": "金ETF富国"
+    },
+    {
+     "code": "518800",
+     "name": "黄金ETF国泰"
+    },
+    {
+     "code": "518850",
+     "name": "黄金ETF华夏"
+    },
+    {
+     "code": "518860",
+     "name": "上海金ETF建信"
+    },
+    {
+     "code": "518880",
+     "name": "黄金ETF华安"
+    },
+    {
+     "code": "518890",
+     "name": "上海金ETF中银"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159812",
+     "name": "黄金ETF前海开源",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 40527236.2
+    },
+    {
+     "code": "159830",
+     "name": "金ETF天弘",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 105002237.5
+    },
+    {
+     "code": "159831",
+     "name": "金ETF嘉实",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 143244189.35000002
+    },
+    {
+     "code": "159834",
+     "name": "金ETF南方",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 211618842.75
+    },
+    {
+     "code": "159934",
+     "name": "黄金ETF易方达",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 846588642.3
+    },
+    {
+     "code": "159937",
+     "name": "黄金ETF博时",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 812325329.0999999
+    },
+    {
+     "code": "518600",
+     "name": "金ETF广发",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 383394272.65
+    },
+    {
+     "code": "518660",
+     "name": "黄金ETF工银",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 298967510.5
+    },
+    {
+     "code": "518680",
+     "name": "金ETF富国",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 361939619.5
+    },
+    {
+     "code": "518800",
+     "name": "黄金ETF国泰",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 831036581.1
+    },
+    {
+     "code": "518850",
+     "name": "黄金ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 732325887.4
+    },
+    {
+     "code": "518860",
+     "name": "上海金ETF建信",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 115963569.05
+    },
+    {
+     "code": "518880",
+     "name": "黄金ETF华安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 3833633390.7
+    },
+    {
+     "code": "518890",
+     "name": "上海金ETF中银",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 82110881.9
+    }
+   ],
+   "primary": "518880",
+   "primary_name": "黄金ETF华安",
+   "substitute": "159934",
+   "status": "tested"
+  },
+  {
+   "id": "dividend",
+   "label": "普通红利(非低波)",
+   "slot": "515100",
+   "kind": "sleeve",
+   "n_members": 20,
+   "members": [
+    {
+     "code": "159332",
+     "name": "央企红利ETF富国"
+    },
+    {
+     "code": "159336",
+     "name": "央企红利ETF融通"
+    },
+    {
+     "code": "159515",
+     "name": "国企红利ETF鹏扬"
+    },
+    {
+     "code": "159581",
+     "name": "红利ETF万家"
+    },
+    {
+     "code": "159589",
+     "name": "红利ETF广发"
+    },
+    {
+     "code": "159708",
+     "name": "红利ETF西部利得"
+    },
+    {
+     "code": "159905",
+     "name": "红利ETF工银"
+    },
+    {
+     "code": "510880",
+     "name": "红利ETF华泰柏瑞"
+    },
+    {
+     "code": "512530",
+     "name": "沪深300红利ETF建信"
+    },
+    {
+     "code": "515080",
+     "name": "中证红利ETF招商"
+    },
+    {
+     "code": "515180",
+     "name": "红利ETF易方达"
+    },
+    {
+     "code": "515890",
+     "name": "红利ETF博时"
+    },
+    {
+     "code": "560020",
+     "name": "红利ETF汇添富"
+    },
+    {
+     "code": "560070",
+     "name": "央企红利ETF汇添富"
+    },
+    {
+     "code": "560570",
+     "name": "A500红利ETF国联安"
+    },
+    {
+     "code": "560700",
+     "name": "央企红利ETF广发"
+    },
+    {
+     "code": "561060",
+     "name": "国企红利ETF华安"
+    },
+    {
+     "code": "561580",
+     "name": "央企红利ETF华泰柏瑞"
+    },
+    {
+     "code": "562060",
+     "name": "标普A股红利ETF华宝"
+    },
+    {
+     "code": "563890",
+     "name": "国企红利ETF创金合信"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159332",
+     "name": "央企红利ETF富国",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 3417735.25
+    },
+    {
+     "code": "159336",
+     "name": "央企红利ETF融通",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 4223341.35
+    },
+    {
+     "code": "159515",
+     "name": "国企红利ETF鹏扬",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 1398704.4500000002
+    },
+    {
+     "code": "159581",
+     "name": "红利ETF万家",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 24921304.65
+    },
+    {
+     "code": "159589",
+     "name": "红利ETF广发",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 8654098.65
+    },
+    {
+     "code": "159708",
+     "name": "红利ETF西部利得",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 7591984.1
+    },
+    {
+     "code": "159905",
+     "name": "红利ETF工银",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 45691683.0
+    },
+    {
+     "code": "510880",
+     "name": "红利ETF华泰柏瑞",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 462915527.55
+    },
+    {
+     "code": "512530",
+     "name": "沪深300红利ETF建信",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 8319002.050000001
+    },
+    {
+     "code": "515080",
+     "name": "中证红利ETF招商",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 315131870.5
+    },
+    {
+     "code": "515180",
+     "name": "红利ETF易方达",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 411725664.35
+    },
+    {
+     "code": "515890",
+     "name": "红利ETF博时",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 5556739.7
+    },
+    {
+     "code": "560020",
+     "name": "红利ETF汇添富",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 3578958.0
+    },
+    {
+     "code": "560070",
+     "name": "央企红利ETF汇添富",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 1178027.6
+    },
+    {
+     "code": "560570",
+     "name": "A500红利ETF国联安",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 26313714.0
+    },
+    {
+     "code": "560700",
+     "name": "央企红利ETF广发",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 10268157.25
+    },
+    {
+     "code": "561060",
+     "name": "国企红利ETF华安",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 771294.6
+    },
+    {
+     "code": "561580",
+     "name": "央企红利ETF华泰柏瑞",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 86776833.0
+    },
+    {
+     "code": "562060",
+     "name": "标普A股红利ETF华宝",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 67303572.4
+    },
+    {
+     "code": "563890",
+     "name": "国企红利ETF创金合信",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 41238.5
+    }
+   ],
+   "primary": "510880",
+   "primary_name": "红利ETF华泰柏瑞",
+   "substitute": "515180",
+   "status": "tested"
+  },
+  {
+   "id": "bank",
+   "label": "银行",
+   "slot": "515100",
+   "kind": "sleeve",
+   "n_members": 17,
+   "members": [
+    {
+     "code": "159080",
+     "name": "银行ETF东财"
+    },
+    {
+     "code": "159253",
+     "name": "银行ETF博时"
+    },
+    {
+     "code": "159887",
+     "name": "银行ETF富国"
+    },
+    {
+     "code": "512410",
+     "name": "银行ETF广发"
+    },
+    {
+     "code": "512700",
+     "name": "银行ETF南方"
+    },
+    {
+     "code": "512730",
+     "name": "银行ETF鹏华"
+    },
+    {
+     "code": "512800",
+     "name": "银行ETF华宝"
+    },
+    {
+     "code": "512820",
+     "name": "银行ETF汇添富"
+    },
+    {
+     "code": "515020",
+     "name": "银行ETF华夏"
+    },
+    {
+     "code": "515290",
+     "name": "银行ETF天弘"
+    },
+    {
+     "code": "515293",
+     "name": "银行ETF天弘"
+    },
+    {
+     "code": "516210",
+     "name": "银行ETF华安"
+    },
+    {
+     "code": "516310",
+     "name": "银行ETF易方达"
+    },
+    {
+     "code": "560670",
+     "name": "银行ETF华泰柏瑞"
+    },
+    {
+     "code": "561480",
+     "name": "银行ETF工银"
+    },
+    {
+     "code": "561530",
+     "name": "银行ETF银华"
+    },
+    {
+     "code": "561860",
+     "name": "银行ETF大成"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159080",
+     "name": "银行ETF东财",
+     "history_through_oos": false,
+     "end": null,
+     "amount20": null
+    },
+    {
+     "code": "159253",
+     "name": "银行ETF博时",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 7326488.3
+    },
+    {
+     "code": "159887",
+     "name": "银行ETF富国",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 98689603.55
+    },
+    {
+     "code": "512410",
+     "name": "银行ETF广发",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 16965295.85
+    },
+    {
+     "code": "512700",
+     "name": "银行ETF南方",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 113530424.85
+    },
+    {
+     "code": "512730",
+     "name": "银行ETF鹏华",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 11275823.35
+    },
+    {
+     "code": "512800",
+     "name": "银行ETF华宝",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 1238688641.7
+    },
+    {
+     "code": "512820",
+     "name": "银行ETF汇添富",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 109786775.45
+    },
+    {
+     "code": "515020",
+     "name": "银行ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 186823032.75
+    },
+    {
+     "code": "515290",
+     "name": "银行ETF天弘",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 137796602.5
+    },
+    {
+     "code": "515293",
+     "name": "银行ETF天弘",
+     "history_through_oos": false,
+     "end": null,
+     "amount20": null
+    },
+    {
+     "code": "516210",
+     "name": "银行ETF华安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 12240593.1
+    },
+    {
+     "code": "516310",
+     "name": "银行ETF易方达",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 229482912.25
+    },
+    {
+     "code": "560670",
+     "name": "银行ETF华泰柏瑞",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 14962265.85
+    },
+    {
+     "code": "561480",
+     "name": "银行ETF工银",
+     "history_through_oos": false,
+     "end": null,
+     "amount20": null
+    },
+    {
+     "code": "561530",
+     "name": "银行ETF银华",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 2950745.35
+    },
+    {
+     "code": "561860",
+     "name": "银行ETF大成",
+     "history_through_oos": false,
+     "end": null,
+     "amount20": null
+    }
+   ],
+   "primary": "512800",
+   "primary_name": "银行ETF华宝",
+   "substitute": "516310",
+   "status": "tested"
+  },
+  {
+   "id": "utility",
+   "label": "公用事业",
+   "slot": "515100",
+   "kind": "sleeve",
+   "n_members": 5,
+   "members": [
+    {
+     "code": "159059",
+     "name": "大成中证全指电力公用事业ETF"
+    },
+    {
+     "code": "159159",
+     "name": "公用事业ETF国投瑞银"
+    },
+    {
+     "code": "159301",
+     "name": "公用事业ETF华夏"
+    },
+    {
+     "code": "560190",
+     "name": "公用事业ETF鹏华"
+    },
+    {
+     "code": "560620",
+     "name": "公用事业ETF万家"
+    }
+   ],
+   "why": "没有同时满足 2022-01-04 前已交易且20日成交额中位数>=20000000的成员；覆盖到 OOS 的成员 0/5",
+   "probes": [
+    {
+     "code": "159059",
+     "name": "大成中证全指电力公用事业ETF",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 4784369.75
+    },
+    {
+     "code": "159159",
+     "name": "公用事业ETF国投瑞银",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 1590397.65
+    },
+    {
+     "code": "159301",
+     "name": "公用事业ETF华夏",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 11496054.35
+    },
+    {
+     "code": "560190",
+     "name": "公用事业ETF鹏华",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 411106.35
+    },
+    {
+     "code": "560620",
+     "name": "公用事业ETF万家",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 343311.94999999995
+    }
+   ],
+   "status": "history_or_liquidity_veto"
+  },
+  {
+   "id": "convertible",
+   "label": "可转债",
+   "slot": "515100",
+   "kind": "sleeve",
+   "n_members": 2,
+   "members": [
+    {
+     "code": "511180",
+     "name": "可转债ETF海富通"
+    },
+    {
+     "code": "511380",
+     "name": "可转债ETF博时"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "511180",
+     "name": "可转债ETF海富通",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2176858034.55
+    },
+    {
+     "code": "511380",
+     "name": "可转债ETF博时",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 9145903062.0
+    }
+   ],
+   "primary": "511380",
+   "primary_name": "可转债ETF博时",
+   "substitute": "511180",
+   "status": "tested"
+  },
+  {
+   "id": "credit",
+   "label": "信用/公司/城投债",
+   "slot": "515100",
+   "kind": "sleeve",
+   "n_members": 10,
+   "members": [
+    {
+     "code": "159395",
+     "name": "信用债ETF大成"
+    },
+    {
+     "code": "159396",
+     "name": "信用债ETF博时"
+    },
+    {
+     "code": "159397",
+     "name": "信用债ETF广发"
+    },
+    {
+     "code": "159398",
+     "name": "信用债ETF天弘"
+    },
+    {
+     "code": "511030",
+     "name": "公司债ETF平安"
+    },
+    {
+     "code": "511070",
+     "name": "公司债ETF南方"
+    },
+    {
+     "code": "511110",
+     "name": "公司债ETF易方达"
+    },
+    {
+     "code": "511190",
+     "name": "信用债ETF海富通"
+    },
+    {
+     "code": "511200",
+     "name": "信用债ETF华夏"
+    },
+    {
+     "code": "511220",
+     "name": "城投债ETF海富通"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159395",
+     "name": "信用债ETF大成",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 884985084.6
+    },
+    {
+     "code": "159396",
+     "name": "信用债ETF博时",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 223927600.2
+    },
+    {
+     "code": "159397",
+     "name": "信用债ETF广发",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 2879079943.9
+    },
+    {
+     "code": "159398",
+     "name": "信用债ETF天弘",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 844603263.7
+    },
+    {
+     "code": "511030",
+     "name": "公司债ETF平安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2371742451.9
+    },
+    {
+     "code": "511070",
+     "name": "公司债ETF南方",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 6856315968.4
+    },
+    {
+     "code": "511110",
+     "name": "公司债ETF易方达",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 4201157806.95
+    },
+    {
+     "code": "511190",
+     "name": "信用债ETF海富通",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 2562022015.7
+    },
+    {
+     "code": "511200",
+     "name": "信用债ETF华夏",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 4686059457.450001
+    },
+    {
+     "code": "511220",
+     "name": "城投债ETF海富通",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2981249969.0
+    }
+   ],
+   "primary": "511220",
+   "primary_name": "城投债ETF海富通",
+   "substitute": "511030",
+   "status": "tested"
+  },
+  {
+   "id": "hs300",
+   "label": "沪深300",
+   "slot": "159952",
+   "kind": "sleeve",
+   "n_members": 25,
+   "members": [
+    {
+     "code": "159300",
+     "name": "沪深300ETF富国"
+    },
+    {
+     "code": "159330",
+     "name": "沪深300ETF东财"
+    },
+    {
+     "code": "159393",
+     "name": "沪深300ETF万家"
+    },
+    {
+     "code": "159673",
+     "name": "沪深300ETF鹏华"
+    },
+    {
+     "code": "159919",
+     "name": "沪深300ETF嘉实"
+    },
+    {
+     "code": "159925",
+     "name": "沪深300ETF南方"
+    },
+    {
+     "code": "510300",
+     "name": "沪深300ETF华泰柏瑞"
+    },
+    {
+     "code": "510310",
+     "name": "沪深300ETF易方达"
+    },
+    {
+     "code": "510320",
+     "name": "沪深300ETF中金"
+    },
+    {
+     "code": "510330",
+     "name": "沪深300ETF华夏"
+    },
+    {
+     "code": "510350",
+     "name": "沪深300ETF工银"
+    },
+    {
+     "code": "510360",
+     "name": "沪深300ETF广发"
+    },
+    {
+     "code": "510370",
+     "name": "沪深300ETF兴业"
+    },
+    {
+     "code": "510380",
+     "name": "沪深300ETF国寿"
+    },
+    {
+     "code": "510390",
+     "name": "沪深300ETF平安"
+    },
+    {
+     "code": "515130",
+     "name": "沪深300ETF博时"
+    },
+    {
+     "code": "515310",
+     "name": "沪深300ETF汇添富"
+    },
+    {
+     "code": "515330",
+     "name": "沪深300ETF天弘"
+    },
+    {
+     "code": "515350",
+     "name": "沪深300ETF民生加银"
+    },
+    {
+     "code": "515360",
+     "name": "沪深300ETF方正富邦"
+    },
+    {
+     "code": "515380",
+     "name": "沪深300ETF泰康"
+    },
+    {
+     "code": "515390",
+     "name": "沪深300ETF华安"
+    },
+    {
+     "code": "515660",
+     "name": "沪深300ETF国联安"
+    },
+    {
+     "code": "561930",
+     "name": "沪深300ETF招商"
+    },
+    {
+     "code": "563520",
+     "name": "沪深300ETF永赢"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159300",
+     "name": "沪深300ETF富国",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 78679275.75
+    },
+    {
+     "code": "159330",
+     "name": "沪深300ETF东财",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 37583777.150000006
+    },
+    {
+     "code": "159393",
+     "name": "沪深300ETF万家",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 26150718.0
+    },
+    {
+     "code": "159673",
+     "name": "沪深300ETF鹏华",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 82026308.94999999
+    },
+    {
+     "code": "159919",
+     "name": "沪深300ETF嘉实",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 1527683403.35
+    },
+    {
+     "code": "159925",
+     "name": "沪深300ETF南方",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 84194952.5
+    },
+    {
+     "code": "510300",
+     "name": "沪深300ETF华泰柏瑞",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 7759773173.2
+    },
+    {
+     "code": "510310",
+     "name": "沪深300ETF易方达",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 1792012686.55
+    },
+    {
+     "code": "510320",
+     "name": "沪深300ETF中金",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 15496427.75
+    },
+    {
+     "code": "510330",
+     "name": "沪深300ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 1114643572.9
+    },
+    {
+     "code": "510350",
+     "name": "沪深300ETF工银",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 18688918.0
+    },
+    {
+     "code": "510360",
+     "name": "沪深300ETF广发",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 90985632.1
+    },
+    {
+     "code": "510370",
+     "name": "沪深300ETF兴业",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2669222.0
+    },
+    {
+     "code": "510380",
+     "name": "沪深300ETF国寿",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 785999.5
+    },
+    {
+     "code": "510390",
+     "name": "沪深300ETF平安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 7794218.85
+    },
+    {
+     "code": "515130",
+     "name": "沪深300ETF博时",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 9085828.2
+    },
+    {
+     "code": "515310",
+     "name": "沪深300ETF汇添富",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 27707680.0
+    },
+    {
+     "code": "515330",
+     "name": "沪深300ETF天弘",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 58672396.5
+    },
+    {
+     "code": "515350",
+     "name": "沪深300ETF民生加银",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 4498968.15
+    },
+    {
+     "code": "515360",
+     "name": "沪深300ETF方正富邦",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 353938.7
+    },
+    {
+     "code": "515380",
+     "name": "沪深300ETF泰康",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 18171667.55
+    },
+    {
+     "code": "515390",
+     "name": "沪深300ETF华安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 200974868.35
+    },
+    {
+     "code": "515660",
+     "name": "沪深300ETF国联安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 1193193.4500000002
+    },
+    {
+     "code": "561930",
+     "name": "沪深300ETF招商",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 6615316.2
+    },
+    {
+     "code": "563520",
+     "name": "沪深300ETF永赢",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 14401959.600000001
+    }
+   ],
+   "primary": "510300",
+   "primary_name": "沪深300ETF华泰柏瑞",
+   "substitute": "510310",
+   "status": "tested"
+  },
+  {
+   "id": "sse50",
+   "label": "上证50",
+   "slot": "159952",
+   "kind": "sleeve",
+   "n_members": 9,
+   "members": [
+    {
+     "code": "510050",
+     "name": "上证50ETF华夏"
+    },
+    {
+     "code": "510100",
+     "name": "上证50ETF易方达"
+    },
+    {
+     "code": "510190",
+     "name": "上证50ETF华安"
+    },
+    {
+     "code": "510600",
+     "name": "上证50ETF申万菱信"
+    },
+    {
+     "code": "510680",
+     "name": "上证50ETF万家"
+    },
+    {
+     "code": "510710",
+     "name": "上证50ETF博时"
+    },
+    {
+     "code": "510800",
+     "name": "上证50ETF建信"
+    },
+    {
+     "code": "510850",
+     "name": "上证50ETF工银"
+    },
+    {
+     "code": "510950",
+     "name": "上证50ETF广发"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "510050",
+     "name": "上证50ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2251157467.05
+    },
+    {
+     "code": "510100",
+     "name": "上证50ETF易方达",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 204699814.95
+    },
+    {
+     "code": "510190",
+     "name": "上证50ETF华安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 730773.5
+    },
+    {
+     "code": "510600",
+     "name": "上证50ETF申万菱信",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 1106150.1
+    },
+    {
+     "code": "510680",
+     "name": "上证50ETF万家",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2757611.55
+    },
+    {
+     "code": "510710",
+     "name": "上证50ETF博时",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 4531634.800000001
+    },
+    {
+     "code": "510800",
+     "name": "上证50ETF建信",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 3226087.8
+    },
+    {
+     "code": "510850",
+     "name": "上证50ETF工银",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 4463607.050000001
+    },
+    {
+     "code": "510950",
+     "name": "上证50ETF广发",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 7040288.649999999
+    }
+   ],
+   "primary": "510050",
+   "primary_name": "上证50ETF华夏",
+   "substitute": "510100",
+   "status": "tested"
+  },
+  {
+   "id": "csi500",
+   "label": "中证500",
+   "slot": "159952",
+   "kind": "sleeve",
+   "n_members": 22,
+   "members": [
+    {
+     "code": "159337",
+     "name": "中证500ETF东财"
+    },
+    {
+     "code": "159500",
+     "name": "中证500ETF富国"
+    },
+    {
+     "code": "159820",
+     "name": "中证500ETF天弘"
+    },
+    {
+     "code": "159922",
+     "name": "中证500ETF嘉实"
+    },
+    {
+     "code": "159935",
+     "name": "中证500ETF景顺"
+    },
+    {
+     "code": "159968",
+     "name": "中证500ETF博时"
+    },
+    {
+     "code": "159982",
+     "name": "中证500ETF鹏华"
+    },
+    {
+     "code": "510500",
+     "name": "中证500ETF南方"
+    },
+    {
+     "code": "510510",
+     "name": "中证500ETF广发"
+    },
+    {
+     "code": "510530",
+     "name": "中证500ETF工银"
+    },
+    {
+     "code": "510550",
+     "name": "中证500ETF方正富邦"
+    },
+    {
+     "code": "510560",
+     "name": "中证500ETF国寿"
+    },
+    {
+     "code": "510570",
+     "name": "中证500ETF兴业"
+    },
+    {
+     "code": "510580",
+     "name": "中证500ETF易方达"
+    },
+    {
+     "code": "510590",
+     "name": "中证500ETF平安"
+    },
+    {
+     "code": "512500",
+     "name": "中证500ETF华夏"
+    },
+    {
+     "code": "512510",
+     "name": "中证500ETF华泰柏瑞"
+    },
+    {
+     "code": "515190",
+     "name": "中证500ETF中银证券"
+    },
+    {
+     "code": "515530",
+     "name": "中证500ETF泰康"
+    },
+    {
+     "code": "515550",
+     "name": "中证500ETF国联"
+    },
+    {
+     "code": "561350",
+     "name": "中证500ETF国泰"
+    },
+    {
+     "code": "563750",
+     "name": "中证500ETF汇添富"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159337",
+     "name": "中证500ETF东财",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 18114218.950000003
+    },
+    {
+     "code": "159500",
+     "name": "中证500ETF富国",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 13663294.5
+    },
+    {
+     "code": "159820",
+     "name": "中证500ETF天弘",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 9027539.600000001
+    },
+    {
+     "code": "159922",
+     "name": "中证500ETF嘉实",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 498828941.0
+    },
+    {
+     "code": "159935",
+     "name": "中证500ETF景顺",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 4380224.6
+    },
+    {
+     "code": "159968",
+     "name": "中证500ETF博时",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 7489677.2
+    },
+    {
+     "code": "159982",
+     "name": "中证500ETF鹏华",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 15111331.3
+    },
+    {
+     "code": "510500",
+     "name": "中证500ETF南方",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 4242839123.9
+    },
+    {
+     "code": "510510",
+     "name": "中证500ETF广发",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 58093959.65
+    },
+    {
+     "code": "510530",
+     "name": "中证500ETF工银",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 6191388.8
+    },
+    {
+     "code": "510550",
+     "name": "中证500ETF方正富邦",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 971467.2
+    },
+    {
+     "code": "510560",
+     "name": "中证500ETF国寿",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 241973.75
+    },
+    {
+     "code": "510570",
+     "name": "中证500ETF兴业",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 3839906.5999999996
+    },
+    {
+     "code": "510580",
+     "name": "中证500ETF易方达",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 250254353.55
+    },
+    {
+     "code": "510590",
+     "name": "中证500ETF平安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 6118815.15
+    },
+    {
+     "code": "512500",
+     "name": "中证500ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 434402556.1
+    },
+    {
+     "code": "512510",
+     "name": "中证500ETF华泰柏瑞",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 11621774.75
+    },
+    {
+     "code": "515190",
+     "name": "中证500ETF中银证券",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 4259484.3
+    },
+    {
+     "code": "515530",
+     "name": "中证500ETF泰康",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2039049.9
+    },
+    {
+     "code": "515550",
+     "name": "中证500ETF国联",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 1277315.15
+    },
+    {
+     "code": "561350",
+     "name": "中证500ETF国泰",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 27299783.450000003
+    },
+    {
+     "code": "563750",
+     "name": "中证500ETF汇添富",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 13683363.65
+    }
+   ],
+   "primary": "510500",
+   "primary_name": "中证500ETF南方",
+   "substitute": "159922",
+   "status": "tested"
+  },
+  {
+   "id": "csi1000",
+   "label": "中证1000",
+   "slot": "159952",
+   "kind": "sleeve",
+   "n_members": 7,
+   "members": [
+    {
+     "code": "159629",
+     "name": "中证1000ETF富国"
+    },
+    {
+     "code": "159633",
+     "name": "中证1000ETF易方达"
+    },
+    {
+     "code": "159845",
+     "name": "中证1000ETF华夏"
+    },
+    {
+     "code": "512100",
+     "name": "中证1000ETF南方"
+    },
+    {
+     "code": "516300",
+     "name": "中证1000ETF华泰柏瑞"
+    },
+    {
+     "code": "560010",
+     "name": "中证1000ETF广发"
+    },
+    {
+     "code": "560110",
+     "name": "中证1000ETF汇添富"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159629",
+     "name": "中证1000ETF富国",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 663777673.9
+    },
+    {
+     "code": "159633",
+     "name": "中证1000ETF易方达",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 968790699.05
+    },
+    {
+     "code": "159845",
+     "name": "中证1000ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2207591847.8
+    },
+    {
+     "code": "512100",
+     "name": "中证1000ETF南方",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 5610991565.0
+    },
+    {
+     "code": "516300",
+     "name": "中证1000ETF华泰柏瑞",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 11749292.0
+    },
+    {
+     "code": "560010",
+     "name": "中证1000ETF广发",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 1551447822.0
+    },
+    {
+     "code": "560110",
+     "name": "中证1000ETF汇添富",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 29688351.95
+    }
+   ],
+   "primary": "512100",
+   "primary_name": "中证1000ETF南方",
+   "substitute": "159845",
+   "status": "tested"
+  },
+  {
+   "id": "broker",
+   "label": "证券",
+   "slot": "159952",
+   "kind": "sleeve",
+   "n_members": 20,
+   "members": [
+    {
+     "code": "159016",
+     "name": "证券ETF广发"
+    },
+    {
+     "code": "159058",
+     "name": "证券ETF大成"
+    },
+    {
+     "code": "159260",
+     "name": "证券ETF博时"
+    },
+    {
+     "code": "159692",
+     "name": "证券ETF东财"
+    },
+    {
+     "code": "159841",
+     "name": "证券ETF天弘"
+    },
+    {
+     "code": "159842",
+     "name": "券商ETF银华"
+    },
+    {
+     "code": "159848",
+     "name": "证券ETF国联安"
+    },
+    {
+     "code": "159993",
+     "name": "证券ETF鹏华"
+    },
+    {
+     "code": "512000",
+     "name": "券商ETF华宝"
+    },
+    {
+     "code": "512570",
+     "name": "证券ETF易方达"
+    },
+    {
+     "code": "512880",
+     "name": "证券ETF国泰"
+    },
+    {
+     "code": "512900",
+     "name": "证券ETF南方"
+    },
+    {
+     "code": "515010",
+     "name": "证券ETF华夏"
+    },
+    {
+     "code": "515560",
+     "name": "证券ETF建信"
+    },
+    {
+     "code": "515850",
+     "name": "证券ETF富国"
+    },
+    {
+     "code": "516200",
+     "name": "证券ETF华安"
+    },
+    {
+     "code": "516730",
+     "name": "证券ETF浦银"
+    },
+    {
+     "code": "560090",
+     "name": "证券ETF汇添富"
+    },
+    {
+     "code": "560400",
+     "name": "证券ETF华泰柏瑞"
+    },
+    {
+     "code": "562870",
+     "name": "证券ETF嘉实"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159016",
+     "name": "证券ETF广发",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 14573618.05
+    },
+    {
+     "code": "159058",
+     "name": "证券ETF大成",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 1738178.85
+    },
+    {
+     "code": "159260",
+     "name": "证券ETF博时",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 4101957.25
+    },
+    {
+     "code": "159692",
+     "name": "证券ETF东财",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 46383029.650000006
+    },
+    {
+     "code": "159841",
+     "name": "证券ETF天弘",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 212269874.4
+    },
+    {
+     "code": "159842",
+     "name": "券商ETF银华",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 197512455.2
+    },
+    {
+     "code": "159848",
+     "name": "证券ETF国联安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2092812.1
+    },
+    {
+     "code": "159993",
+     "name": "证券ETF鹏华",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 47741022.5
+    },
+    {
+     "code": "512000",
+     "name": "券商ETF华宝",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 778369407.5999999
+    },
+    {
+     "code": "512570",
+     "name": "证券ETF易方达",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 124348122.4
+    },
+    {
+     "code": "512880",
+     "name": "证券ETF国泰",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 1171148316.35
+    },
+    {
+     "code": "512900",
+     "name": "证券ETF南方",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 39806516.4
+    },
+    {
+     "code": "515010",
+     "name": "证券ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 38028017.45
+    },
+    {
+     "code": "515560",
+     "name": "证券ETF建信",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 7782983.7
+    },
+    {
+     "code": "515850",
+     "name": "证券ETF富国",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 48094459.0
+    },
+    {
+     "code": "516200",
+     "name": "证券ETF华安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 10033404.1
+    },
+    {
+     "code": "516730",
+     "name": "证券ETF浦银",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2055418.0
+    },
+    {
+     "code": "560090",
+     "name": "证券ETF汇添富",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 72528825.15
+    },
+    {
+     "code": "560400",
+     "name": "证券ETF华泰柏瑞",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 17857248.9
+    },
+    {
+     "code": "562870",
+     "name": "证券ETF嘉实",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 6897386.0
+    }
+   ],
+   "primary": "512880",
+   "primary_name": "证券ETF国泰",
+   "substitute": "512000",
+   "status": "tested"
+  },
+  {
+   "id": "healthcare",
+   "label": "医药",
+   "slot": "159952",
+   "kind": "sleeve",
+   "n_members": 6,
+   "members": [
+    {
+     "code": "159929",
+     "name": "医药ETF汇添富"
+    },
+    {
+     "code": "159938",
+     "name": "医药ETF广发"
+    },
+    {
+     "code": "510660",
+     "name": "医药ETF华夏"
+    },
+    {
+     "code": "512010",
+     "name": "医药ETF易方达"
+    },
+    {
+     "code": "512120",
+     "name": "医药ETF华安"
+    },
+    {
+     "code": "515960",
+     "name": "医药ETF嘉实"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159929",
+     "name": "医药ETF汇添富",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 51391488.4
+    },
+    {
+     "code": "159938",
+     "name": "医药ETF广发",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 36370736.15
+    },
+    {
+     "code": "510660",
+     "name": "医药ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 7845468.65
+    },
+    {
+     "code": "512010",
+     "name": "医药ETF易方达",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 355537005.15
+    },
+    {
+     "code": "512120",
+     "name": "医药ETF华安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 11275571.25
+    },
+    {
+     "code": "515960",
+     "name": "医药ETF嘉实",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 4003493.05
+    }
+   ],
+   "primary": "512010",
+   "primary_name": "医药ETF易方达",
+   "substitute": "159929",
+   "status": "tested"
+  },
+  {
+   "id": "consumer",
+   "label": "消费",
+   "slot": "159952",
+   "kind": "sleeve",
+   "n_members": 12,
+   "members": [
+    {
+     "code": "159672",
+     "name": "消费ETF博时"
+    },
+    {
+     "code": "159689",
+     "name": "消费ETF南方"
+    },
+    {
+     "code": "159798",
+     "name": "消费ETF易方达"
+    },
+    {
+     "code": "159928",
+     "name": "消费ETF汇添富"
+    },
+    {
+     "code": "159936",
+     "name": "可选消费ETF广发"
+    },
+    {
+     "code": "510150",
+     "name": "消费ETF招商"
+    },
+    {
+     "code": "510630",
+     "name": "消费ETF华夏"
+    },
+    {
+     "code": "512600",
+     "name": "消费ETF嘉实"
+    },
+    {
+     "code": "515920",
+     "name": "智能消费ETF博时"
+    },
+    {
+     "code": "517880",
+     "name": "品牌消费ETF华泰柏瑞"
+    },
+    {
+     "code": "560680",
+     "name": "消费ETF广发"
+    },
+    {
+     "code": "562580",
+     "name": "可选消费ETF华夏"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159672",
+     "name": "消费ETF博时",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 3322682.0
+    },
+    {
+     "code": "159689",
+     "name": "消费ETF南方",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 2639868.95
+    },
+    {
+     "code": "159798",
+     "name": "消费ETF易方达",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 13385226.100000001
+    },
+    {
+     "code": "159928",
+     "name": "消费ETF汇添富",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 402389128.1
+    },
+    {
+     "code": "159936",
+     "name": "可选消费ETF广发",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 812940.8
+    },
+    {
+     "code": "510150",
+     "name": "消费ETF招商",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 18083175.15
+    },
+    {
+     "code": "510630",
+     "name": "消费ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 42953645.099999994
+    },
+    {
+     "code": "512600",
+     "name": "消费ETF嘉实",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 12179110.75
+    },
+    {
+     "code": "515920",
+     "name": "智能消费ETF博时",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 1945451.0999999999
+    },
+    {
+     "code": "517880",
+     "name": "品牌消费ETF华泰柏瑞",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2746016.55
+    },
+    {
+     "code": "560680",
+     "name": "消费ETF广发",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 12166749.4
+    },
+    {
+     "code": "562580",
+     "name": "可选消费ETF华夏",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 2109255.1
+    }
+   ],
+   "primary": "159928",
+   "primary_name": "消费ETF汇添富",
+   "substitute": "510630",
+   "status": "tested"
+  },
+  {
+   "id": "military",
+   "label": "军工",
+   "slot": "159952",
+   "kind": "sleeve",
+   "n_members": 4,
+   "members": [
+    {
+     "code": "512560",
+     "name": "军工ETF易方达"
+    },
+    {
+     "code": "512660",
+     "name": "军工ETF国泰"
+    },
+    {
+     "code": "512680",
+     "name": "军工ETF广发"
+    },
+    {
+     "code": "512810",
+     "name": "军工ETF华宝"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "512560",
+     "name": "军工ETF易方达",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 43561984.8
+    },
+    {
+     "code": "512660",
+     "name": "军工ETF国泰",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 285224975.6999999
+    },
+    {
+     "code": "512680",
+     "name": "军工ETF广发",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 58184109.75
+    },
+    {
+     "code": "512810",
+     "name": "军工ETF华宝",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 29706482.099999998
+    }
+   ],
+   "primary": "512660",
+   "primary_name": "军工ETF国泰",
+   "substitute": "512680",
+   "status": "tested"
+  },
+  {
+   "id": "appliance",
+   "label": "家电",
+   "slot": "159952",
+   "kind": "sleeve",
+   "n_members": 8,
+   "members": [
+    {
+     "code": "158002",
+     "name": "家电ETF天弘"
+    },
+    {
+     "code": "159025",
+     "name": "家电ETF华安"
+    },
+    {
+     "code": "159328",
+     "name": "家电ETF易方达"
+    },
+    {
+     "code": "159730",
+     "name": "家电ETF博时"
+    },
+    {
+     "code": "159996",
+     "name": "家电ETF国泰"
+    },
+    {
+     "code": "515640",
+     "name": "家电ETF华夏"
+    },
+    {
+     "code": "560880",
+     "name": "家电ETF广发"
+    },
+    {
+     "code": "561120",
+     "name": "家电ETF富国"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "158002",
+     "name": "家电ETF天弘",
+     "history_through_oos": false,
+     "end": null,
+     "amount20": null
+    },
+    {
+     "code": "159025",
+     "name": "家电ETF华安",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 6500108.949999999
+    },
+    {
+     "code": "159328",
+     "name": "家电ETF易方达",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 6593131.6
+    },
+    {
+     "code": "159730",
+     "name": "家电ETF博时",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 4994921.6
+    },
+    {
+     "code": "159996",
+     "name": "家电ETF国泰",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 53002125.0
+    },
+    {
+     "code": "515640",
+     "name": "家电ETF华夏",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 437164.65
+    },
+    {
+     "code": "560880",
+     "name": "家电ETF广发",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 16044798.0
+    },
+    {
+     "code": "561120",
+     "name": "家电ETF富国",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 6204498.199999999
+    }
+   ],
+   "primary": "159996",
+   "primary_name": "家电ETF国泰",
+   "substitute": "158002",
+   "status": "tested"
+  },
+  {
+   "id": "realestate",
+   "label": "房地产",
+   "slot": "159952",
+   "kind": "sleeve",
+   "n_members": 3,
+   "members": [
+    {
+     "code": "159768",
+     "name": "房地产ETF银华"
+    },
+    {
+     "code": "512200",
+     "name": "房地产ETF南方"
+    },
+    {
+     "code": "515060",
+     "name": "房地产ETF华夏"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159768",
+     "name": "房地产ETF银华",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 27571453.1
+    },
+    {
+     "code": "512200",
+     "name": "房地产ETF南方",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 142359606.14999998
+    },
+    {
+     "code": "515060",
+     "name": "房地产ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 30596063.6
+    }
+   ],
+   "primary": "512200",
+   "primary_name": "房地产ETF南方",
+   "substitute": "515060",
+   "status": "tested"
+  },
+  {
+   "id": "oil_equity",
+   "label": "油气股票",
+   "slot": "159952",
+   "kind": "sleeve",
+   "n_members": 17,
+   "members": [
+    {
+     "code": "159017",
+     "name": "工银瑞信国证石油天然气ETF"
+    },
+    {
+     "code": "159018",
+     "name": "广发国证石油天然气ETF"
+    },
+    {
+     "code": "159019",
+     "name": "华宝国证石油天然气ETF"
+    },
+    {
+     "code": "159026",
+     "name": "南方国证石油天然气ETF"
+    },
+    {
+     "code": "159148",
+     "name": "石油ETF富国"
+    },
+    {
+     "code": "159181",
+     "name": "石油ETF易方达"
+    },
+    {
+     "code": "159189",
+     "name": "石油ETF华夏"
+    },
+    {
+     "code": "159195",
+     "name": "华安国证石油天然气ETF"
+    },
+    {
+     "code": "159197",
+     "name": "招商国证石油天然气ETF"
+    },
+    {
+     "code": "159199",
+     "name": "平安国证石油天然气ETF"
+    },
+    {
+     "code": "159309",
+     "name": "油气ETF汇添富"
+    },
+    {
+     "code": "159588",
+     "name": "石油ETF景顺"
+    },
+    {
+     "code": "159697",
+     "name": "石油ETF鹏华"
+    },
+    {
+     "code": "561360",
+     "name": "石油ETF国泰"
+    },
+    {
+     "code": "561570",
+     "name": "油气ETF华泰柏瑞"
+    },
+    {
+     "code": "561760",
+     "name": "油气ETF博时"
+    },
+    {
+     "code": "563150",
+     "name": "油气ETF银华"
+    }
+   ],
+   "why": "没有同时满足 2022-01-04 前已交易且20日成交额中位数>=20000000的成员；覆盖到 OOS 的成员 0/17",
+   "probes": [
+    {
+     "code": "159017",
+     "name": "工银瑞信国证石油天然气ETF",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 3928445.3
+    },
+    {
+     "code": "159018",
+     "name": "广发国证石油天然气ETF",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 3376844.0999999996
+    },
+    {
+     "code": "159019",
+     "name": "华宝国证石油天然气ETF",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 6706211.55
+    },
+    {
+     "code": "159026",
+     "name": "南方国证石油天然气ETF",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 5897918.699999999
+    },
+    {
+     "code": "159148",
+     "name": "石油ETF富国",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 11830924.850000001
+    },
+    {
+     "code": "159181",
+     "name": "石油ETF易方达",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 3978331.4
+    },
+    {
+     "code": "159189",
+     "name": "石油ETF华夏",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 22376370.95
+    },
+    {
+     "code": "159195",
+     "name": "华安国证石油天然气ETF",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 7289163.199999999
+    },
+    {
+     "code": "159197",
+     "name": "招商国证石油天然气ETF",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 5031893.6
+    },
+    {
+     "code": "159199",
+     "name": "平安国证石油天然气ETF",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 457884.0
+    },
+    {
+     "code": "159309",
+     "name": "油气ETF汇添富",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 40056575.15
+    },
+    {
+     "code": "159588",
+     "name": "石油ETF景顺",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 12907925.049999999
+    },
+    {
+     "code": "159697",
+     "name": "石油ETF鹏华",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 39124971.650000006
+    },
+    {
+     "code": "561360",
+     "name": "石油ETF国泰",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 58503686.099999994
+    },
+    {
+     "code": "561570",
+     "name": "油气ETF华泰柏瑞",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 16235519.0
+    },
+    {
+     "code": "561760",
+     "name": "油气ETF博时",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 4477285.5
+    },
+    {
+     "code": "563150",
+     "name": "油气ETF银华",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 2086642.5
+    }
+   ],
+   "status": "history_or_liquidity_veto"
+  },
+  {
+   "id": "hsi",
+   "label": "恒生指数",
+   "slot": "159941",
+   "kind": "qdii",
+   "n_members": 5,
+   "members": [
+    {
+     "code": "159271",
+     "name": "恒生ETF鹏华"
+    },
+    {
+     "code": "159920",
+     "name": "恒生ETF华夏"
+    },
+    {
+     "code": "513210",
+     "name": "恒生ETF易方达"
+    },
+    {
+     "code": "513600",
+     "name": "恒生指数ETF南方"
+    },
+    {
+     "code": "513660",
+     "name": "恒生ETF华夏"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159271",
+     "name": "恒生ETF鹏华",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 1515192.8
+    },
+    {
+     "code": "159920",
+     "name": "恒生ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 262217670.89999998
+    },
+    {
+     "code": "513210",
+     "name": "恒生ETF易方达",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 4976747.55
+    },
+    {
+     "code": "513600",
+     "name": "恒生指数ETF南方",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 94132756.7
+    },
+    {
+     "code": "513660",
+     "name": "恒生ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 54895267.0
+    }
+   ],
+   "primary": "159920",
+   "primary_name": "恒生ETF华夏",
+   "substitute": "513600",
+   "premium": {
+    "date": "2026-11-24",
+    "premium": -0.009469986253245688,
+    "error": null
+   },
+   "status": "tested"
+  },
+  {
+   "id": "nikkei",
+   "label": "日经/东证",
+   "slot": "513500",
+   "kind": "qdii",
+   "n_members": 5,
+   "members": [
+    {
+     "code": "159866",
+     "name": "日经ETF工银"
+    },
+    {
+     "code": "513000",
+     "name": "日经225ETF易方达"
+    },
+    {
+     "code": "513520",
+     "name": "日经ETF华夏"
+    },
+    {
+     "code": "513800",
+     "name": "日本东证指数ETF南方"
+    },
+    {
+     "code": "513880",
+     "name": "日经225ETF华安"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159866",
+     "name": "日经ETF工银",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 280390926.75
+    },
+    {
+     "code": "513000",
+     "name": "日经225ETF易方达",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 179693645.2
+    },
+    {
+     "code": "513520",
+     "name": "日经ETF华夏",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 223178214.35
+    },
+    {
+     "code": "513800",
+     "name": "日本东证指数ETF南方",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 101308122.5
+    },
+    {
+     "code": "513880",
+     "name": "日经225ETF华安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 166166670.55
+    }
+   ],
+   "primary": "159866",
+   "primary_name": "日经ETF工银",
+   "substitute": "513520",
+   "premium": {
+    "date": "2026-11-24",
+    "premium": 0.02004270266547281,
+    "error": null
+   },
+   "status": "tested"
+  },
+  {
+   "id": "germany",
+   "label": "德国",
+   "slot": "513500",
+   "kind": "qdii",
+   "n_members": 2,
+   "members": [
+    {
+     "code": "159561",
+     "name": "德国ETF嘉实"
+    },
+    {
+     "code": "513030",
+     "name": "德国ETF华安"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "159561",
+     "name": "德国ETF嘉实",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 118128822.0
+    },
+    {
+     "code": "513030",
+     "name": "德国ETF华安",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 134690434.0
+    }
+   ],
+   "primary": "513030",
+   "primary_name": "德国ETF华安",
+   "substitute": "159561",
+   "premium": {
+    "date": "2026-11-24",
+    "premium": 0.011768944397742231,
+    "error": null
+   },
+   "status": "tested"
+  },
+  {
+   "id": "sp_energy",
+   "label": "标普油气",
+   "slot": "513500",
+   "kind": "qdii",
+   "n_members": 2,
+   "members": [
+    {
+     "code": "159518",
+     "name": "标普油气ETF嘉实"
+    },
+    {
+     "code": "513350",
+     "name": "标普油气ETF富国"
+    }
+   ],
+   "why": "没有同时满足 2022-01-04 前已交易且20日成交额中位数>=20000000的成员；覆盖到 OOS 的成员 0/2",
+   "probes": [
+    {
+     "code": "159518",
+     "name": "标普油气ETF嘉实",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 640627702.4
+    },
+    {
+     "code": "513350",
+     "name": "标普油气ETF富国",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 1041326836.9999999
+    }
+   ],
+   "status": "history_or_liquidity_veto"
+  },
+  {
+   "id": "cash_5y",
+   "label": "5Y国债复合(511010)",
+   "slot": "cash",
+   "kind": "cash",
+   "n_members": 4,
+   "members": [
+    {
+     "code": "511010",
+     "name": "国债ETF国泰"
+    },
+    {
+     "code": "511020",
+     "name": "国债ETF平安"
+    },
+    {
+     "code": "511100",
+     "name": "国债ETF华夏"
+    },
+    {
+     "code": "511160",
+     "name": "国债ETF东财"
+    }
+   ],
+   "why": null,
+   "probes": [
+    {
+     "code": "511010",
+     "name": "国债ETF国泰",
+     "history_through_oos": true,
+     "end": "2026-11-25",
+     "amount20": 2789681552.3500004
+    }
+   ],
+   "primary": "511010",
+   "primary_name": "国债ETF国泰",
+   "substitute": "511020",
+   "status": "tested"
+  },
+  {
+   "id": "cash_30y",
+   "label": "30年国债",
+   "slot": "cash",
+   "kind": "cash",
+   "n_members": 2,
+   "members": [
+    {
+     "code": "511090",
+     "name": "30年国债ETF鹏扬"
+    },
+    {
+     "code": "511130",
+     "name": "30年国债ETF博时"
+    }
+   ],
+   "why": "没有同时满足 2022-01-04 前已交易且20日成交额中位数>=20000000的成员；覆盖到 OOS 的成员 0/2",
+   "probes": [
+    {
+     "code": "511090",
+     "name": "30年国债ETF鹏扬",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 6199209929.7
+    },
+    {
+     "code": "511130",
+     "name": "30年国债ETF博时",
+     "history_through_oos": false,
+     "end": "2026-11-25",
+     "amount20": 3828688182.8
+    }
+   ],
+   "status": "history_or_liquidity_veto"
+  },
+  {
+   "id": "soy",
+   "label": "豆粕",
+   "slot": null,
+   "kind": "cite",
+   "n_members": 1,
+   "members": [
+    {
+     "code": "159985",
+     "name": "豆粕ETF华夏"
+    }
+   ],
+   "why": "场内只有一只，无替代",
+   "status": "uniqueness_veto"
+  },
+  {
+   "id": "chemcycl",
+   "label": "能源化工",
+   "slot": null,
+   "kind": "cite",
+   "n_members": 1,
+   "members": [
+    {
+     "code": "159981",
+     "name": "能源化工ETF建信"
+    }
+   ],
+   "why": "场内只有一只，无替代",
+   "status": "uniqueness_veto"
+  },
+  {
+   "id": "coal",
+   "label": "煤炭",
+   "slot": null,
+   "kind": "cite",
+   "n_members": 1,
+   "members": [
+    {
+     "code": "515220",
+     "name": "煤炭ETF国泰"
+    }
+   ],
+   "why": "场内只有一只，无替代",
+   "status": "uniqueness_veto"
+  },
+  {
+   "id": "liquor",
+   "label": "酒",
+   "slot": null,
+   "kind": "cite",
+   "n_members": 1,
+   "members": [
+    {
+     "code": "512690",
+     "name": "酒ETF鹏华"
+    }
+   ],
+   "why": "场内只有一只，无替代",
+   "status": "uniqueness_veto"
+  },
+  {
+   "id": "france",
+   "label": "法国",
+   "slot": null,
+   "kind": "cite",
+   "n_members": 1,
+   "members": [
+    {
+     "code": "513080",
+     "name": "法国ETF华安"
+    }
+   ],
+   "why": "场内只有一只，无替代",
+   "status": "uniqueness_veto"
+  },
+  {
+   "id": "saudi",
+   "label": "沙特",
+   "slot": null,
+   "kind": "cite",
+   "n_members": 1,
+   "members": [
+    {
+     "code": "159329",
+     "name": "沙特ETF南方"
+    }
+   ],
+   "why": "场内只有一只，无替代",
+   "status": "uniqueness_veto"
+  },
+  {
+   "id": "brazil",
+   "label": "巴西",
+   "slot": null,
+   "kind": "cite",
+   "n_members": 1,
+   "members": [
+    {
+     "code": "159100",
+     "name": "巴西ETF华夏"
+    }
+   ],
+   "why": "场内只有一只，无替代",
+   "status": "uniqueness_veto"
+  },
+  {
+   "id": "short_bond",
+   "label": "短融",
+   "slot": null,
+   "kind": "cite",
+   "n_members": 1,
+   "members": [
+    {
+     "code": "511360",
+     "name": "短融ETF海富通"
+    }
+   ],
+   "why": "场内只有一只，无替代；不作现金升级",
+   "status": "uniqueness_veto"
+  }
+ ],
+ "tested": [
+  {
+   "id": "gold",
+   "label": "黄金",
+   "code": "518880",
+   "name": "黄金ETF华安",
+   "slot": "515100",
+   "kind": "sleeve",
+   "own_start": "2013-07-29",
+   "amount20": 3833633390.7,
+   "corr_since_2022": 0.10666568888165036,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.15074083253588588,
+     "max_dd": -0.08928488443615912,
+     "sharpe": 1.4274375484021864,
+     "calmar": 1.6883130161149424,
+     "vol": 0.08864662552294503,
+     "turnover": 107.42218286240592
+    },
+    "oos": {
+     "cagr": 0.14404848588218533,
+     "max_dd": -0.06568207863415054,
+     "sharpe": 1.4467442807818605,
+     "calmar": 2.1931170401067237,
+     "vol": 0.08309282824299155,
+     "turnover": 39.87534471666298
+    },
+    "real": {
+     "cagr": 0.2926077943152223,
+     "max_dd": -0.06575089001330603,
+     "sharpe": 2.1080486325182095,
+     "calmar": 4.450248418781969,
+     "vol": 0.11655933779908981,
+     "turnover": 16.794410120515806
+    },
+    "train": {
+     "cagr": 0.15271502658936487,
+     "max_dd": -0.08928488443615912,
+     "sharpe": 1.3948815149749336,
+     "calmar": 1.7104241950221692,
+     "vol": 0.0921775106371111,
+     "turnover": 66.94153664438414
+    }
+   },
+   "yearly_proxy": {
+    "2014": -0.03468658999363039,
+    "2015": 0.301777232637203,
+    "2016": 0.07560195634538736,
+    "2017": 0.05997548406891595,
+    "2018": 0.09835519332908071,
+    "2019": 0.18392665348929915,
+    "2020": 0.3876915968861394,
+    "2021": 0.09367943419089708,
+    "2022": -0.034131885553654207,
+    "2023": 0.13355068587400276,
+    "2024": 0.20987722073382709,
+    "2025": 0.3012582885290669,
+    "2026": 0.11183782939553488
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "dividend",
+   "label": "普通红利(非低波)",
+   "code": "510880",
+   "name": "红利ETF华泰柏瑞",
+   "slot": "515100",
+   "kind": "sleeve",
+   "own_start": "2013-01-04",
+   "amount20": 462915527.55,
+   "corr_since_2022": 0.9015342283317715,
+   "oos_own_history": true,
+   "corr_veto": true,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.1677476865653018,
+     "max_dd": -0.08953244272920757,
+     "sharpe": 1.5033678853912318,
+     "calmar": 1.873596670121663,
+     "vol": 0.09427817379341503,
+     "turnover": 107.79050361948924
+    },
+    "oos": {
+     "cagr": 0.14933721370949038,
+     "max_dd": -0.06037573625305925,
+     "sharpe": 1.5831956270897098,
+     "calmar": 2.473464059859368,
+     "vol": 0.07861737745264812,
+     "turnover": 39.954628903044664
+    },
+    "real": {
+     "cagr": 0.335882311805231,
+     "max_dd": -0.04460331580590171,
+     "sharpe": 2.627234807925104,
+     "calmar": 7.530433684950134,
+     "vol": 0.10561072075262383,
+     "turnover": 16.837664685537508
+    },
+    "train": {
+     "cagr": 0.17776775810657242,
+     "max_dd": -0.08953244272920757,
+     "sharpe": 1.4646819641498514,
+     "calmar": 1.9855122086217851,
+     "vol": 0.10321226777769354,
+     "turnover": 67.27789339630222
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.10362862807093953,
+    "2015": 0.34642327399558415,
+    "2016": 0.05503033960010617,
+    "2017": 0.08022890100326485,
+    "2018": 0.07348104827946633,
+    "2019": 0.17251345704376742,
+    "2020": 0.39882673072688535,
+    "2021": 0.10976958622391253,
+    "2022": -0.041327693722443715,
+    "2023": 0.13016955020870946,
+    "2024": 0.20584314265457682,
+    "2025": 0.25206267139803784,
+    "2026": 0.19445164069359766
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "bank",
+   "label": "银行",
+   "code": "512800",
+   "name": "银行ETF华宝",
+   "slot": "515100",
+   "kind": "sleeve",
+   "own_start": "2017-08-03",
+   "amount20": 1238688641.7,
+   "corr_since_2022": 0.7962507673729098,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.159073952919639,
+     "max_dd": -0.0886048465409831,
+     "sharpe": 1.486479607815217,
+     "calmar": 1.7953188694487636,
+     "vol": 0.09006858241870859,
+     "turnover": 107.52904637609134
+    },
+    "oos": {
+     "cagr": 0.15249434236362513,
+     "max_dd": -0.06186715175928015,
+     "sharpe": 1.638102587747457,
+     "calmar": 2.464867672540797,
+     "vol": 0.07760942220476988,
+     "turnover": 39.91421068686758
+    },
+    "real": {
+     "cagr": 0.3410591082534713,
+     "max_dd": -0.0425940307398337,
+     "sharpe": 2.711804986091065,
+     "calmar": 8.007204350691204,
+     "vol": 0.10366990620580385,
+     "turnover": 16.815961332059118
+    },
+    "train": {
+     "cagr": 0.16202157357787028,
+     "max_dd": -0.0886048465409831,
+     "sharpe": 1.4082159011710067,
+     "calmar": 1.8285859058841567,
+     "vol": 0.09736904034898311,
+     "turnover": 67.05323186919254
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.014605453492632536,
+    "2015": 0.33872578601036807,
+    "2016": 0.06647238577369485,
+    "2017": 0.07104169600286125,
+    "2018": 0.08216721725279963,
+    "2019": 0.17318970369926356,
+    "2020": 0.4018823849341302,
+    "2021": 0.08598658257337344,
+    "2022": -0.04720997149187012,
+    "2023": 0.12310190713527969,
+    "2024": 0.2199931723307651,
+    "2025": 0.2707168054151581,
+    "2026": 0.18811212871259286
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "convertible",
+   "label": "可转债",
+   "code": "511380",
+   "name": "可转债ETF博时",
+   "slot": "515100",
+   "kind": "sleeve",
+   "own_start": "2020-04-07",
+   "amount20": 9145903062.0,
+   "corr_since_2022": 0.3415294388389184,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.15079441483572054,
+     "max_dd": -0.0825649807373191,
+     "sharpe": 1.4011089405060255,
+     "calmar": 1.8263725551571763,
+     "vol": 0.0904622322615676,
+     "turnover": 107.53977641395176
+    },
+    "oos": {
+     "cagr": 0.13171981782393405,
+     "max_dd": -0.0660670425994142,
+     "sharpe": 1.358398566595705,
+     "calmar": 1.9937295910548594,
+     "vol": 0.08035014566988412,
+     "turnover": 39.89700744588682
+    },
+    "real": {
+     "cagr": 0.29416790660408276,
+     "max_dd": -0.045745675795132335,
+     "sharpe": 2.213308981527606,
+     "calmar": 6.430507397496668,
+     "vol": 0.1112880096439924,
+     "turnover": 16.82472775108222
+    },
+    "train": {
+     "cagr": 0.1612049758683305,
+     "max_dd": -0.0825649807373191,
+     "sharpe": 1.4121897083856139,
+     "calmar": 1.9524618600857537,
+     "vol": 0.09654040340752584,
+     "turnover": 67.08063756991663
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.014605453492632536,
+    "2015": 0.33872578601036807,
+    "2016": 0.06647238577369485,
+    "2017": 0.06976514852305638,
+    "2018": 0.08409704878762803,
+    "2019": 0.16278515996241882,
+    "2020": 0.3837543826904797,
+    "2021": 0.10371540844001959,
+    "2022": -0.04856146959920138,
+    "2023": 0.12252947136544967,
+    "2024": 0.19123849788004477,
+    "2025": 0.26614398617536983,
+    "2026": 0.1281854492856085
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "credit",
+   "label": "信用/公司/城投债",
+   "code": "511220",
+   "name": "城投债ETF海富通",
+   "slot": "515100",
+   "kind": "sleeve",
+   "own_start": "2014-12-16",
+   "amount20": 2981249969.0,
+   "corr_since_2022": 0.08784599999177707,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.15180415534655678,
+     "max_dd": -0.07971443388368527,
+     "sharpe": 1.4829821516669939,
+     "calmar": 1.904349663551029,
+     "vol": 0.08578048664100255,
+     "turnover": 107.43378088516931
+    },
+    "oos": {
+     "cagr": 0.13681125223319412,
+     "max_dd": -0.06046657818368062,
+     "sharpe": 1.479141753680171,
+     "calmar": 2.26259292890032,
+     "vol": 0.07663056997637625,
+     "turnover": 39.86476828679014
+    },
+    "real": {
+     "cagr": 0.3040121205237578,
+     "max_dd": -0.04500211529520315,
+     "sharpe": 2.4395430609348323,
+     "calmar": 6.7555073473660245,
+     "vol": 0.10374650189124435,
+     "turnover": 16.816747814250533
+    },
+    "train": {
+     "cagr": 0.1596612690446213,
+     "max_dd": -0.07971443388368527,
+     "sharpe": 1.4732822758249833,
+     "calmar": 2.0029154227901795,
+     "vol": 0.09129754157719959,
+     "turnover": 66.97668716571225
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.0022435079784590695,
+    "2015": 0.32432040241998306,
+    "2016": 0.06407184554879741,
+    "2017": 0.05873390778336485,
+    "2018": 0.10263844993412063,
+    "2019": 0.15968953319788426,
+    "2020": 0.4091095824962001,
+    "2021": 0.0965833299084713,
+    "2022": -0.04128531905874455,
+    "2023": 0.1271190226983776,
+    "2024": 0.19038908602273796,
+    "2025": 0.24595216594592095,
+    "2026": 0.15718007987785487
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "hs300",
+   "label": "沪深300",
+   "code": "510300",
+   "name": "沪深300ETF华泰柏瑞",
+   "slot": "159952",
+   "kind": "sleeve",
+   "own_start": "2013-01-04",
+   "amount20": 7759773173.2,
+   "corr_since_2022": 0.8523435362074677,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.14702473564178842,
+     "max_dd": -0.07671194593539543,
+     "sharpe": 1.387844126865383,
+     "calmar": 1.9165820114328527,
+     "vol": 0.0888600251382734,
+     "turnover": 107.57663581989185
+    },
+    "oos": {
+     "cagr": 0.11660060531766647,
+     "max_dd": -0.05891115202925046,
+     "sharpe": 1.3789574899540011,
+     "calmar": 1.9792620123906617,
+     "vol": 0.06877251926906064,
+     "turnover": 40.152638747288464
+    },
+    "real": {
+     "cagr": 0.2158123920666768,
+     "max_dd": -0.04613315044414834,
+     "sharpe": 2.1833520789978103,
+     "calmar": 4.678032824312588,
+     "vol": 0.08293243123617627,
+     "turnover": 17.044196327789855
+    },
+    "train": {
+     "cagr": 0.16550854966114303,
+     "max_dd": -0.07671194593539543,
+     "sharpe": 1.4068422160378655,
+     "calmar": 2.157532932361402,
+     "vol": 0.09976438562575615,
+     "turnover": 66.87031772770703
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.16713156698610954,
+    "2015": 0.1804400372388959,
+    "2016": 0.06647238577369485,
+    "2017": 0.06976514852305638,
+    "2018": 0.08409704878762803,
+    "2019": 0.17546060783690787,
+    "2020": 0.3715139946627668,
+    "2021": 0.11578886764050567,
+    "2022": -0.0420796188924909,
+    "2023": 0.13185630906366774,
+    "2024": 0.20610218784135648,
+    "2025": 0.15781427803565107,
+    "2026": 0.12304451492099111
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "sse50",
+   "label": "上证50",
+   "code": "510050",
+   "name": "上证50ETF华夏",
+   "slot": "159952",
+   "kind": "sleeve",
+   "own_start": "2013-01-04",
+   "amount20": 2251157467.05,
+   "corr_since_2022": 0.6578782294040041,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.14384924540412425,
+     "max_dd": -0.0743580870977677,
+     "sharpe": 1.3585506448723423,
+     "calmar": 1.9345474180231128,
+     "vol": 0.08872315380177682,
+     "turnover": 107.65579804033462
+    },
+    "oos": {
+     "cagr": 0.10862543316071016,
+     "max_dd": -0.058911152029250125,
+     "sharpe": 1.297670107542496,
+     "calmar": 1.8438857401188873,
+     "vol": 0.06748734867119761,
+     "turnover": 40.15020797261438
+    },
+    "real": {
+     "cagr": 0.18870613445345485,
+     "max_dd": -0.05188205614879571,
+     "sharpe": 1.9858284855491257,
+     "calmar": 3.637213874335532,
+     "vol": 0.07968723986389939,
+     "turnover": 17.041981735019867
+    },
+    "train": {
+     "cagr": 0.16559314714478246,
+     "max_dd": -0.0743580870977677,
+     "sharpe": 1.4028229774456484,
+     "calmar": 2.2269688961613125,
+     "vol": 0.10012386056673779,
+     "turnover": 66.95193039832978
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.21436085809007732,
+    "2015": 0.14229117476429032,
+    "2016": 0.06647238577369485,
+    "2017": 0.06976514852305638,
+    "2018": 0.08409704878762803,
+    "2019": 0.18363894670036274,
+    "2020": 0.35352639380167394,
+    "2021": 0.11576843267866321,
+    "2022": -0.0420796188924909,
+    "2023": 0.13185630906366774,
+    "2024": 0.20610218784135648,
+    "2025": 0.14046887415129072,
+    "2026": 0.10212531582200413
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "csi500",
+   "label": "中证500",
+   "code": "510500",
+   "name": "中证500ETF南方",
+   "slot": "159952",
+   "kind": "sleeve",
+   "own_start": "2013-03-15",
+   "amount20": 4242839123.9,
+   "corr_since_2022": 0.8631460896777674,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.14771816151466344,
+     "max_dd": -0.08375687030361179,
+     "sharpe": 1.4284010600245083,
+     "calmar": 1.7636542647689344,
+     "vol": 0.08662234578568148,
+     "turnover": 107.39033925458051
+    },
+    "oos": {
+     "cagr": 0.1318854524965527,
+     "max_dd": -0.058911152029250125,
+     "sharpe": 1.4960216158998538,
+     "calmar": 2.2387179329148057,
+     "vol": 0.07266698749748599,
+     "turnover": 39.843319154488846
+    },
+    "real": {
+     "cagr": 0.2687986474358659,
+     "max_dd": -0.03823978188728383,
+     "sharpe": 2.4295348189855264,
+     "calmar": 7.029293426102192,
+     "vol": 0.0924443377004664,
+     "turnover": 16.735802223560434
+    },
+    "train": {
+     "cagr": 0.15646581726389952,
+     "max_dd": -0.08375687030361179,
+     "sharpe": 1.395651419951652,
+     "calmar": 1.8680953179927062,
+     "vol": 0.09462135992592789,
+     "turnover": 66.9933265909903
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.041821672965714596,
+    "2015": 0.2941549595543367,
+    "2016": 0.06647238577369485,
+    "2017": 0.06976514852305638,
+    "2018": 0.08409704878762803,
+    "2019": 0.15954976850104385,
+    "2020": 0.33693290576854906,
+    "2021": 0.12004723457644495,
+    "2022": -0.0420796188924909,
+    "2023": 0.13185630906366774,
+    "2024": 0.20610218784135648,
+    "2025": 0.19024849230229712,
+    "2026": 0.1649206160700074
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "csi1000",
+   "label": "中证1000",
+   "code": "512100",
+   "name": "中证1000ETF南方",
+   "slot": "159952",
+   "kind": "sleeve",
+   "own_start": "2016-11-04",
+   "amount20": 5610991565.0,
+   "corr_since_2022": 0.846287964964452,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.1448457499621829,
+     "max_dd": -0.08434806856860622,
+     "sharpe": 1.3950626625358633,
+     "calmar": 1.717238490699638,
+     "vol": 0.08691292827272114,
+     "turnover": 107.41496553832658
+    },
+    "oos": {
+     "cagr": 0.12460313919227461,
+     "max_dd": -0.05891115202925068,
+     "sharpe": 1.4363027540877586,
+     "calmar": 2.115102742014049,
+     "vol": 0.07111478372855704,
+     "turnover": 39.830258882134366
+    },
+    "real": {
+     "cagr": 0.24521304000759447,
+     "max_dd": -0.03653469601100667,
+     "sharpe": 2.31511920557026,
+     "calmar": 6.711785419912076,
+     "vol": 0.08875688959517829,
+     "turnover": 16.72227079889815
+    },
+    "train": {
+     "cagr": 0.1565012518880955,
+     "max_dd": -0.08434806856860622,
+     "sharpe": 1.3798279125792303,
+     "calmar": 1.8554218791720407,
+     "vol": 0.09581005598050317,
+     "turnover": 67.03097417150958
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.014605453492632536,
+    "2015": 0.33872578601036807,
+    "2016": 0.06647238577369485,
+    "2017": 0.06976514852305638,
+    "2018": 0.08409704878762803,
+    "2019": 0.1571044626319289,
+    "2020": 0.3438030714835816,
+    "2021": 0.10870323088961276,
+    "2022": -0.0420796188924909,
+    "2023": 0.13185630906366774,
+    "2024": 0.20610218784135648,
+    "2025": 0.1706644628927474,
+    "2026": 0.1489629311883256
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "broker",
+   "label": "证券",
+   "code": "512880",
+   "name": "证券ETF国泰",
+   "slot": "159952",
+   "kind": "sleeve",
+   "own_start": "2016-08-08",
+   "amount20": 1171148316.35,
+   "corr_since_2022": 0.6549657924950844,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.1361751631845758,
+     "max_dd": -0.08540619683504114,
+     "sharpe": 1.2751877279177333,
+     "calmar": 1.5944412493579712,
+     "vol": 0.08928125562006695,
+     "turnover": 107.55516251168169
+    },
+    "oos": {
+     "cagr": 0.10339250450523751,
+     "max_dd": -0.07706989069266235,
+     "sharpe": 1.1653293615154445,
+     "calmar": 1.341542119445114,
+     "vol": 0.07131665695610574,
+     "turnover": 39.83466356791497
+    },
+    "real": {
+     "cagr": 0.17323820436422466,
+     "max_dd": -0.07706989069266312,
+     "sharpe": 1.6315530064986055,
+     "calmar": 2.24780654036553,
+     "vol": 0.08946055603906393,
+     "turnover": 16.725959505255688
+    },
+    "train": {
+     "cagr": 0.15626367749691705,
+     "max_dd": -0.08540619683504114,
+     "sharpe": 1.3335961227504118,
+     "calmar": 1.829652686663176,
+     "vol": 0.09922633576264459,
+     "turnover": 67.16680034605454
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.014605453492632536,
+    "2015": 0.33872578601036807,
+    "2016": 0.06647238577369485,
+    "2017": 0.06976514852305638,
+    "2018": 0.08409704878762803,
+    "2019": 0.17568139065034805,
+    "2020": 0.36563143916844476,
+    "2021": 0.07213091842301877,
+    "2022": -0.0420796188924909,
+    "2023": 0.13185630906366774,
+    "2024": 0.20610218784135648,
+    "2025": 0.12489832831465697,
+    "2026": 0.09279722922789158
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "healthcare",
+   "label": "医药",
+   "code": "512010",
+   "name": "医药ETF易方达",
+   "slot": "159952",
+   "kind": "sleeve",
+   "own_start": "2013-10-28",
+   "amount20": 355537005.15,
+   "corr_since_2022": 0.656635144360535,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.13236105494822348,
+     "max_dd": -0.08170031445047676,
+     "sharpe": 1.2778312702937602,
+     "calmar": 1.620080116441352,
+     "vol": 0.08625671725932123,
+     "turnover": 107.44518250397041
+    },
+    "oos": {
+     "cagr": 0.10049628309548542,
+     "max_dd": -0.07428989125664309,
+     "sharpe": 1.150749651257757,
+     "calmar": 1.3527585166104132,
+     "vol": 0.06984696003271376,
+     "turnover": 39.96222230080744
+    },
+    "real": {
+     "cagr": 0.1634963363591191,
+     "max_dd": -0.07428989125664243,
+     "sharpe": 1.5998542933980504,
+     "calmar": 2.2007884732837124,
+     "vol": 0.08582294549899028,
+     "turnover": 16.854617010033913
+    },
+    "train": {
+     "cagr": 0.15183281940758464,
+     "max_dd": -0.08170031445047676,
+     "sharpe": 1.3425894462526273,
+     "calmar": 1.858411689463193,
+     "vol": 0.09542502162306045,
+     "turnover": 66.92925377915591
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.03170080384741891,
+    "2015": 0.19889607638096307,
+    "2016": 0.06647238577369485,
+    "2017": 0.06976514852305638,
+    "2018": 0.08409704878762803,
+    "2019": 0.17433997302734028,
+    "2020": 0.40682233814632385,
+    "2021": 0.1124912845571433,
+    "2022": -0.0420796188924909,
+    "2023": 0.13185630906366774,
+    "2024": 0.20610218784135648,
+    "2025": 0.1195329290725673,
+    "2026": 0.0845115750968799
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "consumer",
+   "label": "消费",
+   "code": "159928",
+   "name": "消费ETF汇添富",
+   "slot": "159952",
+   "kind": "sleeve",
+   "own_start": "2013-09-16",
+   "amount20": 402389128.1,
+   "corr_since_2022": 0.4520320517502669,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.12989866549700668,
+     "max_dd": -0.08032213419905654,
+     "sharpe": 1.2627835855493634,
+     "calmar": 1.6172212901500875,
+     "vol": 0.08551155153515982,
+     "turnover": 108.29697705926336
+    },
+    "oos": {
+     "cagr": 0.08579943077748209,
+     "max_dd": -0.08032213419905632,
+     "sharpe": 0.9993048154048283,
+     "calmar": 1.0681916215628908,
+     "vol": 0.06676205695359762,
+     "turnover": 40.84149970898014
+    },
+    "real": {
+     "cagr": 0.11509387953608874,
+     "max_dd": -0.0803221341990561,
+     "sharpe": 1.2077153068128943,
+     "calmar": 1.4329036533175343,
+     "vol": 0.07795389937596917,
+     "turnover": 17.730604812403122
+    },
+    "train": {
+     "cagr": 0.157716317904687,
+     "max_dd": -0.0797415826923984,
+     "sharpe": 1.3919560658484575,
+     "calmar": 1.9778428340590457,
+     "vol": 0.09572782567878826,
+     "turnover": 66.9017602858324
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.05633457920183105,
+    "2015": 0.19743258787321816,
+    "2016": 0.06647238577369485,
+    "2017": 0.06976514852305638,
+    "2018": 0.08409704878762803,
+    "2019": 0.2011689569101205,
+    "2020": 0.41323752890336785,
+    "2021": 0.09894460206958167,
+    "2022": -0.0420796188924909,
+    "2023": 0.13185630906366774,
+    "2024": 0.20610218784135648,
+    "2025": 0.10233047549935859,
+    "2026": 0.033707657928447876
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "military",
+   "label": "军工",
+   "code": "512660",
+   "name": "军工ETF国泰",
+   "slot": "159952",
+   "kind": "sleeve",
+   "own_start": "2016-08-08",
+   "amount20": 285224975.6999999,
+   "corr_since_2022": 0.6812309754197015,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.14444126060819373,
+     "max_dd": -0.0816628071913651,
+     "sharpe": 1.3388685359079509,
+     "calmar": 1.7687520864879935,
+     "vol": 0.09053398535296477,
+     "turnover": 107.89530381969254
+    },
+    "oos": {
+     "cagr": 0.10435238731409724,
+     "max_dd": -0.07276583002610904,
+     "sharpe": 1.1118939680525513,
+     "calmar": 1.4340850269509007,
+     "vol": 0.07582711318607147,
+     "turnover": 40.08558842147157
+    },
+    "real": {
+     "cagr": 0.1788621550673437,
+     "max_dd": -0.0727658300261087,
+     "sharpe": 1.5151223560669134,
+     "calmar": 2.458051464583956,
+     "vol": 0.1001677799508439,
+     "turnover": 16.979461404058988
+    },
+    "train": {
+     "cagr": 0.1694283395844618,
+     "max_dd": -0.0816628071913651,
+     "sharpe": 1.4517537718401956,
+     "calmar": 2.074730779061155,
+     "vol": 0.09892871792384149,
+     "turnover": 67.25587746946451
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.014605453492632536,
+    "2015": 0.33872578601036807,
+    "2016": 0.06647238577369485,
+    "2017": 0.06976514852305638,
+    "2018": 0.08409704878762803,
+    "2019": 0.1494753170912122,
+    "2020": 0.487116138442665,
+    "2021": 0.09391835201200172,
+    "2022": -0.0420796188924909,
+    "2023": 0.13185630906366774,
+    "2024": 0.20610218784135648,
+    "2025": 0.15267077361456471,
+    "2026": 0.07122358420750996
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "appliance",
+   "label": "家电",
+   "code": "159996",
+   "name": "家电ETF国泰",
+   "slot": "159952",
+   "kind": "sleeve",
+   "own_start": "2020-03-16",
+   "amount20": 53002125.0,
+   "corr_since_2022": 0.6677662990765821,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.14380606107954974,
+     "max_dd": -0.06743507888990463,
+     "sharpe": 1.3972439710190045,
+     "calmar": 2.1325112010965293,
+     "vol": 0.08607250607385604,
+     "turnover": 107.74814363567963
+    },
+    "oos": {
+     "cagr": 0.11112092304005095,
+     "max_dd": -0.05891115202925035,
+     "sharpe": 1.3239885102510693,
+     "calmar": 1.8862459689275402,
+     "vol": 0.0678635873819702,
+     "turnover": 40.15517210921579
+    },
+    "real": {
+     "cagr": 0.19516012597661825,
+     "max_dd": -0.050231349654848545,
+     "sharpe": 2.031035579139211,
+     "calmar": 3.885225607466443,
+     "vol": 0.08061725236058451,
+     "turnover": 17.04448355070027
+    },
+    "train": {
+     "cagr": 0.1638791589109363,
+     "max_dd": -0.06743507888990463,
+     "sharpe": 1.4425227100647724,
+     "calmar": 2.430176721205999,
+     "vol": 0.09607090247352927,
+     "turnover": 67.03943741000805
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.014605453492632536,
+    "2015": 0.33872578601036807,
+    "2016": 0.06647238577369485,
+    "2017": 0.06976514852305638,
+    "2018": 0.08409704878762803,
+    "2019": 0.17277486929446662,
+    "2020": 0.3923975056561544,
+    "2021": 0.10597143693161915,
+    "2022": -0.0420796188924909,
+    "2023": 0.13185630906366774,
+    "2024": 0.20610218784135648,
+    "2025": 0.15273570777152812,
+    "2026": 0.10169488741080523
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "realestate",
+   "label": "房地产",
+   "code": "512200",
+   "name": "房地产ETF南方",
+   "slot": "159952",
+   "kind": "sleeve",
+   "own_start": "2017-09-25",
+   "amount20": 142359606.14999998,
+   "corr_since_2022": 0.45404864412462,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.12819906545808757,
+     "max_dd": -0.07983869512539199,
+     "sharpe": 1.2359300441794838,
+     "calmar": 1.6057259610360914,
+     "vol": 0.08619282444554252,
+     "turnover": 107.40922324879485
+    },
+    "oos": {
+     "cagr": 0.09257895621692547,
+     "max_dd": -0.0746361938158101,
+     "sharpe": 1.0334023439702484,
+     "calmar": 1.2404029664936447,
+     "vol": 0.07085717943143477,
+     "turnover": 39.82430742669361
+    },
+    "real": {
+     "cagr": 0.1399958478134362,
+     "max_dd": -0.07463619381580922,
+     "sharpe": 1.3250359713640976,
+     "calmar": 1.875709902342082,
+     "vol": 0.0883815656101966,
+     "turnover": 16.717558267435468
+    },
+    "train": {
+     "cagr": 0.1502833588034327,
+     "max_dd": -0.07983869512539199,
+     "sharpe": 1.336012897572248,
+     "calmar": 1.8823373624456494,
+     "vol": 0.09484074542783714,
+     "turnover": 67.03136258199584
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.014605453492632536,
+    "2015": 0.33872578601036807,
+    "2016": 0.06647238577369485,
+    "2017": 0.06976514852305638,
+    "2018": 0.08409704878762803,
+    "2019": 0.15725354039457917,
+    "2020": 0.2708692017504688,
+    "2021": 0.12686340607949775,
+    "2022": -0.0420796188924909,
+    "2023": 0.13185630906366774,
+    "2024": 0.20610218784135648,
+    "2025": 0.12555178047236937,
+    "2026": 0.042158465688339586
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "hsi",
+   "label": "恒生指数",
+   "code": "159920",
+   "name": "恒生ETF华夏",
+   "slot": "159941",
+   "kind": "qdii",
+   "own_start": "2013-01-04",
+   "amount20": 262217670.89999998,
+   "corr_since_2022": 0.3857433784956288,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": {
+    "date": "2026-11-24",
+    "premium": -0.009469986253245688,
+    "error": null
+   },
+   "metrics": {
+    "proxy": {
+     "cagr": 0.1066269967924629,
+     "max_dd": -0.14866362947457878,
+     "sharpe": 0.9474294904252903,
+     "calmar": 0.7172366043349959,
+     "vol": 0.09266131503954955,
+     "turnover": 107.42941978604713
+    },
+    "oos": {
+     "cagr": 0.1114305528003372,
+     "max_dd": -0.060675489924264636,
+     "sharpe": 1.1989019541302648,
+     "calmar": 1.8365002563543404,
+     "vol": 0.07563939119075773,
+     "turnover": 39.38469268396929
+    },
+    "real": {
+     "cagr": 0.2178085675558077,
+     "max_dd": -0.04704613819719017,
+     "sharpe": 1.8179963890265554,
+     "calmar": 4.629680052438742,
+     "vol": 0.10143737682123058,
+     "turnover": 16.715350207068777
+    },
+    "train": {
+     "cagr": 0.1061738812848223,
+     "max_dd": -0.14098408266947282,
+     "sharpe": 0.8638550275073495,
+     "calmar": 0.7530912658682146,
+     "vol": 0.10223393544925166,
+     "turnover": 67.52237522792163
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.05323958529052231,
+    "2015": 0.383063372087064,
+    "2016": 0.08224060877338113,
+    "2017": 0.12410587856925637,
+    "2018": 0.0365592623618165,
+    "2019": 0.06915359305580959,
+    "2020": 0.10792351624371688,
+    "2021": -0.038702592095638866,
+    "2022": 0.026957382058689028,
+    "2023": 0.004811948541695532,
+    "2024": 0.14458140187168822,
+    "2025": 0.26716935015482823,
+    "2026": 0.08134919408988983
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "nikkei",
+   "label": "日经/东证",
+   "code": "159866",
+   "name": "日经ETF工银",
+   "slot": "513500",
+   "kind": "qdii",
+   "own_start": "2021-04-08",
+   "amount20": 280390926.75,
+   "corr_since_2022": 0.6571702256115616,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": {
+    "date": "2026-11-24",
+    "premium": 0.02004270266547281,
+    "error": null
+   },
+   "metrics": {
+    "proxy": {
+     "cagr": 0.15669504309729265,
+     "max_dd": -0.0785042768795261,
+     "sharpe": 1.4958514579170383,
+     "calmar": 1.9960064511868485,
+     "vol": 0.08800625505685385,
+     "turnover": 107.50982572009784
+    },
+    "oos": {
+     "cagr": 0.14507507841970346,
+     "max_dd": -0.053653014450533276,
+     "sharpe": 1.4880238266986796,
+     "calmar": 2.703950186311694,
+     "vol": 0.08129001041360555,
+     "turnover": 39.9053164333328
+    },
+    "real": {
+     "cagr": 0.32617435175801934,
+     "max_dd": -0.0474721182182235,
+     "sharpe": 2.436761948292387,
+     "calmar": 6.870861549902532,
+     "vol": 0.11111149756802312,
+     "turnover": 16.807040991602342
+    },
+    "train": {
+     "cagr": 0.1627349926041406,
+     "max_dd": -0.0785042768795261,
+     "sharpe": 1.4892060123383188,
+     "calmar": 2.072944291352129,
+     "vol": 0.09215300606312225,
+     "turnover": 67.05457720917073
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.014605453492632536,
+    "2015": 0.3359026307130357,
+    "2016": 0.05686187203372639,
+    "2017": 0.06157138866046186,
+    "2018": 0.0846249634864984,
+    "2019": 0.17486595320652598,
+    "2020": 0.42188785680541585,
+    "2021": 0.09325179850807142,
+    "2022": -0.040375536524520084,
+    "2023": 0.12900998783939666,
+    "2024": 0.1812234553234371,
+    "2025": 0.27275588060266465,
+    "2026": 0.17520910796083067
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "germany",
+   "label": "德国",
+   "code": "513030",
+   "name": "德国ETF华安",
+   "slot": "513500",
+   "kind": "qdii",
+   "own_start": "2014-09-05",
+   "amount20": 134690434.0,
+   "corr_since_2022": 0.6753241766372435,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": {
+    "date": "2026-11-24",
+    "premium": 0.011768944397742231,
+    "error": null
+   },
+   "metrics": {
+    "proxy": {
+     "cagr": 0.1520391224160229,
+     "max_dd": -0.07901949387655793,
+     "sharpe": 1.4386933273113627,
+     "calmar": 1.92407107356995,
+     "vol": 0.08874376180914427,
+     "turnover": 107.37387694253565
+    },
+    "oos": {
+     "cagr": 0.14084793051008293,
+     "max_dd": -0.05960814649893409,
+     "sharpe": 1.5218656447158192,
+     "calmar": 2.3628973350580793,
+     "vol": 0.0768194822089775,
+     "turnover": 39.74244922139812
+    },
+    "real": {
+     "cagr": 0.2967020792029291,
+     "max_dd": -0.04421286005609215,
+     "sharpe": 2.3938038081823163,
+     "calmar": 6.710764217164597,
+     "vol": 0.10336221561849003,
+     "turnover": 16.82922879709842
+    },
+    "train": {
+     "cagr": 0.15754829008370264,
+     "max_dd": -0.07901949387655793,
+     "sharpe": 1.39066091310864,
+     "calmar": 1.9937901694209812,
+     "vol": 0.09570739021561539,
+     "turnover": 67.08310097250441
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.007728034949723073,
+    "2015": 0.32929366482602784,
+    "2016": 0.05323229991900624,
+    "2017": 0.06403859138994639,
+    "2018": 0.06569582170161437,
+    "2019": 0.1659643336670391,
+    "2020": 0.42814281946824084,
+    "2021": 0.09435150482636656,
+    "2022": -0.036023015969667505,
+    "2023": 0.1247601663884852,
+    "2024": 0.18459552883214592,
+    "2025": 0.26449610443947247,
+    "2026": 0.16009880548635014
+   },
+   "pass_three_calmar": false
+  },
+  {
+   "id": "cash_5y",
+   "label": "5Y国债复合(511010)",
+   "code": "511010",
+   "name": "国债ETF国泰",
+   "slot": "cash",
+   "kind": "cash",
+   "own_start": "2013-03-26",
+   "amount20": 2789681552.3500004,
+   "corr_since_2022": null,
+   "oos_own_history": true,
+   "corr_veto": false,
+   "premium": null,
+   "metrics": {
+    "proxy": {
+     "cagr": 0.15433514918485125,
+     "max_dd": -0.07983071306532707,
+     "sharpe": 1.4468682138016788,
+     "calmar": 1.9332803536222418,
+     "vol": 0.08967727072416667,
+     "turnover": 107.53228860530852
+    },
+    "oos": {
+     "cagr": 0.1374218335225148,
+     "max_dd": -0.06026402156185884,
+     "sharpe": 1.472684018711148,
+     "calmar": 2.280329622234989,
+     "vol": 0.0773706704894662,
+     "turnover": 39.92194978561225
+    },
+    "real": {
+     "cagr": 0.31903651246020504,
+     "max_dd": -0.04374683051362882,
+     "sharpe": 2.544983727882732,
+     "calmar": 7.292791471162988,
+     "vol": 0.10396374347819871,
+     "turnover": 16.80999912026103
+    },
+    "train": {
+     "cagr": 0.16352671172555078,
+     "max_dd": -0.07983071306532707,
+     "sharpe": 1.4280901936406223,
+     "calmar": 2.0484185277379847,
+     "vol": 0.0968886278261391,
+     "turnover": 67.05535814388715
+    }
+   },
+   "yearly_proxy": {
+    "2014": 0.014605453492632536,
+    "2015": 0.33872578601036807,
+    "2016": 0.06647238577369485,
+    "2017": 0.062100519109779206,
+    "2018": 0.07086703214367884,
+    "2019": 0.16526382226413028,
+    "2020": 0.4218014027383252,
+    "2021": 0.10905239964764046,
+    "2022": -0.045930514123918575,
+    "2023": 0.1244643216047725,
+    "2024": 0.1837377661934898,
+    "2025": 0.2539356179489687,
+    "2026": 0.16707261579773136
+   },
+   "pass_three_calmar": false
+  }
+ ],
+ "rules": [
+  {
+   "id": "gate_60_80_100",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.15059622645382587,
+     "max_dd": -0.0823903013615499,
+     "sharpe": 1.432086839993243,
+     "calmar": 1.8278392476436125,
+     "vol": 0.08824758569620192,
+     "turnover": 115.24718145503297
+    },
+    "oos": {
+     "cagr": 0.12987296351598543,
+     "max_dd": -0.06499583663475605,
+     "sharpe": 1.4356418832397362,
+     "calmar": 1.9981735791140935,
+     "vol": 0.0745785826781784,
+     "turnover": 41.15335766339334
+    },
+    "real": {
+     "cagr": 0.2778310798883321,
+     "max_dd": -0.0609770311698139,
+     "sharpe": 2.3640669851206613,
+     "calmar": 4.556323496868928,
+     "vol": 0.09823666551392515,
+     "turnover": 16.73163570005244
+    },
+    "train": {
+     "cagr": 0.16281806716031855,
+     "max_dd": -0.08004154769643457,
+     "sharpe": 1.4325809774621727,
+     "calmar": 2.0341694013441876,
+     "vol": 0.09610719322503224,
+     "turnover": 73.41434099755317
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  },
+  {
+   "id": "gate_100_120_140",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.1546440652745047,
+     "max_dd": -0.08530525901700159,
+     "sharpe": 1.4351563311053415,
+     "calmar": 1.8128315540743354,
+     "vol": 0.09065723914527227,
+     "turnover": 108.55851290309856
+    },
+    "oos": {
+     "cagr": 0.13837759079847745,
+     "max_dd": -0.05898628978118825,
+     "sharpe": 1.4636534828040675,
+     "calmar": 2.345928033646362,
+     "vol": 0.07848120039294339,
+     "turnover": 41.16117120214129
+    },
+    "real": {
+     "cagr": 0.30259267321617167,
+     "max_dd": -0.04623126633562258,
+     "sharpe": 2.3888353198923955,
+     "calmar": 6.545195431582088,
+     "vol": 0.1055729019362802,
+     "turnover": 17.06211028070357
+    },
+    "train": {
+     "cagr": 0.1636419896400123,
+     "max_dd": -0.08530525901700159,
+     "sharpe": 1.4167831620885347,
+     "calmar": 1.9183106824328144,
+     "vol": 0.09779413119662701,
+     "turnover": 66.84358269618173
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  },
+  {
+   "id": "gate_all",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.1488652379565809,
+     "max_dd": -0.08004154769643401,
+     "sharpe": 1.418243215704214,
+     "calmar": 1.859849568641126,
+     "vol": 0.08803316672933584,
+     "turnover": 116.32740059402533
+    },
+    "oos": {
+     "cagr": 0.1295281935662551,
+     "max_dd": -0.06130818028164475,
+     "sharpe": 1.4342898948683678,
+     "calmar": 2.1127391641900513,
+     "vol": 0.07442818041898325,
+     "turnover": 40.86308542632011
+    },
+    "real": {
+     "cagr": 0.2778310798883321,
+     "max_dd": -0.0609770311698139,
+     "sharpe": 2.3640669851206613,
+     "calmar": 4.556323496868928,
+     "vol": 0.09823666551392515,
+     "turnover": 16.73163570005244
+    },
+    "train": {
+     "cagr": 0.1599032633610138,
+     "max_dd": -0.08004154769643401,
+     "sharpe": 1.409655194019139,
+     "calmar": 1.997753266434374,
+     "vol": 0.09587216611272516,
+     "turnover": 74.91055616292968
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  },
+  {
+   "id": "gate_any",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.1566069750883452,
+     "max_dd": -0.08530525901700159,
+     "sharpe": 1.4478482644547959,
+     "calmar": 1.8358419737888958,
+     "vol": 0.09106204083925919,
+     "turnover": 109.29411686566394
+    },
+    "oos": {
+     "cagr": 0.1393319404997746,
+     "max_dd": -0.06292761718402629,
+     "sharpe": 1.4630817565337908,
+     "calmar": 2.2141620282921344,
+     "vol": 0.07911915104172733,
+     "turnover": 42.07467946218069
+    },
+    "real": {
+     "cagr": 0.30259267321617167,
+     "max_dd": -0.04623126633562258,
+     "sharpe": 2.3888353198923955,
+     "calmar": 6.545195431582088,
+     "vol": 0.1055729019362802,
+     "turnover": 17.06211028070357
+    },
+    "train": {
+     "cagr": 0.16653540197001138,
+     "max_dd": -0.08530525901700159,
+     "sharpe": 1.4384474556079343,
+     "calmar": 1.9522290171678676,
+     "vol": 0.09806792709435244,
+     "turnover": 66.5399546093968
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  },
+  {
+   "id": "cn_fb_trigger_6",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.16198156393917196,
+     "max_dd": -0.07983071306532707,
+     "sharpe": 1.5289004825788521,
+     "calmar": 2.0290632229054397,
+     "vol": 0.08915470168367251,
+     "turnover": 108.21021688530016
+    },
+    "oos": {
+     "cagr": 0.14495743598389454,
+     "max_dd": -0.058911152029251346,
+     "sharpe": 1.5534722452758976,
+     "calmar": 2.4606111235427606,
+     "vol": 0.07761182248811137,
+     "turnover": 40.92781865167984
+    },
+    "real": {
+     "cagr": 0.3151865928093638,
+     "max_dd": -0.04691248088462685,
+     "sharpe": 2.520797692450881,
+     "calmar": 6.718608499612519,
+     "vol": 0.10379350107983379,
+     "turnover": 17.68970747249203
+    },
+    "train": {
+     "cagr": 0.17146870905214118,
+     "max_dd": -0.07983071306532707,
+     "sharpe": 1.5120137552289523,
+     "calmar": 2.1479040142335304,
+     "vol": 0.09595091410080132,
+     "turnover": 66.72863922884477
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  },
+  {
+   "id": "cn_fb_trigger_8",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.1636831099168976,
+     "max_dd": -0.07983071306532719,
+     "sharpe": 1.5265655366503685,
+     "calmar": 2.0503776508040485,
+     "vol": 0.09031962164487367,
+     "turnover": 106.60617123366319
+    },
+    "oos": {
+     "cagr": 0.14748191394538335,
+     "max_dd": -0.058911152029251346,
+     "sharpe": 1.5791613592578149,
+     "calmar": 2.503463416776397,
+     "vol": 0.077751562882864,
+     "turnover": 39.9171622177026
+    },
+    "real": {
+     "cagr": 0.32461912823367056,
+     "max_dd": -0.043455893447549854,
+     "sharpe": 2.5830337677276805,
+     "calmar": 7.470082938818816,
+     "vol": 0.10407365403910263,
+     "turnover": 16.80955882088468
+    },
+    "train": {
+     "cagr": 0.17262435948482824,
+     "max_dd": -0.07983071306532719,
+     "sharpe": 1.4974237408394957,
+     "calmar": 2.1623802776704,
+     "vol": 0.09765655495686977,
+     "turnover": 66.13525001118505
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  },
+  {
+   "id": "cn_fb_cut_4",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.16093250214088095,
+     "max_dd": -0.0798307130653273,
+     "sharpe": 1.5052236824719896,
+     "calmar": 2.0159221427620997,
+     "vol": 0.09000857310108606,
+     "turnover": 107.5372404626019
+    },
+    "oos": {
+     "cagr": 0.14750930521553007,
+     "max_dd": -0.058911152029250125,
+     "sharpe": 1.579485520650351,
+     "calmar": 2.5039283757732296,
+     "vol": 0.07775068361958092,
+     "turnover": 39.916702199488
+    },
+    "real": {
+     "cagr": 0.3246426165097187,
+     "max_dd": -0.043455893447549854,
+     "sharpe": 2.5833314874565696,
+     "calmar": 7.470623447232859,
+     "vol": 0.10406831753266031,
+     "turnover": 16.81193719562159
+    },
+    "train": {
+     "cagr": 0.1680591935539657,
+     "max_dd": -0.0798307130653273,
+     "sharpe": 1.4640731552003738,
+     "calmar": 2.1051946938822783,
+     "vol": 0.09718389875799413,
+     "turnover": 67.06394021983057
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  },
+  {
+   "id": "cn_fb_cut_6",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.16096116161255458,
+     "max_dd": -0.07983071306532707,
+     "sharpe": 1.504810289461471,
+     "calmar": 2.0162811458396575,
+     "vol": 0.09005232881769736,
+     "turnover": 107.53367271798679
+    },
+    "oos": {
+     "cagr": 0.14745452196420517,
+     "max_dd": -0.0589111520292499,
+     "sharpe": 1.5788369761840362,
+     "calmar": 2.5029984457101215,
+     "vol": 0.0777524532188906,
+     "turnover": 39.91762249955954
+    },
+    "real": {
+     "cagr": 0.3245956400910015,
+     "max_dd": -0.04345589344755019,
+     "sharpe": 2.5827348008952615,
+     "calmar": 7.469542433474015,
+     "vol": 0.10407904411197873,
+     "turnover": 16.807180454227407
+    },
+    "train": {
+     "cagr": 0.16812110723230012,
+     "max_dd": -0.07983071306532707,
+     "sharpe": 1.4636808633178056,
+     "calmar": 2.1059702560181726,
+     "vol": 0.0972506056828824,
+     "turnover": 67.06513043886781
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  },
+  {
+   "id": "cooloff_2",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.15975908659515414,
+     "max_dd": -0.07983071306532719,
+     "sharpe": 1.4897940016314142,
+     "calmar": 2.0012233445092726,
+     "vol": 0.09027810720345229,
+     "turnover": 110.82877908503839
+    },
+    "oos": {
+     "cagr": 0.14614856644809082,
+     "max_dd": -0.058911152029251346,
+     "sharpe": 1.5645768475301793,
+     "calmar": 2.4808302233764365,
+     "vol": 0.07773185829144004,
+     "turnover": 40.352582176378974
+    },
+    "real": {
+     "cagr": 0.31545592126829747,
+     "max_dd": -0.04345589344754963,
+     "sharpe": 2.514221519237446,
+     "calmar": 7.259220700387768,
+     "vol": 0.10416170383186464,
+     "turnover": 17.21705369597703
+    },
+    "train": {
+     "cagr": 0.16699986488622476,
+     "max_dd": -0.07983071306532719,
+     "sharpe": 1.4488865425603434,
+     "calmar": 2.091925005725117,
+     "vol": 0.0976045483751246,
+     "turnover": 69.92243790388387
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  },
+  {
+   "id": "cooloff_4",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.16028999541152533,
+     "max_dd": -0.0798307130653273,
+     "sharpe": 1.5019152707454468,
+     "calmar": 2.007873777606826,
+     "vol": 0.08982718347015049,
+     "turnover": 105.46199888790073
+    },
+    "oos": {
+     "cagr": 0.1477222248123553,
+     "max_dd": -0.05891115202925046,
+     "sharpe": 1.5843242156348978,
+     "calmar": 2.507542625189345,
+     "vol": 0.07762417799247823,
+     "turnover": 39.20355476271584
+    },
+    "real": {
+     "cagr": 0.3254361196764295,
+     "max_dd": -0.043455893447549854,
+     "sharpe": 2.5958559092156315,
+     "calmar": 7.488883413919967,
+     "vol": 0.1037858491168141,
+     "turnover": 16.12681995030674
+    },
+    "train": {
+     "cagr": 0.1668449728831929,
+     "max_dd": -0.0798307130653273,
+     "sharpe": 1.4563074771351998,
+     "calmar": 2.089984749937782,
+     "vol": 0.09697351375056008,
+     "turnover": 65.70468512040935
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  },
+  {
+   "id": "growth_cap_m4",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.15527064253271217,
+     "max_dd": -0.07953832928186477,
+     "sharpe": 1.4726575097399024,
+     "calmar": 1.952148655052462,
+     "vol": 0.08859151291064891,
+     "turnover": 106.0452706789736
+    },
+    "oos": {
+     "cagr": 0.13834786521990594,
+     "max_dd": -0.058146890884834046,
+     "sharpe": 1.4935757996435346,
+     "calmar": 2.379282247333194,
+     "vol": 0.07680506104861552,
+     "turnover": 39.17462361599987
+    },
+    "real": {
+     "cagr": 0.2929216060529629,
+     "max_dd": -0.04552359481173185,
+     "sharpe": 2.384649871077261,
+     "calmar": 6.434500774035409,
+     "vol": 0.10249735190326904,
+     "turnover": 16.855802728148866
+    },
+    "train": {
+     "cagr": 0.16464497597287586,
+     "max_dd": -0.07953832928186477,
+     "sharpe": 1.457272989176942,
+     "calmar": 2.070007975518489,
+     "vol": 0.09551700411021048,
+     "turnover": 66.3424647546045
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  },
+  {
+   "id": "growth_cap_p4",
+   "metrics": {
+    "proxy": {
+     "cagr": 0.1619728104531386,
+     "max_dd": -0.08113093164555063,
+     "sharpe": 1.4925345150295615,
+     "calmar": 1.9964372054887094,
+     "vol": 0.09146281251298104,
+     "turnover": 113.01391507638158
+    },
+    "oos": {
+     "cagr": 0.14636848831318572,
+     "max_dd": -0.06013157698953853,
+     "sharpe": 1.544269996580868,
+     "calmar": 2.43413686520562,
+     "vol": 0.07893945264301012,
+     "turnover": 41.403885176712144
+    },
+    "real": {
+     "cagr": 0.32104857333519954,
+     "max_dd": -0.046199849645167546,
+     "sharpe": 2.507529684435421,
+     "calmar": 6.949125934412665,
+     "vol": 0.10621942069742184,
+     "turnover": 17.578528095833914
+    },
+    "train": {
+     "cagr": 0.16994988598921124,
+     "max_dd": -0.08113093164555063,
+     "sharpe": 1.4577166597160887,
+     "calmar": 2.094760685501528,
+     "vol": 0.0988287339503818,
+     "turnover": 70.75683181207705
+    }
+   },
+   "yearly_proxy": null,
+   "pass_three_calmar": false
+  }
+ ],
+ "not_rerun": [
+  "US ETFs + cash only: paper PR #17",
+  "AI-application sleeves 159852/515230/159509: paper PR #18; 159509 premium veto",
+  "rule ablation vs then-v40: PR #16",
+  "six-slot recombination vs then-v39: PR #13",
+  "cash-duration timing and conditional gold: PR #14",
+  "159509 pool scan: PR #11",
+  "defense_momentum is zero-contribution with one defense slot (v41 report); not reopened",
+  "110017 not retested"
+ ]
+}
